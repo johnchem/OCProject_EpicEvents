@@ -1,9 +1,11 @@
-import psycopg2
 import subprocess
 import os
+from sqlalchemy import create_engine
+
 
 from settings import SERVER, ADMIN_LOGIN, PORT, DATABASE_NAME, PSQL, PGPASSWORD
 from connection import psycopg2_cursor
+from create_table import Base
 
 ADMIN_CREDENTIAL = {
     "database": DATABASE_NAME,
@@ -13,6 +15,15 @@ ADMIN_CREDENTIAL = {
 }
 
 
+def _create_engine(user, password, port, database):
+    engine = create_engine(f"postgresql+psycopg2://{user}:{password}@localhost:{port}/{database}", echo=True)
+    return engine
+
+
+def _create_engine_superuser():
+    return _create_engine(**ADMIN_CREDENTIAL)
+
+
 def _create_database():
     # Create table statement
     sql_create_database = "CREATE DATABASE "+DATABASE_NAME+";"
@@ -20,6 +31,16 @@ def _create_database():
     # Create a table in PostgreSQL database
     cmd = f'"{PSQL}" -h {SERVER} -U {ADMIN_LOGIN} -p {PORT} -c "{sql_create_database}" -w'
     subprocess.run(cmd)
+
+
+def _create_tables(user, password, port, database):
+    engine = _create_engine_superuser()
+    Base.metadata.create_all(engine)
+
+
+def _drop_tables(user, password, port, database):
+    engine = _create_engine_superuser()
+    Base.metadata.drop_all(engine)
 
 
 @psycopg2_cursor(ADMIN_CREDENTIAL)
@@ -44,5 +65,6 @@ def _create_user(cursor, login, password, team):
 
 
 if __name__ == "__main__":
-    test_print()
+    _create_tables(**ADMIN_CREDENTIAL)
+    # _drop_tables(**ADMIN_CREDENTIAL)
     print("terminé")

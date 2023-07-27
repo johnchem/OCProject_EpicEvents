@@ -28,4 +28,3 @@ def psycopg2_cursor(conn_info):
             return return_val
         return wrapper
     return wrap
-
