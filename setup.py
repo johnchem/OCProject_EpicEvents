@@ -2,7 +2,6 @@ import subprocess
 import os
 from sqlalchemy import create_engine
 
-
 from settings import SERVER, ADMIN_LOGIN, PORT, DATABASE_NAME, PSQL, PGPASSWORD
 from connection import psycopg2_cursor
 from create_table import Base
@@ -33,14 +32,20 @@ def _create_database():
     subprocess.run(cmd)
 
 
-def _create_tables(user, password, port, database):
+def _create_tables():
     engine = _create_engine_superuser()
     Base.metadata.create_all(engine)
 
 
-def _drop_tables(user, password, port, database):
+def _drop_tables():
     engine = _create_engine_superuser()
     Base.metadata.drop_all(engine)
+
+
+def _reinit_tables():
+    engine = _create_engine_superuser()
+    Base.metadata.drop_all(engine)
+    Base.metadata.create_all(engine)
 
 
 @psycopg2_cursor(ADMIN_CREDENTIAL)
@@ -65,6 +70,7 @@ def _create_user(cursor, login, password, team):
 
 
 if __name__ == "__main__":
-    _create_tables(**ADMIN_CREDENTIAL)
+    _reinit_tables()
+    # _create_tables(**ADMIN_CREDENTIAL)
     # _drop_tables(**ADMIN_CREDENTIAL)
     print("terminé")
