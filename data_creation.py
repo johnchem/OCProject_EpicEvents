@@ -1,6 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session, lazyload, joinedload
-from create_table import User, Client, Contrat, Evenement
+from models import User, Client, Contrat, Evenement
 from datetime import datetime
 
 from setup import _create_engine_superuser

@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 
 from settings import SERVER, ADMIN_LOGIN, PORT, DATABASE_NAME, PSQL, PGPASSWORD
 from connection import psycopg2_cursor
-from create_table import Base
+from models import Base
 
 ADMIN_CREDENTIAL = {
     "database": DATABASE_NAME,
