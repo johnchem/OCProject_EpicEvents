@@ -2,7 +2,7 @@ import subprocess
 import os
 from sqlalchemy import create_engine
 
-from settings import SERVER, ADMIN_LOGIN, PORT, DATABASE_NAME, PSQL, PGPASSWORD
+from settings import SERVER, ADMIN_LOGIN, PORT, DATABASE_NAME, PSQL, PGPASSWORD, TEST_DATABASE_NAME, TEST_ADMIN_LOGIN, TEST_PGPASSWORD
 from connection import psycopg2_cursor
 from models import Base
 
@@ -10,6 +10,13 @@ ADMIN_CREDENTIAL = {
     "database": DATABASE_NAME,
     "user": ADMIN_LOGIN,
     "password": PGPASSWORD,
+    "port": PORT,
+}
+
+TEST_CREDENTIAL = {
+    "database": TEST_DATABASE_NAME,
+    "user": TEST_ADMIN_LOGIN,
+    "password": TEST_PGPASSWORD,
     "port": PORT,
 }
 
@@ -21,6 +28,10 @@ def _create_engine(user, password, port, database):
 
 def _create_engine_superuser():
     return _create_engine(**ADMIN_CREDENTIAL)
+
+
+def _create_test_engine():
+    return _create_engine(**TEST_CREDENTIAL)
 
 
 def _create_database():

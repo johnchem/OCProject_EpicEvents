@@ -59,3 +59,21 @@ class SqlAlchemyRepository(AbstractRepository):
         stmt = select(Contrat).options(joinedload(Contrat.client)).filter_by(contrat_status=contract_status).filter_by(client=client)
         return session.scalars(stmt).unique().first()
 
+    def list_contract(self, session: Session, client_name):
+        client = session.query(Client).filter(full_name=client_name)
+        stmt = select(Contrat).options(joinedload(Contrat.client)).filter_by(client=client).first()
+        return session.scalars(stmt).unique().first()
+
+    def update_contrat(self, session: Session, client_id):
+        yield session.query(Contrat).filter_by(client_id=client_id)
+        session.execute(select(Contrat)).where(client_id=client_id)
+
+    def get_event_by_client(self, session: Session, client_name):
+        client = session.query(Client).filter(full_name=client_name)
+        stmt = select(Evenement).options(joinedload(Evenement.client)).filter_by(client=client).first()
+        return session.scalars(stmt).unique().first()
+
+    def get_event_by_support(self, session: Session, support_email):
+        user = session.query(User).filter_by(email=support_email)
+        stmt = select(Evenement).option(joinedload(Evenement.contact_support)).filter_by(contact_support=user).first()
+        return session.scalars(stmt).unique().first()

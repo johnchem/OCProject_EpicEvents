@@ -17,6 +17,7 @@ PSQL = env("PSQL")
 
 SERVER = env("SERVER")
 DATABASE_NAME = env("DATABASE_NAME")
+TEST_DATABASE_NAME = env("TEST_DATABASE_NAME")
 
 # Connection option
 PORT = env("PORT")
@@ -24,6 +25,10 @@ PORT = env("PORT")
 # Admin credential
 ADMIN_LOGIN = env("ADMIN_LOGIN")
 PGPASSWORD = env("PGPASSWORD")  # permet de stocker le mdp admin dans les variables d'env
+
+# Test credential
+TEST_ADMIN_LOGIN = env("ADMIN_LOGIN")
+TEST_PGPASSWORD = env("PGPASSWORD")  # permet de stocker le mdp admin dans les variables d'env
 
 # Application credential
 LOGIN = env("DATABASE_LOGIN")

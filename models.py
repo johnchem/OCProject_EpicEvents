@@ -10,21 +10,31 @@ from typing import List
 import sqlalchemy.sql.functions as func
 
 
+class Departements(enum.Enum):
+    COMMERCIAL = "Commercial"
+    GESTION = "Gestion"
+    SUPPORT = "Support"
+
+    @classmethod
+    def values(cls) -> set:
+        return set(i.value for i in cls)
+
+
+class ContratStatus(enum.Enum):
+    SIGNED = "Contrat signé"
+    NOT_SIGNED = "Contrat en cours"
+
+    @classmethod
+    def values(cls) -> set:
+        return set(i.value for i in cls)
+
+
 class Base(DeclarativeBase):
     pass
 
 
 class User(Base):
     __tablename__ = "user"
-
-    class Departements(enum.Enum):
-        COMMERCIAL = "Commercial"
-        GESTION = "Gestion"
-        SUPPORT = "Support"
-
-        @classmethod
-        def values(cls) -> set:
-            return set(i.value for i in cls)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(30), nullable=False)
@@ -33,7 +43,7 @@ class User(Base):
     departement: Mapped[str] = mapped_column(
         Enum(
             Departements,
-            values_callable=lambda m: list(m.values())
+            # values_callable=lambda m: list(m.values())
             )
         )
 
@@ -42,7 +52,7 @@ class User(Base):
     evenements: Mapped[List["Evenement"]] = relationship(back_populates="contact_support")
 
     def __repr__(self) -> str:
-        return f'User(id={self.id!r}, name={self.name!r}, forname={self.forname!r}, dpt={self.departement!r})'
+        return f'User(id={self.id}, name={self.name}, forname={self.forname}, dpt={self.departement})'
 
 
 class Client(Base):
@@ -64,14 +74,6 @@ class Client(Base):
 
 class Contrat(Base):
     __tablename__ = "contrat"
-
-    class ContratStatus(enum.Enum):
-        SIGNED = "Contrat signé"
-        NOT_SIGNED = "Contrat en cours"
-
-        @classmethod
-        def values(cls) -> set:
-            return set(i.value for i in cls)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     client_id: Mapped[int] = mapped_column(ForeignKey("client.id"))
