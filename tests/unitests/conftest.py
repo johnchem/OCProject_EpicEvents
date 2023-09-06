@@ -9,6 +9,7 @@ DT_STRING = "%d/%m/%Y %H:%M:%S"
 
 # ---------- General Tooling -------------
 
+
 @pytest.fixture
 def create_object_record(_session_creation):
     def _create_object_record(obj):
@@ -44,12 +45,14 @@ def database_access():
 
 # -------------- User Object ----------------
 
+
 @pytest.fixture
 def user_paul():
     _user = User(
         name="paul",
         forname="test",
         email="paul@test1.com",
+        password="abc123!",
         departement=Departements.COMMERCIAL,
     )
     return _user
@@ -61,17 +64,19 @@ def user_jean():
         name="jean",
         forname="test",
         email="jean@test1.com",
+        password="abc123!",
         departement=Departements.COMMERCIAL,
     )
     return _user
 
 
 @pytest.fixture
-def user_gorge():
+def user_george():
     _user = User(
         name="george",
         forname="test",
         email="george@test2.com",
+        password="abc123!",
         departement=Departements.GESTION,
     )
     return _user
@@ -83,6 +88,7 @@ def user_michel():
         name="michel",
         forname="test",
         email="michel@test3.com",
+        password="abc123!",
         departement=Departements.SUPPORT
     )
     return _user
@@ -161,18 +167,19 @@ def contract_jean_nemarre(create_object_record, client_bowling_2):
 
 # ---------- Evenement Object --------------
 
+
 @pytest.fixture
 def evenement_contrat_roule_maboule(create_object_record, contrat_roule_maboule, user_michel):
     user_michel = create_object_record(user_michel)
     contrat_roule_maboule = create_object_record(contrat_roule_maboule)
 
     _event = Evenement(
-        contrat=contrat_roule_maboule(),
+        contrat=contrat_roule_maboule,
         event_date_start=datetime.strptime("01/05/2025 10:25:00", DT_STRING),
         event_date_end=datetime.strptime("06/05/2025 10:25:00", DT_STRING),
         location="bali-bali",
         attendees=10,
-        contact_support=user_michel(),
+        contact_support=user_michel,
         note="les chefs se la coule douce",
     )
     return _event

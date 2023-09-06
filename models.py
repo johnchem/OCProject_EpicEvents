@@ -33,6 +33,8 @@ class Base(DeclarativeBase):
     pass
 
 
+
+
 class User(Base):
     __tablename__ = "user"
 
@@ -40,6 +42,7 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(30), nullable=False)
     forname: Mapped[str] = mapped_column(String(30), nullable=False)
     email: Mapped[str] = mapped_column(String(30), unique=True)
+    password: Mapped[str] = mapped_column()
     departement: Mapped[str] = mapped_column(
         Enum(
             Departements,
@@ -67,9 +70,18 @@ class Client(Base):
     last_update: Mapped[datetime] = mapped_column(DateTime, default=func.now(), onupdate=func.now())
     commercial_contact_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
 
-    contrat: Mapped["Contrat"] = relationship(back_populates="client")
-    commercial_contact: Mapped["User"] = relationship(back_populates="client_portfolio")
-    evenements: Mapped["Evenement"] = relationship(back_populates="client")
+    contrat: Mapped["Contrat"] = relationship(
+        back_populates="client",
+        lazy="joined",
+        cascade="save-update, delete, delete-orphan")
+    commercial_contact: Mapped["User"] = relationship(
+        back_populates="client_portfolio",
+        lazy="joined",
+        cascade="save-update")
+    evenements: Mapped["Evenement"] = relationship(
+        back_populates="client",
+        lazy="joined",
+        cascade="save-update, delete, delete-orphan")
 
 
 class Contrat(Base):
@@ -88,13 +100,9 @@ class Contrat(Base):
             )
         )
 
-    client: Mapped["Client"] = relationship(back_populates="contrat")
-    commercial: Mapped["User"] = relationship(back_populates="contrat_portfolio")
-    evenements: Mapped[List["Evenement"]] = relationship(back_populates="contrat")
-
-    # @property
-    # def commercial_contact(self):
-    #     return self.client.commercial_contact
+    client: Mapped["Client"] = relationship(back_populates="contrat", lazy="joined")
+    commercial: Mapped["User"] = relationship(back_populates="contrat_portfolio", lazy="joined")
+    evenements: Mapped[List["Evenement"]] = relationship(back_populates="contrat", lazy="joined")
 
     def __init__(self, client, total_amount, remaining_amount, contrat_status):
         self.total_amount = total_amount
@@ -117,9 +125,9 @@ class Evenement(Base):
     attendees: Mapped[int] = mapped_column(Integer)
     note: Mapped[str] = mapped_column(Text)
 
-    client: Mapped["Client"] = relationship(back_populates="evenements")
-    contrat: Mapped["Contrat"] = relationship(back_populates="evenements")
-    contact_support: Mapped["User"] = relationship(back_populates="evenements")
+    client: Mapped["Client"] = relationship(back_populates="evenements", lazy="joined")
+    contrat: Mapped["Contrat"] = relationship(back_populates="evenements", lazy="joined")
+    contact_support: Mapped["User"] = relationship(back_populates="evenements", lazy="joined")
 
     @property
     def client_name(self):

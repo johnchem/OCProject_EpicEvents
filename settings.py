@@ -33,3 +33,6 @@ TEST_PGPASSWORD = env("PGPASSWORD")  # permet de stocker le mdp admin dans les v
 # Application credential
 LOGIN = env("DATABASE_LOGIN")
 PWD = env("DATABASE_PWD")
+
+# Clé secrète pour signer le token
+SECRET_KEY = env("JWT_SECRET")
