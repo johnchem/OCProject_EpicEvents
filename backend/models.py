@@ -14,6 +14,7 @@ class Departements(enum.Enum):
     COMMERCIAL = "Commercial"
     GESTION = "Gestion"
     SUPPORT = "Support"
+    ADMIN = "Administrator"
 
     @classmethod
     def values(cls) -> set:
@@ -31,8 +32,6 @@ class ContratStatus(enum.Enum):
 
 class Base(DeclarativeBase):
     pass
-
-
 
 
 class User(Base):

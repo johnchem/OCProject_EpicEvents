@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy.orm import sessionmaker
 
 from setup import _create_test_engine
-from models import Base, User, Client, Contrat, Evenement, Departements, ContratStatus
+from backend.models import Base, User, Client, Contrat, Evenement, Departements, ContratStatus
 
 DT_STRING = "%d/%m/%Y %H:%M:%S"
 

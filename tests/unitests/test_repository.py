@@ -5,8 +5,8 @@ import sqlalchemy
 from conftest import *
 from conftest import DT_STRING
 from werkzeug.security import check_password_hash
-from models import User, Client, Contrat, Evenement, Departements, ContratStatus
-from repository import SqlAlchemyRepository
+from backend.models import User, Client, Contrat, Evenement, Departements, ContratStatus
+from backend.repository import SqlAlchemyRepository
 
 # --------- Test Object CRUD : User -------------
 

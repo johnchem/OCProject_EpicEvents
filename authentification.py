@@ -2,18 +2,10 @@ from sqlalchemy import event
 import jwt
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import User
+from backend.models import User
 from settings import SECRET_KEY
 
-# # Fonction pour enregistrer un nouvel utilisateur
-# def register_user(username, password):
-#     hashed_password = generate_password_hash(password)
-#     new_user = User(username=username, password=hashed_password)
-#     session.add(new_user)
-#     session.commit()
 
-
-# Fonction pour authentifier un utilisateur
 def authenticate_user(user, password):
     if check_password_hash(user.password, password):
         return user.id
@@ -21,7 +13,7 @@ def authenticate_user(user, password):
 
 
 @event.listens_for(User.password, "set", retval=True)
-@event.listens_for(User.password, "modified", retval=True)
+# @event.listens_for(User.password, "modified", retval=True)
 def hash_user_password(target, value, oldvalue, initiator):
     if value != oldvalue:
         return generate_password_hash(value)

@@ -1,31 +1,14 @@
-import abc
-from sqlalchemy import select, update
+from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 from sqlalchemy.orm import Session
-from models import User, Client, Contrat, Evenement
+
+from backend.models import User, Client, Contrat, Evenement
 import authentification as auth
 
 
-class AbstractRepository(abc.ABC):
-    @abc.abstractmethod
-    def add(self, session: Session, data):
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def get_user(self, session: Session, user_email):
-        raise NotImplementedError
-
-    def get_client(self, session: Session, client_name):
-        raise NotImplementedError
-
-    def get_contract(self, session: Session, contract_status, client_name):
-        raise NotImplementedError
-
-
-class SqlAlchemyRepository(AbstractRepository):
+class SqlAlchemyRepository():
     def __init__(self, session: Session):
         self.session = session
-        self.user_auth = False
 
     def add(self, data):
         self.session.add(data)
@@ -44,15 +27,13 @@ class SqlAlchemyRepository(AbstractRepository):
         return self.session.query(User).filter_by(email=user_email).first()
 
     def user_login(self, user_email, password):
-        user = self.get_user(user_email)
-        if auth.authenticate_user(user, password):
-            self.user_auth = True
-            return True
-        return False
-
-    def user_logout(self):
-        self.user_auth = False
-        return True
+        try:
+            user = self.get_user(user_email)
+            if auth.authenticate_user(user, password):
+                return user
+            return False
+        except:
+            print("ce compte n'existe pas")
 
     def list_user(self):
         return self.session.query(User).all()
@@ -90,7 +71,10 @@ class SqlAlchemyRepository(AbstractRepository):
 
     def get_contract(self, contract_status, client_name):
         client = self.session.query(Client).filter_by(full_name=client_name).first()
-        stmt = select(Contrat).options(joinedload(Contrat.client)).filter_by(contrat_status=contract_status).filter_by(client=client)
+        stmt = select(Contrat).\
+            options(joinedload(Contrat.client)).\
+            filter_by(contrat_status=contract_status).\
+            filter_by(client=client)
         return self.session.scalars(stmt).unique().first()
 
     def list_contract(self):
