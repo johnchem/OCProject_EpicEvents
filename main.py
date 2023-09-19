@@ -11,6 +11,7 @@ import setup
 
 # controller
 from controller.controller import Controller
+from controller.permissions import Permissions
 
 
 def create_session():
@@ -27,9 +28,10 @@ def run():
     handler = cli_handler()
 
     views = Views(handler)
-    app = Controller(repository, views)
+    permissions = Permissions()
+    app = Controller(repository, views, permissions)
     app.start()
-    
+
 
 def start_application():
     setup.create_tables()
