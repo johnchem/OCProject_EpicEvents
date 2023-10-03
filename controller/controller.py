@@ -41,21 +41,25 @@ class Controller(menu.Menu):
             print(f"error {user}")
 
     @check_user_auth
-    def user_info(self):
+    def user_info(self, *args, **kwargs):
         self.view.prompt_display_user_info(self._logged_user)
 
     @check_user_auth
-    def create_user(self):
-        if self.permissions.create_user(self._logged_user):
-            data = self.view.prompt_create_user_form()
-            user = models.User(**data)
-            response = self.repository.add(user)
+    def create_user(self, *args, **kwargs):
+        if not self.permissions.create_user(self._logged_user):
+            self.view.prompt_error_message("besoin d'un accés admin ou commercial pour cette opération")
+            self.main_menu()
+        data = self.view.prompt_create_user_form()
+        user = models.User(**data)
+        response = self.repository.add(user)
+
         if response:
             self.view.prompt_display_user_info(user)
+            self.repository.commit()
             self.main_menu()
 
     @check_user_auth
-    def list_user(self):
+    def list_user(self, *args, **kwargs):
         users = self.repository.list_user()
         choices = self.view.prompt_list_users(users)
         if choices == "q":
@@ -63,44 +67,65 @@ class Controller(menu.Menu):
         try:
             choices = int(choices)
             if choices > len(users):
-                self.list_user
-            user_picked = users[int(choices)]
+                self.list_user()
+            user_picked = users[choices-1]
             self.view.prompt_display_user_info(user_picked)
-        except:
+            self.user_opt_menu(user_picked)
+
+        except Exception as err:
+            self.view.print(err)
             self.view.prompt_error_message(
-                f"Veuillez choisir une valeur entre 1 et {len(choices)}",
-                "ou q pour quitter",
+                (
+                    f"Veuillez choisir une valeur entre 1 et {len(users)}"
+                    + "\n ou q pour quitter"
+                )
             )
 
-    def update_user(self, user_id):
+    @check_user_auth
+    def update_user(self, user, *args, **kwargs):
         if not self.permissions.update_user(self._logged_user):
             self.view.prompt_error_message("besoin d'un accés admin pour cette opération")
-        user_data = self.repository.update_user(user_id)
-        self.view.prompt_display_update_user(user_data)
-        response = next(user_data)
+            self.user_opt_menu(user)
+
+        # update_user_gen = self.repository.update_user(user.id)
+        user_data = self.repository.get_user(user.email)
+        user_data = self.view.prompt_display_update_user(user_data)
+
+        # response = update_user_gen.send(user_data)
+        response = self.repository.commit()
         if not response:
-            self.view.prompt_error_message("erreur lors de la mise à jour")    
+            self.view.prompt_error_message("erreur lors de la mise à jour")
         self.main_menu()
 
-    def delete_user(self, user_id):
-        response = self.repository.delete_user(user_id)
+    @check_user_auth
+    def delete_user(self, user_data, *args, **kwargs):
+        response = self.repository.delete_user(user_data)
         if not response:
-            self.view.prompt_error_message("erreur lors de la suppression")    
+            self.view.prompt_error_message("erreur lors de la suppression")
+        self.view.print("L'utilisateur à bien été supprimé")
         self.main_menu()
 
+    @check_user_auth
     def create_client(self):
         if self.permissions.create_client(self._logged_user):
             default_commercial = self._logged_user
-            data = self.view.prompt_create_client_form(default_commercial)
+            data = self.view.prompt_create_client(default_commercial.email)
+
+            if data["commercial_contact"] != default_commercial.email:
+                data.commercial_contact = self.repository.get_user(data.commercial_contact)
+            else:
+                data["commercial_contact"] = default_commercial
+
             client = models.Client(**data)
             response = self.repository.add(client)
         if response:
-            self.view.prompt_display_client_info(client)
+            self.view.prompt_client_info(client)
             self.main_menu()
 
+    @check_user_auth
     def list_client(self):
         client = self.repository.list_client()
-        choices = self.view.prompt_list_users(client)
+        choices = self.view.prompt_list_client(client)
         if choices == "q":
             self.main_menu()
         try:
@@ -109,27 +134,45 @@ class Controller(menu.Menu):
                 self.list_user
             user_picked = client[int(choices)]
             self.view.prompt_display_client_info(user_picked)
-        except:
+        except Exception as err:
             self.view.prompt_error_message(
                 f"Veuillez choisir une valeur entre 1 et {len(choices)}",
                 "ou q pour quitter",
             )
 
-    def update_client(self):
-        pass
+    @check_user_auth
+    def update_client(self, client, *args, **kwargs):
+        if not self.permissions.update_client(self._logged_user):
+            self.view.prompt_error_message("besoin d'un accés admin pour cette opération")
+            self.client_opt_menu(client)
 
+        # update_user_gen = self.repository.update_user(user.id)
+        client_data = self.repository.get_client(client.full_name)
+        client_data = self.view.prompt_update_client(client_data)
+
+        # response = update_user_gen.send(user_data)
+        response = self.repository.commit()
+        if not response:
+            self.view.prompt_error_message("erreur lors de la mise à jour")
+        self.main_menu()
+
+    @check_user_auth
     def delete_client(self):
         pass
 
+    @check_user_auth
     def create_contract(self):
         pass
 
+    @check_user_auth
     def list_contract(self):
         pass
 
+    @check_user_auth
     def filter_contract(self):
         pass
 
+    @check_user_auth
     def update_contract(self):
         pass
 

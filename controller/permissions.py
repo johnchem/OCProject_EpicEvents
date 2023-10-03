@@ -16,7 +16,7 @@ class Permissions:
         return False
 
     def update_user(self, user):
-        if user.departement.value in ["Administrator"]:
+        if user.departement.value in ["Administrator", "Commercial"]:
             return True
         return False
 

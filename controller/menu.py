@@ -5,20 +5,7 @@ class Menu(ABC):
     def __init__(self, view):
         self.view = view
 
-    def menu_handler(self, menu_dict):
-        # get the list of item for the main menu
-        menu_item_list = [x for x in menu_dict.keys()]
-
-        user_answer = (
-            self.view.prompt_display_menu(menu_item_list)-1
-        )
-
-        # convert the answer to the function
-        function_called_by_user = menu_dict[menu_item_list[user_answer]]
-        # Call the function
-        function_called_by_user()
-
-    def main_menu(self):
+    def main_menu(self, *args, **kwargs):
         MENU_ITEM_DICT = {
             "Utilisateurs": self.user_menu,
             "Client": self.client_menu,
@@ -26,35 +13,69 @@ class Menu(ABC):
             "Evenements": self.event_menu,
             "Quitter": self.quit,
         }
+        # get the list of item for the main menu
+        menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
+        user_answer = (
+            self.view.prompt_main_menu(menu_item_list)-1
+        )
+        # convert the answer to the function
+        function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
+        # Call the function
+        function_called_by_user()
 
-        self.menu_handler(MENU_ITEM_DICT)
-
-    def user_menu(self):
+    def user_menu(self, *args, **kwargs):
         MENU_ITEM_DICT = {
             "Affichage des utilisateurs": self.list_user,
             "Ajouter un utilisateur": self.create_user,
             "Retour": self.main_menu,
         }
 
-        self.menu_handler(MENU_ITEM_DICT)
+        menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
+        user_answer = (
+            self.view.prompt_user_menu(menu_item_list)-1
+        )
+        # convert the answer to the function
+        function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
+        # Call the function
+        function_called_by_user()
 
-    def user_opt_menu(self):
+    def user_opt_menu(self, user_data, *args, **kwargs):
         MENU_ITEM_DICT = {
             "Modifier": self.update_user,
             "Supprimer": self.delete_user,
             "Retour": self.user_menu,
         }
+        menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
 
-        self.menu_handler(MENU_ITEM_DICT)
+        # self.view.prompt
+        # self.view.prompt_user_header(*args, **kwargs)
+        # user_answer = (
+        #     self.view.prompt_display_menu(menu_item_list)-1
+        # )
+        user_answer = (
+            self.view.prompt_user_opt_menu(menu_item_list, user_data)-1
+        )
+
+        # convert the answer to the function
+        function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
+        # Call the function
+        function_called_by_user(user_data)
 
     def client_menu(self):
         MENU_ITEM_DICT = {
-            "Nouveau client": self.create_client,
             "Liste des clients": self.list_client,
+            "Nouveau client": self.create_client,
             "Retour": self.main_menu,
         }
 
-        self.menu_handler(MENU_ITEM_DICT)
+        menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
+        user_answer = (
+            self.view.prompt_client_menu(menu_item_list)-1
+        )
+        # convert the answer to the function
+        function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
+        # Call the function
+        function_called_by_user()
 
     def client_opt_menu(self):
         MENU_ITEM_DICT = {
@@ -65,7 +86,14 @@ class Menu(ABC):
             "Retour": self.main_menu,
         }
 
-        self.menu_handler(MENU_ITEM_DICT)
+        menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
+        user_answer = (
+            self.view.prompt_client_opt_menu(menu_item_list)-1
+        )
+        # convert the answer to the function
+        function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
+        # Call the function
+        function_called_by_user()
 
     def contract_menu(self):
         MENU_ITEM_DICT = {
@@ -74,7 +102,14 @@ class Menu(ABC):
             "Retour": self.main_menu,
         }
 
-        self.menu_handler(MENU_ITEM_DICT)
+        menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
+        user_answer = (
+            self.view.prompt_display_menu(menu_item_list)-1
+        )
+        # convert the answer to the function
+        function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
+        # Call the function
+        function_called_by_user()
 
     def contract_opt_menu(self):
         MENU_ITEM_DICT = {
@@ -84,7 +119,14 @@ class Menu(ABC):
             "Retour": self.main_menu,
         }
 
-        self.menu_handler(MENU_ITEM_DICT)
+        menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
+        user_answer = (
+            self.view.prompt_display_menu(menu_item_list)-1
+        )
+        # convert the answer to the function
+        function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
+        # Call the function
+        function_called_by_user()
 
     def event_menu(self):
         MENU_ITEM_DICT = {
@@ -93,7 +135,14 @@ class Menu(ABC):
             "Retour": self.main_menu,
         }
 
-        self.menu_handler(MENU_ITEM_DICT)
+        menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
+        user_answer = (
+            self.view.prompt_display_menu(menu_item_list)-1
+        )
+        # convert the answer to the function
+        function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
+        # Call the function
+        function_called_by_user()
 
     def event_opt_menu(self):
         MENU_ITEM_DICT = {
@@ -102,7 +151,14 @@ class Menu(ABC):
             "Retour": self.main_menu,
         }
 
-        self.menu_handler(MENU_ITEM_DICT)
+        menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
+        user_answer = (
+            self.view.prompt_display_menu(menu_item_list)-1
+        )
+        # convert the answer to the function
+        function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
+        # Call the function
+        function_called_by_user()
 
     @abstractmethod
     def create_user(self):

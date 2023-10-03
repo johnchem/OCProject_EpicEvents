@@ -38,16 +38,11 @@ class SqlAlchemyRepository():
     def list_user(self):
         return self.session.query(User).all()
 
-    def update_user(self, user_id: int):
-        stmt = select(User).where(User.id == user_id)
-        yield self.session.scalars(stmt).one()
-        self.session.commit()
-        return True
-
-    def delete_user(self, user_id: int):
-        stmt = select(User).where(User.id == user_id)
+    def delete_user(self, user_data):
+        stmt = select(User).where(User.id == user_data.id)
         user = self.session.scalars(stmt).one()
         self.session.delete(user)
+        self.session.commit()
         return True
 
     def get_client(self, client_name: str):
@@ -67,6 +62,7 @@ class SqlAlchemyRepository():
         stmt = select(Client).where(Client.id == client_id)
         client = self.session.scalars(stmt).first()
         self.session.delete(client)
+        self.session.commit()
         return True
 
     def get_contract(self, contract_status, client_name):

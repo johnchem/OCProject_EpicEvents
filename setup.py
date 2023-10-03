@@ -84,7 +84,7 @@ def reinit_tables():
     engine = _create_engine_superuser()
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
-    
+
     Session = sessionmaker(bind=engine)
     session = Session()
     user = _create_general_user()
