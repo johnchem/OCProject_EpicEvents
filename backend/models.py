@@ -109,6 +109,9 @@ class Contrat(Base):
         self.contrat_status = contrat_status
         self.client = client
         self.commercial = client.commercial_contact
+    
+    def __repr__(self):
+        return f"{self.creation_date} - {self.remaining_amount}/{self.total_amount}"
 
 
 class Evenement(Base):

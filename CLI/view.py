@@ -24,7 +24,7 @@ class Views:
         return self._handler.display_menu(menu_item)
 
     # -------- User views --------------
-    def prompt_display_user_info(self, user_data):
+    def prompt_user_info(self, user_data):
         return self._handler.display_user_info(user_data)
 
     def prompt_user_header(self, user_data):
@@ -62,6 +62,7 @@ class Views:
         return self._handler.display_menu(menu_item)
 
     def prompt_client_info(self, client_data):
+        self._handler.clear()
         return self._handler.display_client_info(client_data)
 
     def prompt_create_client(self, default_commercial):

@@ -42,7 +42,7 @@ class Controller(menu.Menu):
 
     @check_user_auth
     def user_info(self, *args, **kwargs):
-        self.view.prompt_display_user_info(self._logged_user)
+        self.view.prompt_user_info(self._logged_user)
 
     @check_user_auth
     def create_user(self, *args, **kwargs):
@@ -54,7 +54,7 @@ class Controller(menu.Menu):
         response = self.repository.add(user)
 
         if response:
-            self.view.prompt_display_user_info(user)
+            self.view.prompt_user_info(user)
             self.repository.commit()
             self.main_menu()
 
@@ -69,7 +69,7 @@ class Controller(menu.Menu):
             if choices > len(users):
                 self.list_user()
             user_picked = users[choices-1]
-            self.view.prompt_display_user_info(user_picked)
+            self.view.prompt_user_info(user_picked)
             self.user_opt_menu(user_picked)
 
         except Exception as err:
@@ -119,6 +119,7 @@ class Controller(menu.Menu):
             client = models.Client(**data)
             response = self.repository.add(client)
         if response:
+            self.repository.commit()
             self.view.prompt_client_info(client)
             self.main_menu()
 
@@ -132,9 +133,12 @@ class Controller(menu.Menu):
             choices = int(choices)
             if choices > len(client):
                 self.list_user
-            user_picked = client[int(choices)]
-            self.view.prompt_display_client_info(user_picked)
+            client_picked = client[int(choices)]
+            self.view.prompt_client_info(client_picked)
+            self.client_opt_menu(client_picked)
+
         except Exception as err:
+            self.view.print(err)
             self.view.prompt_error_message(
                 f"Veuillez choisir une valeur entre 1 et {len(choices)}",
                 "ou q pour quitter",

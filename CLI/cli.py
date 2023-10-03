@@ -7,6 +7,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.prompt import Prompt, IntPrompt
+from rich.padding import Padding
 
 
 class Display:
@@ -162,14 +163,14 @@ class cli_handler:
         grid.add_column(justify="center")
 
         grid.add_row(
-            f"[blue]{client_data.full_name}[/blue]",
-            f"[blue]{client_data.email}[/blue]",
+            f"[purple]{client_data.full_name}[/purple]",
+            f"[purple]{client_data.email}[/purple]",
             )
         grid.add_row(
-            f"[blue]{client_data.phone}[/blue]", "",
+            f"[purple]{client_data.phone}[/purple]", "",
             )
         grid.add_row(
-            f"[blue]{client_data.company_name}[/blue]", "",
+            f"[purple]{client_data.company_name}[/purple]", "",
             )
         grid.add_row(
             "[green]Date de creation :[/green]",
@@ -181,9 +182,24 @@ class cli_handler:
         )
         grid.add_row(
             "[green]Responsable client[/green]",
-            f"[blue]{client_data.commercial_contact}[/blue]"
+            f"[blue]{client_data.commercial_contact.forname} {client_data.commercial_contact.name.upper()}[/blue]"
         )
         self._display.print(grid)
+        
+        self._display.print(Padding("[green u]Contrats actif[/green u]", 2))
+        if client_data.contrat:
+            for contrat in client_data.contrat:
+                self._display.print(repr(contrat))
+        else:
+            self._display.print("[i] ... pas de contrat[/i]")
+
+        self._display.print(Padding("[green u]Evenement actif[/green u]", 2))
+        if client_data.evenements:
+            for event in client_data.evenements:
+                self._display.print(repr(event))
+        else:
+            self._display.print("[i] ... pas d'évenement[/i]")
+        os.system("pause")
 
     def display_list_user(self, user_list):
         table = Table(title="Utilisateurs")
