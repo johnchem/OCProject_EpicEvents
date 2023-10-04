@@ -112,7 +112,7 @@ class Controller(menu.Menu):
             data = self.view.prompt_create_client(default_commercial.email)
 
             if data["commercial_contact"] != default_commercial.email:
-                data.commercial_contact = self.repository.get_user(data.commercial_contact)
+                data["commercial_contact"] = self.repository.get_user(data.commercial_contact)
             else:
                 data["commercial_contact"] = default_commercial
 
@@ -133,14 +133,14 @@ class Controller(menu.Menu):
             choices = int(choices)
             if choices > len(client):
                 self.list_user
-            client_picked = client[int(choices)]
+            client_picked = client[choices]
             self.view.prompt_client_info(client_picked)
             self.client_opt_menu(client_picked)
 
         except Exception as err:
             self.view.print(err)
             self.view.prompt_error_message(
-                f"Veuillez choisir une valeur entre 1 et {len(choices)}",
+                f"Veuillez choisir une valeur entre 1 et {len(client)}",
                 "ou q pour quitter",
             )
 
@@ -150,9 +150,10 @@ class Controller(menu.Menu):
             self.view.prompt_error_message("besoin d'un accés admin pour cette opération")
             self.client_opt_menu(client)
 
-        # update_user_gen = self.repository.update_user(user.id)
-        client_data = self.repository.get_client(client.full_name)
-        client_data = self.view.prompt_update_client(client_data)
+        client_data = self.view.prompt_update_client(
+            client,
+            commercial_email=client.commercial.email)
+        client_data["commercial"] = self.repository.get_user(client_data.email)
 
         # response = update_user_gen.send(user_data)
         response = self.repository.commit()
@@ -165,8 +166,28 @@ class Controller(menu.Menu):
         pass
 
     @check_user_auth
-    def create_contract(self):
-        pass
+    def create_contract(self, *args, **kwargs):
+        if self.permissions.create_contrat(self._logged_user):
+            if "client" in kwargs:
+                client = kwargs.get("client")
+                commercial = client.commercial_contact
+
+                data = self.view.prompt_create_contrat(
+                    client_name=client.full_name,
+                    commercial_email=commercial.email)
+                data["commercial"] = commercial
+                data["client"] = client
+            else:
+                data = self.view.prompt_create_contrat()
+                data["commercial"] = self.repository.get_user(data["commercial_email"])
+                data["client"] = self.repository.get_client(data["client_name"])
+
+            client = models.Client(**data)
+            response = self.repository.add(client)
+        if response:
+            self.repository.commit()
+            self.view.prompt_contrat_info(client)
+            self.main_menu()
 
     @check_user_auth
     def list_contract(self):

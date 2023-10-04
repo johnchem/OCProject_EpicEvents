@@ -185,15 +185,15 @@ class cli_handler:
             f"[blue]{client_data.commercial_contact.forname} {client_data.commercial_contact.name.upper()}[/blue]"
         )
         self._display.print(grid)
-        
-        self._display.print(Padding("[green u]Contrats actif[/green u]", 2))
+
+        self._display.print(Padding("[green u]Contrats actif[/green u]", (1,0)))
         if client_data.contrat:
             for contrat in client_data.contrat:
                 self._display.print(repr(contrat))
         else:
             self._display.print("[i] ... pas de contrat[/i]")
 
-        self._display.print(Padding("[green u]Evenement actif[/green u]", 2))
+        self._display.print(Padding("[green u]Evenement actif[/green u]", (1,0)))
         if client_data.evenements:
             for event in client_data.evenements:
                 self._display.print(repr(event))

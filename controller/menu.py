@@ -47,11 +47,6 @@ class Menu(ABC):
         }
         menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
 
-        # self.view.prompt
-        # self.view.prompt_user_header(*args, **kwargs)
-        # user_answer = (
-        #     self.view.prompt_display_menu(menu_item_list)-1
-        # )
         user_answer = (
             self.view.prompt_user_opt_menu(menu_item_list, user_data)-1
         )
@@ -77,7 +72,7 @@ class Menu(ABC):
         # Call the function
         function_called_by_user()
 
-    def client_opt_menu(self):
+    def client_opt_menu(self, client_data, *args, **kwargs):
         MENU_ITEM_DICT = {
             "Modifier": self.update_client,
             "Créer nouveau contrat": self.create_contract,
@@ -88,12 +83,12 @@ class Menu(ABC):
 
         menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
         user_answer = (
-            self.view.prompt_client_opt_menu(menu_item_list)-1
+            self.view.prompt_client_opt_menu(menu_item_list, client_data)-1
         )
         # convert the answer to the function
         function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
         # Call the function
-        function_called_by_user()
+        function_called_by_user(client=client_data)
 
     def contract_menu(self):
         MENU_ITEM_DICT = {
