@@ -57,7 +57,7 @@ class Views:
         self._handler.print("[i]Menu client[/i]")
         return self._handler.display_menu(menu_item)
 
-    def prompt_client_opt_menu(self, menu_item):
+    def prompt_client_opt_menu(self, menu_item, client):
         self._handler.clear()
         return self._handler.display_menu(menu_item)
 
@@ -76,3 +76,12 @@ class Views:
     def prompt_list_client(self, client_list):
         self._handler.clear()
         return self._handler.display_list_client(client_list)
+
+    # -------- Contract views --------------
+    def prompt_create_contract(self, client=None):
+        self._handler.clear()
+        return self._handler.display_create_contract(client)
+
+    def prompt_contract_info(self, client):
+        self._handler.clear()
+        return self._handler.display_contract_info(client)

@@ -133,7 +133,7 @@ class Controller(menu.Menu):
             choices = int(choices)
             if choices > len(client):
                 self.list_user
-            client_picked = client[choices]
+            client_picked = client[choices-1]
             self.view.prompt_client_info(client_picked)
             self.client_opt_menu(client_picked)
 
@@ -167,26 +167,23 @@ class Controller(menu.Menu):
 
     @check_user_auth
     def create_contract(self, *args, **kwargs):
-        if self.permissions.create_contrat(self._logged_user):
+        if self.permissions.create_contract(self._logged_user):
             if "client" in kwargs:
                 client = kwargs.get("client")
-                commercial = client.commercial_contact
 
-                data = self.view.prompt_create_contrat(
-                    client_name=client.full_name,
-                    commercial_email=commercial.email)
-                data["commercial"] = commercial
+                data = self.view.prompt_create_contract(
+                    client=client,
+                    )
                 data["client"] = client
             else:
-                data = self.view.prompt_create_contrat()
-                data["commercial"] = self.repository.get_user(data["commercial_email"])
-                data["client"] = self.repository.get_client(data["client_name"])
+                data = self.view.prompt_create_contract()
+                data["client"] = self.repository.get_client(data["client"])
 
-            client = models.Client(**data)
-            response = self.repository.add(client)
+            contrat = models.Contrat(**data)
+            response = self.repository.add(contrat)
         if response:
             self.repository.commit()
-            self.view.prompt_contrat_info(client)
+            self.view.prompt_contract_info(contrat)
             self.main_menu()
 
     @check_user_auth

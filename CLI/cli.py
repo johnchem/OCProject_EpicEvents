@@ -1,6 +1,6 @@
 import os
 from typing import Optional
-from backend.models import Departements
+from backend.models import ContratStatus, Departements
 
 from rich import box
 from rich.console import Console
@@ -186,14 +186,15 @@ class cli_handler:
         )
         self._display.print(grid)
 
-        self._display.print(Padding("[green u]Contrats actif[/green u]", (1,0)))
+        self._display.print(Padding("[green u]Contrats actif[/green u]", (1, 0, 0, 0)))
         if client_data.contrat:
-            for contrat in client_data.contrat:
-                self._display.print(repr(contrat))
+            self._display.print(f"{client_data.contrat}")
+            # for contrat in client_data.contrat:
+            #     self._display.print(contrat)
         else:
             self._display.print("[i] ... pas de contrat[/i]")
 
-        self._display.print(Padding("[green u]Evenement actif[/green u]", (1,0)))
+        self._display.print(Padding("[green u]Evenement actif[/green u]", (1, 0, 0, 0)))
         if client_data.evenements:
             for event in client_data.evenements:
                 self._display.print(repr(event))
@@ -282,3 +283,52 @@ class cli_handler:
             default=client_data.commercial_contact.email
         )
         return client_data
+
+    # -------- Contract views --------------
+    def display_create_contract(self, client=None):
+        if client:
+            default_value = client.full_name
+        else:
+            default_value = None
+
+        client_full_name = self._display.ask(
+            "[green]Nom client[/green]",
+            default=default_value
+            )
+        total_amount = self._display.ask("[green]Montant global[/green]")
+        remaining_amount = self._display.ask("[green]Montant restant[/green]")
+
+        for pos, item in enumerate(ContratStatus, start=1):
+            self._display.print(f"[green][{pos}] : [/green]{item.value}")
+        status_choices = int(self._display.input())
+        contrat_status = [x for x in ContratStatus][status_choices-1]
+
+        return {
+            "client": client_full_name,
+            "total_amount": total_amount,
+            "remaining_amount": remaining_amount,
+            "contrat_status": contrat_status,
+        }
+
+    def display_contract_info(self, contract):
+        grid = Table.grid(expand=False, padding=(0, 1, 1, 1))
+        grid.add_column(justify="center")
+        grid.add_column(justify="center")
+
+        grid.add_row(
+            f"[purple]{contract.client.full_name}[/purple]",
+            f"[purple]{contract.commercial.name} {contract.commercial.forname.upper()}[/purple]",
+            )
+        grid.add_row(
+            f"[purple]{contract.remaining_amount}/{contract.total_amount}[/purple]", "",
+            )
+        grid.add_row(
+            "[green]Date de creation :[/green]",
+            f"[blue]{contract.creation_date}[/blue]"
+        )
+        grid.add_row(
+            f"[blue]{contract.contrat_status.value}[/blue]",
+            ""
+        )
+        self._display.print(grid)
+        os.system("pause")
