@@ -332,3 +332,9 @@ class cli_handler:
         )
         self._display.print(grid)
         os.system("pause")
+
+    def display_contract_header(self, contract):
+        pass
+    
+    def display_update_contract_form(self, contract, client_fullname, commercial_email):
+        pass

@@ -249,10 +249,13 @@ class Controller(menu.Menu):
         if not self.permissions.update_contract(self._logged_user, contract):
             self.view.prompt_error_message("accés non authorisé")
             self.contract_opt_menu(contract)
-        contract_data = self.view.prompt_update_client(
+        contract_data = self.view.prompt_update_contract(
             contract,
-            commercial_email=contract.commercial.email)
-        contract_data["commercial"] = self.repository.get_user(contract_data.email)
+            client_fullname=contract.client.full_name,
+            commercial_email=contract.commercial.email,
+            )
+        contract_data["commercial"] = self.repository.get_user(contract_data["commercial_email"])
+        contract_data["client"] = self.repository.get_client(contract_data["client_fullname"])
 
         # response = update_user_gen.send(user_data)
         response = self.repository.commit()
@@ -260,23 +263,97 @@ class Controller(menu.Menu):
             self.view.prompt_error_message("erreur lors de la mise à jour")
         self.main_menu()
 
-    def delete_contract(self):
-        pass
+    def delete_contract(self, contract):
+        if not self.permissions.delete_contract(self._logged_user):
+            self.view.prompt_error_message("accés non authorisé")
+            self.contract_opt_menu(contract)
 
-    def create_event(self):
-        pass
+        response = self.repository.delete_contract(contract)
+        if not response:
+            self.view.prompt_error_message("erreur lors de la suppression")
+        self.view.print("Le contrat à bien été supprimé")
+        self.contract_menu()
+
+    def create_event(self, contract):
+        if not self.permissions.update_contract(self._logged_user, contract):
+            self.view.prompt_error_message("accés non authorisé")
+            self.contract_opt_menu(contract)
+        if contract.contrat_status == models.ContratStatus.SIGNED:
+            event_data = self.view.prompt_create_event(
+                contract=contract
+            )
+            event_data["client"] = contract.client
+            event = models.Evenement(**event_data)
+            response = self.repository.add(event)
+
+            if response:
+                self.repository.commit()
+                self.view.prompt_event_info(event)
+                self.contract_opt_menu(contract)
+
+            if not response:
+                self.view.prompt_error_message("erreur lors de la creation")
+                self.contract_opt_menu(contract)
+        else:
+            self.view.prompt_error_message("Le contrat doit être signé pour crée un évenement")
+            self.contract_opt_menu(contract)
 
     def list_events(self):
-        pass
+        if not self.permissions.read_event(self._logged_user):
+            self.view.prompt_error_message("accés non authorisé")
+            self.event_menu()
+
+        event = self.repository.list_event()
+        choices = self.view.prompt_list_event(event)
+        if choices == "q":
+            self.contract_menu()
+        try:
+            choices = int(choices)
+            if choices > len(event):
+                self.list_user
+            event_picked = event[choices-1]
+            self.view.prompt_event_info(event_picked)
+            self.event_opt_menu(event_picked)
+
+        except Exception as err:
+            self.view.print(err)
+            self.view.prompt_error_message(
+                f"Veuillez choisir une valeur entre 1 et {len(event)}",
+                "ou q pour quitter",
+            )
 
     def filter_events(self):
         pass
 
-    def update_event(self):
-        pass
+    def update_event(self, event):
+        if not self.permissions.update_event(self._logged_user):
+            self.view.prompt_error_message("accés non authorisé")
+            self.event_opt_menu(event)
 
-    def delete_event(self):
-        pass
+        if self._logged_user.departement == models.Departements.GESTION:
+            event_data = self.view.prompt_update_event_support(event)
+            event_data["contact_support"] = self.repository.get_user(
+                event_data["support_email"]
+                )
+
+        if self._logged_user.departement == models.Departements.SUPPORT:
+            event_data = self.view.prompt_update_event(event)
+
+        response = self.repository.commit()
+        if not response:
+            self.view.prompt_error_message("erreur lors de la mise à jour")
+        self.event_opt_menu(event)
+
+    def delete_event(self, event):
+        if not self.permissions.delete_event(self._logged_user):
+            self.view.prompt_error_message("accés non authorisé")
+            self.event_opt_menu(event)
+
+        response = self.repository.delete_event(event)
+        if not response:
+            self.view.prompt_error_message("erreur lors de la suppression")
+        self.view.print("L'évenement à bien été supprimé")
+        self.event_menu()
 
     def quit(self):
         # self.view.exit_message()

@@ -78,10 +78,44 @@ class Views:
         return self._handler.display_list_client(client_list)
 
     # -------- Contract views --------------
+    def prompt_contract_menu(self, menu_item):
+        self._handler.clear()
+        self._handler.print("[i]Menu contrat[/i]")
+        return self._handler.display_menu(menu_item)
+
+    def prompt_contract_opt_menu(self, menu_item, contract):
+        self._handler.clear()
+        self._handler.display_contract_header(contract)
+        return self._handler.display_menu(menu_item)
+
     def prompt_create_contract(self, client=None):
         self._handler.clear()
         return self._handler.display_create_contract(client)
 
+    def prompt_update_contract(self, contract, client_fullname, commercial_email):
+        self._handler.clear()
+        return self._handler.display_update_contract_form(contract, client_fullname, commercial_email)
+
     def prompt_contract_info(self, client):
         self._handler.clear()
         return self._handler.display_contract_info(client)
+
+    def prompt_list_contract(self, contract_list):
+        self._handler.clear()
+        return self._handler.display_list_contract(contract_list)
+
+    # -------- Event views --------------
+    def prompt_create_event(self):
+        pass
+
+    def prompt_list_event(self, event_list):
+        pass
+
+    def prompt_event_info(self, event):
+        pass
+
+    def prompt_update_event(self, event):
+        pass
+
+    def prompt_update_event_support(self):
+        pass
