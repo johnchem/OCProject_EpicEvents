@@ -334,10 +334,46 @@ class cli_handler:
         os.system("pause")
 
     def display_contract_header(self, contract):
-        pass
+        client = contract.client
+        commercial = contract.commercial
+
+        grid = Table.grid(expand=False, padding=(0, 1, 1, 1))
+        grid.add_column(justify="center")
+        grid.add_column(justify="center")
+        grid.add_row("id", f"{contract.id}")
+        grid.add_row(
+            f"{client.full_name}\n{client.email}\n{client.telephone}",
+            f"{commercial.name.upper()} {commercial.forname}\n{commercial.email}"
+        )
+        grid.add_row(
+            "montant", f"{contract.remaining_amount}/{contract.total_amount}"
+        )
+        if contract.contrat_status == ContratStatus.SIGNED:
+            grid.add_row(f"[green]{contract.contrat_status.value}[/green]", "")
+        else:
+            grid.add_row(f"[light red]{contract.contrat_status.value}[/light red]", "")
+        self.display.print(grid)
 
     def display_update_contract_form(self, contract, client_fullname, commercial_email):
-        pass
+        contract.client = self._display.print(f"[green]Nom du client [/green] : {client_fullname}")
+        contract.commercial = self._display.print(f"[green]Mail commercial [/green : {commercial_email}]")
+        contract.total_amount = self._display.ask(
+            "[green]Montant total [/green]",
+            default=contract.total_amount
+            )
+        contract.remaining_amount = self._display.ask(
+            "[green]Montant restant [/green]",
+            contract.remaining_amount
+            )
+
+        for pos, item in enumerate(ContratStatus, start=1):
+            self._display.print(f"[green][{pos}] : [/green]{item.value}")
+        dpt_choices = self._display.ask(
+            f"[green]Statut du contrat [/green][blue]{contract.contrat_status.value}[/blue]",
+            int=True
+        )
+        contract.contrat_status = [x for x in Departements][dpt_choices-1]
+        return contract
 
     # ------------------- Event display -----------------------
     def display_event_header(self, event):
