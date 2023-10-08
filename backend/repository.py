@@ -32,11 +32,14 @@ class SqlAlchemyRepository():
             if auth.authenticate_user(user, password):
                 return user
             return False
-        except:
+        except Exception as err:
+            print(err)
             print("ce compte n'existe pas")
 
     def list_user(self):
-        return self.session.query(User).all()
+        stmt = select(User).order_by(User.id)
+        return self.session.scalars(stmt).all()
+        # return self.session.query(User).all()
 
     def delete_user(self, user_data):
         stmt = select(User).where(User.id == user_data.id)
@@ -50,13 +53,9 @@ class SqlAlchemyRepository():
         return self.session.scalars(stmt).unique().first()
 
     def list_client(self):
-        return self.session.query(Client).all()
-
-    def update_client(self, client_id: int):
-        stmt = select(Client).where(Client.id == client_id)
-        yield self.session.scalars(stmt).unique().first()
-        self.session.commit()
-        return True
+        stmt = select(Client).order_by(Client.id)
+        return self.session.scalars(stmt).all()
+        # return self.session.query(Client).all()
 
     def delete_client(self, client_id: int):
         stmt = select(Client).where(Client.id == client_id)
@@ -65,23 +64,22 @@ class SqlAlchemyRepository():
         self.session.commit()
         return True
 
-    def get_contract(self, contract_status, client_name):
-        client = self.session.query(Client).filter_by(full_name=client_name).first()
-        stmt = select(Contrat).\
-            options(joinedload(Contrat.client)).\
-            filter_by(contrat_status=contract_status).\
-            filter_by(client=client)
-        return self.session.scalars(stmt).unique().first()
+    def get_contract(self, contract_id):
+        stmt = select(Contrat).filter_by(Contrat.id)
+        return self.session.scalars(stmt).first()
+
+    # def get_contract(self, contract_status, client_name):
+    #     client = self.session.query(Client).filter_by(full_name=client_name).first()
+    #     stmt = select(Contrat).\
+    #         options(joinedload(Contrat.client)).\
+    #         filter_by(contrat_status=contract_status).\
+    #         filter_by(client=client)
+    #     return self.session.scalars(stmt).unique().first()
 
     def list_contract(self):
-        contrat = self.session.query(Contrat).all()
-        return contrat
-
-    def update_contrat(self, contrat_id: int):
-        stmt = select(Contrat).where(Contrat.id == contrat_id)
-        yield self.session.scalars(stmt).first()
-        self.session.commit()
-        return True
+        stmt = select(Contrat).order_by(Contrat.id)
+        return self.session.scalars(stmt).all()
+        # return self.session.query(Contrat).all()
 
     def delete_contrat(self, contrat_id: int):
         stmt = select(Contrat).where(Contrat.id == contrat_id)
@@ -89,12 +87,26 @@ class SqlAlchemyRepository():
         self.session.delete(client)
         return True
 
-    def get_event_by_client(self, session: Session, client_name):
-        client = session.query(Client).filter(full_name=client_name)
-        stmt = select(Evenement).options(joinedload(Evenement.client)).filter_by(client=client).first()
-        return session.scalars(stmt).unique().first()
+    def get_event(self, event_id: int):
+        stmt = select(Evenement).filter_by(id=event_id)
+        return self.session.scalars(stmt).unique().first()
 
-    def get_event_by_support(self, session: Session, support_email):
-        user = session.query(User).filter_by(email=support_email)
-        stmt = select(Evenement).option(joinedload(Evenement.contact_support)).filter_by(contact_support=user).first()
-        return session.scalars(stmt).unique().first()
+    def list_event(self):
+        stmt = select(Evenement).order_by(Evenement.id)
+        return self.session.scalars(stmt).all()
+
+    def delete_event(self, event_id: int):
+        stmt = select(Evenement).where(Evenement.id == event_id)
+        event = self.session.scalars(stmt).first()
+        self.session.delete(event)
+        return True
+
+    # def get_event_by_client(self, session: Session, client_name):
+    #     client = session.query(Client).filter(full_name=client_name)
+    #     stmt = select(Evenement).options(joinedload(Evenement.client)).filter_by(client=client).first()
+    #     return session.scalars(stmt).unique().first()
+
+    # def get_event_by_support(self, session: Session, support_email):
+    #     user = session.query(User).filter_by(email=support_email)
+    #     stmt = select(Evenement).option(joinedload(Evenement.contact_support)).filter_by(contact_support=user).first()
+    #     return session.scalars(stmt).unique().first()

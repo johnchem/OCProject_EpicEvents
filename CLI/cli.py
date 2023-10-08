@@ -188,9 +188,9 @@ class cli_handler:
 
         self._display.print(Padding("[green u]Contrats actif[/green u]", (1, 0, 0, 0)))
         if client_data.contrat:
-            self._display.print(f"{client_data.contrat}")
-            # for contrat in client_data.contrat:
-            #     self._display.print(contrat)
+            # self._display.print(f"{client_data.contrat}")
+            for contrat in client_data.contrat:
+                self._display.print(f"{contrat}")
         else:
             self._display.print("[i] ... pas de contrat[/i]")
 

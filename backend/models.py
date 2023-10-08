@@ -69,7 +69,7 @@ class Client(Base):
     last_update: Mapped[datetime] = mapped_column(DateTime, default=func.now(), onupdate=func.now())
     commercial_contact_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
 
-    contrat: Mapped["Contrat"] = relationship(
+    contrat: Mapped[List["Contrat"]] = relationship(
         back_populates="client",
         lazy="joined",
         cascade="save-update, delete, delete-orphan")
@@ -77,7 +77,7 @@ class Client(Base):
         back_populates="client_portfolio",
         lazy="joined",
         cascade="save-update")
-    evenements: Mapped["Evenement"] = relationship(
+    evenements: Mapped[list["Evenement"]] = relationship(
         back_populates="client",
         lazy="joined",
         cascade="save-update, delete, delete-orphan")
@@ -101,7 +101,7 @@ class Contrat(Base):
 
     client: Mapped["Client"] = relationship(back_populates="contrat", lazy="joined")
     commercial: Mapped["User"] = relationship(back_populates="contrat_portfolio", lazy="joined")
-    evenements: Mapped[List["Evenement"]] = relationship(back_populates="contrat", lazy="joined")
+    evenements: Mapped["Evenement"] = relationship(back_populates="contrat", lazy="joined")
 
     def __init__(self, client, total_amount, remaining_amount, contrat_status):
         self.total_amount = total_amount

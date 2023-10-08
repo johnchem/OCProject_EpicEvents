@@ -99,6 +99,10 @@ class Controller(menu.Menu):
 
     @check_user_auth
     def delete_user(self, user_data, *args, **kwargs):
+        if not self.permissions.delete_user(self._logged_user):
+            self.view.prompt_error_message(
+                "besoin d'un accés admin ou faire partis \n de l'équipe gestion pour cette opération")
+            self.user_opt_menu(user_data)
         response = self.repository.delete_user(user_data)
         if not response:
             self.view.prompt_error_message("erreur lors de la suppression")
@@ -107,7 +111,11 @@ class Controller(menu.Menu):
 
     @check_user_auth
     def create_client(self):
-        if self.permissions.create_client(self._logged_user):
+        if not self.permissions.create_client(self._logged_user):
+            self.view.prompt_error_message(
+                "besoin d'un accés admin ou faire partis \n de l'équipe gestion pour cette opération")
+            self.user_menu()
+        else:
             default_commercial = self._logged_user
             data = self.view.prompt_create_client(default_commercial.email)
 
@@ -125,6 +133,10 @@ class Controller(menu.Menu):
 
     @check_user_auth
     def list_client(self):
+        if not self.permissions.read_client(self._logged_user):
+            self.view.prompt_error_message("accés non authorisé")
+            self.user_menu()
+
         client = self.repository.list_client()
         choices = self.view.prompt_list_client(client)
         if choices == "q":
@@ -145,7 +157,7 @@ class Controller(menu.Menu):
             )
 
     @check_user_auth
-    def update_client(self, client, *args, **kwargs):
+    def update_client(self, client):
         if not self.permissions.update_client(self._logged_user):
             self.view.prompt_error_message("besoin d'un accés admin pour cette opération")
             self.client_opt_menu(client)
@@ -162,41 +174,91 @@ class Controller(menu.Menu):
         self.main_menu()
 
     @check_user_auth
-    def delete_client(self):
-        pass
+    def delete_client(self, client):
+        if not self.permissions.delete_client(self._logged_user):
+            self.view.prompt_error_message("accés non authorisé")
+            self.client_opt_menu(client)
+
+        response = self.repository.delete_user(client)
+        if not response:
+            self.view.prompt_error_message("erreur lors de la suppression")
+        self.view.print("Le client à bien été supprimé")
+        self.client_menu()
 
     @check_user_auth
-    def create_contract(self, *args, **kwargs):
-        if self.permissions.create_contract(self._logged_user):
-            if "client" in kwargs:
-                client = kwargs.get("client")
+    def create_contract(self, client=None):
+        if not self.permissions.create_contract(self._logged_user):
+            self.view.prompt_error_message("accés non authorisé")
+            self.client_menu()
 
-                data = self.view.prompt_create_contract(
-                    client=client,
-                    )
-                data["client"] = client
-            else:
-                data = self.view.prompt_create_contract()
-                data["client"] = self.repository.get_client(data["client"])
+        if client:
+            if not self.permissions.create_contract(self._logged_user):
+                self.view.prompt_error_message("besoin d'un accés admin pour cette opération")
+                self.client_opt_menu(client)
 
-            contrat = models.Contrat(**data)
-            response = self.repository.add(contrat)
+            data = self.view.prompt_create_contract(
+                client=client,
+            )
+            data["client"] = client
+        else:
+            if not self.permissions.create_contract(self._logged_user):
+                self.view.prompt_error_message("besoin d'un accés admin pour cette opération")
+                self.contract_menu()
+
+            data = self.view.prompt_create_contract()
+            data["client"] = self.repository.get_client(data["client"])
+
+        contrat = models.Contrat(**data)
+        response = self.repository.add(contrat)
+
         if response:
             self.repository.commit()
             self.view.prompt_contract_info(contrat)
-            self.main_menu()
+            self.contract_menu()
 
     @check_user_auth
     def list_contract(self):
-        pass
+        if not self.permissions.read_contract(self._logged_user):
+            self.view.prompt_error_message("accés non authorisé")
+            self.contract_menu()
+        contract = self.repository.list_contract()
+        choices = self.view.prompt_list_contract(contract)
+        if choices == "q":
+            self.contract_menu()
+        try:
+            choices = int(choices)
+            if choices > len(contract):
+                self.list_user
+            contract_picked = contract[choices-1]
+            self.view.prompt_contract_info(contract_picked)
+            self.contract_opt_menu(contract_picked)
+
+        except Exception as err:
+            self.view.print(err)
+            self.view.prompt_error_message(
+                f"Veuillez choisir une valeur entre 1 et {len(contract)}",
+                "ou q pour quitter",
+            )
 
     @check_user_auth
     def filter_contract(self):
         pass
 
     @check_user_auth
-    def update_contract(self):
-        pass
+    def update_contract(self, contract):
+        if not self.permissions.update_contract(self._logged_user, contract):
+            self.view.prompt_error_message("accés non authorisé")
+            self.contract_opt_menu(contract)
+        contract_data = self.view.prompt_update_client(
+            contract,
+            commercial_email=contract.commercial.email)
+        contract_data["commercial"] = self.repository.get_user(contract_data.email)
+
+        # response = update_user_gen.send(user_data)
+        response = self.repository.commit()
+        if not response:
+            self.view.prompt_error_message("erreur lors de la mise à jour")
+        self.main_menu()
 
     def delete_contract(self):
         pass

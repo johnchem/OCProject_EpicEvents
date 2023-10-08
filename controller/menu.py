@@ -94,6 +94,7 @@ class Menu(ABC):
         MENU_ITEM_DICT = {
             "Liste des contrats": self.list_contract,
             "Filter les contrats": self.filter_contract,
+            "Créer un contrat": self.create_contract,
             "Retour": self.main_menu,
         }
 
