@@ -335,6 +335,20 @@ class cli_handler:
 
     def display_contract_header(self, contract):
         pass
-    
+
     def display_update_contract_form(self, contract, client_fullname, commercial_email):
         pass
+
+    # ------------------- Event display -----------------------
+    def display_event_header(self, event):
+        pass
+
+    def display_create_event(self):
+        pass
+
+    def display_event_update(self, event):
+        pass
+
+    def display_event_define_support(self, event):
+        pass
+

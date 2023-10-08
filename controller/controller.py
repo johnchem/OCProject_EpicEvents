@@ -290,8 +290,7 @@ class Controller(menu.Menu):
                 self.repository.commit()
                 self.view.prompt_event_info(event)
                 self.contract_opt_menu(contract)
-
-            if not response:
+            else:
                 self.view.prompt_error_message("erreur lors de la creation")
                 self.contract_opt_menu(contract)
         else:

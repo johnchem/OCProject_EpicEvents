@@ -105,17 +105,32 @@ class Views:
         return self._handler.display_list_contract(contract_list)
 
     # -------- Event views --------------
-    def prompt_create_event(self):
-        pass
+    def prompt_event_menu(self, menu_item):
+        self._handler.clear()
+        self._handler.print("[1]Menu Evenements")
+        return self._handler.display_menu(menu_item)
+
+    def prompt_event_opt_menu(self, menu_item, event):
+        self._handler.clear()
+        self._handler.display_event_header(event)
+        return self._handler.display_menu(menu_item)
+
+    def prompt_create_event(self, contract):
+        self._handler.clear()
+        return self._handler.dipslay_create_event(contract)
 
     def prompt_list_event(self, event_list):
-        pass
+        self._handler.clear()
+        return self._handler.display_list_event(event_list)
 
     def prompt_event_info(self, event):
-        pass
+        self._handler.clear()
+        self._handler.display_event_info(event)
 
     def prompt_update_event(self, event):
-        pass
+        self._handler.clear()
+        return self._handler.display_event_update(event)
 
-    def prompt_update_event_support(self):
-        pass
+    def prompt_update_event_support(self, event):
+        self._handler.clear()
+        return self._handler.display_event_define_support(event)
