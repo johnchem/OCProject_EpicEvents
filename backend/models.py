@@ -118,6 +118,7 @@ class Evenement(Base):
     __tablename__ = "events"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(60), nullable=False)
     contrat_id: Mapped[int] = mapped_column(ForeignKey("contrat.id"))
     client_id: Mapped["Client"] = mapped_column(ForeignKey("client.id"))
     event_date_start: Mapped[datetime] = mapped_column(DateTime)
