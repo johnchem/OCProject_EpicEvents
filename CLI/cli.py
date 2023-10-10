@@ -393,7 +393,27 @@ class cli_handler:
         self._display.print(grid)
 
     def display_event_info(self, event):
-        pass
+        grid = Table.grid(expand=False, padding=(0, 1, 1, 1))
+        grid.add_column(justify="center", color="green")
+        grid.add_column(justify="center")
+        grid.add_row("id", f"{event.id}")
+        grid.add_row(None, f"{event.name}")
+        grid.add_row(
+            f"{event.client.full_name}",
+            f"{event.client.email}\n{event.client.phone}"
+        )
+        grid.add_row(f"id : {event.contract.id}", f"{event.contract.status}")
+        grid.add_row("Date début", f"{event.event_date_start}")
+        grid.add_row("Date fin", f"{event.event_date_end}")
+        grid.add_row(
+            "Contact support",
+            f"{event.contact_support.name.upper()} {event.contact_support.forname}"
+        )
+        grid.add_row("Lieu", f"{event.location}")
+        grid.add_row("Nombre participant", f"{event.attendees}")
+        grid.add_row("Notes", f"{event.note}")
+        self._display.print(grid)
+        os.system("pause")
 
     def display_create_event(self, contract):
         grid = Table.grid(expand=False, padding=(0, 1, 1, 1))
@@ -404,13 +424,14 @@ class cli_handler:
             f"{contract.client.full_name}",
             f"{contract.client.email}\n{contract.client.phone}"
         )
-
+        name = self._display.ask("[green]Nom[/green]")
         event_data_start = self._display.ask("[green]Date début[/green]")
         event_date_end = self._display.ask("[green]Date de fin[/green]")
         location = self._display.ask("[green]lieu[/green]")
         attendees = self._display.ask("[green]Nombres de participant[/green]")
         note = self._display.ask("[green]Note additionnelle[/green]")
         return {
+            "name": name,
             "event_data_start": event_data_start,
             "event_date_end": event_date_end,
             "location": location,
@@ -419,7 +440,45 @@ class cli_handler:
         }
 
     def display_event_update(self, event):
-        pass
+        grid = Table.grid(expand=False, padding=(0, 1, 1, 1))
+        grid.add_column(justify="center")
+        grid.add_column(justify="center")
+        event.name = self._display.ask("[green]Nom[/green]", default=event.name)
+        event.event_date_start = self._display.ask(
+            "[green]Date début[/green]",
+            default=event.event_date_start
+        )
+        event.event_date_end = self._display.ask("[green]Date de fin[/green]", default=event.event_date_end)
+        event.location = self._display.ask("[green]lieu[/green]", default=event.location)
+        event.attendees = self._display.ask("[green]Nombres de participant[/green]", dafault=event.attendees)
+        event.note = self._display.ask("[green]Note additionnelle[/green]", default=event.note)
+        return event
 
     def display_event_define_support(self, event):
-        pass
+        if event.contact_support:
+            support_email = event.contact_support.email
+        else:
+            support_email = None
+
+        grid = Table.grid(expand=False, padding=(0, 1, 1, 1))
+        grid.add_column(justify="center", color="green")
+        grid.add_column(justify="center")
+        grid.add_row("id", f"{event.id}")
+        grid.add_row(None, f"{event.name}")
+        grid.add_row(
+            f"{event.client.full_name}",
+            f"{event.client.email}\n{event.client.phone}"
+        )
+        grid.add_row(f"id : {event.contract.id}", f"{event.contract.status}")
+        grid.add_row("Date début", f"{event.event_date_start}")
+        grid.add_row("Date fin", f"{event.event_date_end}")
+        grid.add_row("Lieu", f"{event.location}")
+        grid.add_row("Nombre participant", f"{event.attendees}")
+        grid.add_row("Notes", f"{event.note}")
+        self._display.print(grid)
+
+        support_email = self._display.ask(
+            "email du contact support",
+            default=support_email
+        )
+        return support_email

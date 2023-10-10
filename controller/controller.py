@@ -330,13 +330,13 @@ class Controller(menu.Menu):
             self.event_opt_menu(event)
 
         if self._logged_user.departement == models.Departements.GESTION:
-            event_data = self.view.prompt_update_event_support(event)
-            event_data["contact_support"] = self.repository.get_user(
-                event_data["support_email"]
+            support_email = self.view.prompt_update_event_support(event)
+            event.contact_support = self.repository.get_user(
+                support_email
                 )
 
         if self._logged_user.departement == models.Departements.SUPPORT:
-            event_data = self.view.prompt_update_event(event)
+            event = self.view.prompt_update_event(event)
 
         response = self.repository.commit()
         if not response:

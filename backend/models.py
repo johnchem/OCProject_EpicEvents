@@ -132,20 +132,20 @@ class Evenement(Base):
     contrat: Mapped["Contrat"] = relationship(back_populates="evenements", lazy="joined")
     contact_support: Mapped["User"] = relationship(back_populates="evenements", lazy="joined")
 
-    @property
-    def client_name(self):
-        return self.client.company_name
+    # @property
+    # def client_name(self):
+    #     return self.client.company_name
 
-    @property
-    def client_contact(self) -> str:
-        return self.client.full_name
+    # @property
+    # def client_contact(self) -> str:
+    #     return self.client.full_name
 
-    def __init__(self, contrat, event_date_start, event_date_end, location, attendees, contact_support, note):
-        self.contrat = contrat
-        self.client = contrat.client
-        self.contact_support = contact_support
-        self.event_date_start = event_date_start
-        self.event_date_end = event_date_end
-        self.location = location
-        self.attendees = attendees
-        self.note = note
+    # def __init__(self, contrat, event_date_start, event_date_end, location, attendees, contact_support, note):
+    #     self.contrat = contrat
+    #     self.client = contrat.client
+    #     self.contact_support = contact_support
+    #     self.event_date_start = event_date_start
+    #     self.event_date_end = event_date_end
+    #     self.location = location
+    #     self.attendees = attendees
+    #     self.note = note
