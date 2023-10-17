@@ -5,7 +5,7 @@ import sqlalchemy
 from conftest import *
 from conftest import DT_STRING
 from werkzeug.security import check_password_hash
-from backend.models import User, Client, Contrat, Evenement, Departements, ContratStatus
+from backend.models import User, Client, Contract, Evenement, Departements, ContractStatus
 from backend.repository import SqlAlchemyRepository
 
 # --------- Test Object CRUD : User -------------
@@ -173,80 +173,80 @@ def test_delete_client(database_access, client_bowling):
 # --------- Test Object CRUD : Contract -----------
 
 
-def test_create_contrat(database_access, contrat_roule_maboule):
+def test_create_contract(database_access, contract_roule_maboule):
     session = database_access
     repository = SqlAlchemyRepository(session)
-    repository.add(contrat_roule_maboule)
+    repository.add(contract_roule_maboule)
     session.commit()
 
-    contrat = session.query(Contrat).join(Client). \
+    contract = session.query(Contract).join(Client). \
         filter(Client.full_name == "roule maboule").first()
-    assert contrat.client.full_name == "roule maboule"
-    assert contrat.total_amount == 10000
-    assert contrat.remaining_amount == 250
-    assert contrat.contrat_status == ContratStatus.SIGNED
+    assert contract.client.full_name == "roule maboule"
+    assert contract.total_amount == 10000
+    assert contract.remaining_amount == 250
+    assert contract.contract_status == ContractStatus.SIGNED
 
 
-def test_list_contrat(database_access, contract_jean_nemarre, contrat_roule_maboule):
+def test_list_contract(database_access, contract_jean_nemarre, contract_roule_maboule):
     session = database_access
     session.add(contract_jean_nemarre)
-    session.add(contrat_roule_maboule)
+    session.add(contract_roule_maboule)
     session.flush()
 
     repository = SqlAlchemyRepository(session)
-    list_contrat = repository.list_contract()
+    list_contract = repository.list_contract()
 
-    assert 2 == len(list_contrat)
-    assert 35000 == sum([x.total_amount for x in list_contrat])
-    assert 2 == len([x for x in list_contrat if x.client.company_name == "Bowling & Cie"])
+    assert 2 == len(list_contract)
+    assert 35000 == sum([x.total_amount for x in list_contract])
+    assert 2 == len([x for x in list_contract if x.client.company_name == "Bowling & Cie"])
 
 
-def test_update_contrat(database_access, contrat_roule_maboule):
+def test_update_contract(database_access, contract_roule_maboule):
     session = database_access
-    session.add(contrat_roule_maboule)
+    session.add(contract_roule_maboule)
     session.commit()
-    session.refresh(contrat_roule_maboule)
+    session.refresh(contract_roule_maboule)
 
     repository = SqlAlchemyRepository(session)
-    contrat_generator = repository.update_contrat(contrat_roule_maboule.id)
-    contrat = next(contrat_generator)
-    contrat.total_amount = 1500
-    contrat.remaining_amount = 0
-    contrat.contrat_status = ContratStatus.NOT_SIGNED
+    contract_generator = repository.update_contract(contract_roule_maboule.id)
+    contract = next(contract_generator)
+    contract.total_amount = 1500
+    contract.remaining_amount = 0
+    contract.contract_status = ContractStatus.NOT_SIGNED
     try:
-        next(contrat_generator)
+        next(contract_generator)
     except StopIteration:
         pass
 
-    contrat_control = session.query(Contrat).join(Client).where(Client.email == "rmaboule@bowling.com").first()
-    assert contrat_control.total_amount == 1500
-    assert contrat_control.remaining_amount == 0
-    assert contrat_control.contrat_status == ContratStatus.NOT_SIGNED
+    contract_control = session.query(Contract).join(Client).where(Client.email == "rmaboule@bowling.com").first()
+    assert contract_control.total_amount == 1500
+    assert contract_control.remaining_amount == 0
+    assert contract_control.contract_status == ContractStatus.NOT_SIGNED
 
 
-def test_delete_contrat(database_access, contrat_roule_maboule):
+def test_delete_contract(database_access, contract_roule_maboule):
     session = database_access
-    session.add(contrat_roule_maboule)
+    session.add(contract_roule_maboule)
     session.flush()
-    session.refresh(contrat_roule_maboule)
+    session.refresh(contract_roule_maboule)
 
     repository = SqlAlchemyRepository(session)
-    repository.delete_contrat(contrat_roule_maboule.id)
+    repository.delete_contract(contract_roule_maboule.id)
     session.commit()
     with pytest.raises(sqlalchemy.exc.NoResultFound, match="No row was found when one was required"):
-        session.query(Contrat).where(Contrat.id == contrat_roule_maboule.id).one()
+        session.query(Contract).where(Contract.id == contract_roule_maboule.id).one()
 
 # --------- Test Object CRUD : Evenement ----------
 
 
-def test_create_evenement(database_access, evenement_contrat_roule_maboule):
+def test_create_evenement(database_access, evenement_contract_roule_maboule):
     session = database_access
-    session.add(evenement_contrat_roule_maboule)
+    session.add(evenement_contract_roule_maboule)
     session.commit()
 
     event = session.query(Evenement).join(Client).filter(Client.full_name == "roule maboule").first()
     assert event.client.full_name == "roule maboule"
-    assert event.contrat.client.full_name == "roule maboule"
+    assert event.contract.client.full_name == "roule maboule"
     assert event.event_date_start == datetime.strptime("01/05/2025 10:25:00", DT_STRING)
     assert event.event_date_end == datetime.strptime("06/05/2025 10:25:00", DT_STRING)
     assert event.location == "bali-bali"

@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 from sqlalchemy.orm import Session
 
-from backend.models import User, Client, Contrat, Evenement
+from backend.models import User, Client, Contract, Evenement
 import authentification as auth
 
 
@@ -65,24 +65,24 @@ class SqlAlchemyRepository():
         return True
 
     def get_contract(self, contract_id):
-        stmt = select(Contrat).filter_by(Contrat.id)
+        stmt = select(Contract).filter_by(contract_id)
         return self.session.scalars(stmt).first()
 
     # def get_contract(self, contract_status, client_name):
     #     client = self.session.query(Client).filter_by(full_name=client_name).first()
-    #     stmt = select(Contrat).\
-    #         options(joinedload(Contrat.client)).\
-    #         filter_by(contrat_status=contract_status).\
+    #     stmt = select(Contract).\
+    #         options(joinedload(Contract.client)).\
+    #         filter_by(contract_status=contract_status).\
     #         filter_by(client=client)
     #     return self.session.scalars(stmt).unique().first()
 
     def list_contract(self):
-        stmt = select(Contrat).order_by(Contrat.id)
+        stmt = select(Contract).order_by(Contract.id)
         return self.session.scalars(stmt).all()
-        # return self.session.query(Contrat).all()
+        # return self.session.query(contract).all()
 
-    def delete_contrat(self, contrat_id: int):
-        stmt = select(Contrat).where(Contrat.id == contrat_id)
+    def delete_contract(self, contract_id: int):
+        stmt = select(Contract).where(Contract.id == contract_id)
         client = self.session.scalars(stmt).first()
         self.session.delete(client)
         return True

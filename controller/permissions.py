@@ -114,7 +114,7 @@ class Permissions:
         return False
 
     def create_event_for_own_client(self, user):
-        # if contrat is signed
+        # if contract is signed
         if user.departement.value in ["Administrator"]:
             return True
         return False

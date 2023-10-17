@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy.orm import sessionmaker
 
 from setup import _create_test_engine
-from backend.models import Base, User, Client, Contrat, Evenement, Departements, ContratStatus
+from backend.models import Base, User, Client, Contract, Evenement, Departements, ContractStatus
 
 DT_STRING = "%d/%m/%Y %H:%M:%S"
 
@@ -141,14 +141,14 @@ def client_staplehero(create_object_record, user_paul):
 # ---------- Contract Object --------------
 
 @pytest.fixture
-def contrat_roule_maboule(create_object_record, client_bowling):
+def contract_roule_maboule(create_object_record, client_bowling):
     client_bowling = create_object_record(client_bowling)
 
-    _contract = Contrat(
+    _contract = Contract(
         client=client_bowling,
         total_amount=10000,
         remaining_amount=250,
-        contrat_status=ContratStatus.SIGNED
+        contract_status=ContractStatus.SIGNED
     )
     return _contract
 
@@ -157,11 +157,11 @@ def contrat_roule_maboule(create_object_record, client_bowling):
 def contract_jean_nemarre(create_object_record, client_bowling_2):
     client_bowling = create_object_record(client_bowling_2)
 
-    _contract = Contrat(
+    _contract = Contract(
         client=client_bowling,
         total_amount=25000,
         remaining_amount=25000,
-        contrat_status=ContratStatus.NOT_SIGNED,
+        contract_status=ContractStatus.NOT_SIGNED,
     )
     return _contract
 
@@ -169,12 +169,13 @@ def contract_jean_nemarre(create_object_record, client_bowling_2):
 
 
 @pytest.fixture
-def evenement_contrat_roule_maboule(create_object_record, contrat_roule_maboule, user_michel):
+def evenement_contract_roule_maboule(create_object_record, contract_roule_maboule, user_michel):
     user_michel = create_object_record(user_michel)
-    contrat_roule_maboule = create_object_record(contrat_roule_maboule)
+    contract_roule_maboule = create_object_record(contract_roule_maboule)
 
     _event = Evenement(
-        contrat=contrat_roule_maboule,
+        nom="Steering comitee",
+        contract=contract_roule_maboule,
         event_date_start=datetime.strptime("01/05/2025 10:25:00", DT_STRING),
         event_date_end=datetime.strptime("06/05/2025 10:25:00", DT_STRING),
         location="bali-bali",

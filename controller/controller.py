@@ -48,7 +48,7 @@ class Controller(menu.Menu):
     def create_user(self, *args, **kwargs):
         if not self.permissions.create_user(self._logged_user):
             self.view.prompt_error_message("besoin d'un accés admin ou commercial pour cette opération")
-            self.main_menu()
+            self.user_menu()
         data = self.view.prompt_create_user_form()
         user = models.User(**data)
         response = self.repository.add(user)
@@ -56,14 +56,14 @@ class Controller(menu.Menu):
         if response:
             self.view.prompt_user_info(user)
             self.repository.commit()
-            self.main_menu()
+            self.user_menu()
 
     @check_user_auth
     def list_user(self, *args, **kwargs):
         users = self.repository.list_user()
         choices = self.view.prompt_list_users(users)
         if choices == "q":
-            self.main_menu()
+            self.user_menu()
         try:
             choices = int(choices)
             if choices > len(users):
@@ -80,10 +80,11 @@ class Controller(menu.Menu):
                     + "\n ou q pour quitter"
                 )
             )
+            self.user_opt_menu(user_picked)
 
     @check_user_auth
-    def update_user(self, user, *args, **kwargs):
-        if not self.permissions.update_user(self._logged_user):
+    def update_user(self, user):
+        if not self.permissions.update_user(self._logged_user, user):
             self.view.prompt_error_message("besoin d'un accés admin pour cette opération")
             self.user_opt_menu(user)
 
@@ -95,7 +96,7 @@ class Controller(menu.Menu):
         response = self.repository.commit()
         if not response:
             self.view.prompt_error_message("erreur lors de la mise à jour")
-        self.main_menu()
+        self.user_menu()
 
     @check_user_auth
     def delete_user(self, user_data, *args, **kwargs):
@@ -107,7 +108,7 @@ class Controller(menu.Menu):
         if not response:
             self.view.prompt_error_message("erreur lors de la suppression")
         self.view.print("L'utilisateur à bien été supprimé")
-        self.main_menu()
+        self.user_menu()
 
     @check_user_auth
     def create_client(self):
@@ -117,15 +118,25 @@ class Controller(menu.Menu):
             self.user_menu()
         else:
             default_commercial = self._logged_user
-            data = self.view.prompt_create_client(default_commercial.email)
+            data = self.view.prompt_create_client()
+            while True:
+                commercial_mail = self.view.prompt_ask_commercial(default_commercial.email)
+                if commercial_mail != default_commercial.email:
+                    commercial = self.repository.get_user(commercial_mail)
+                else:
+                    commercial = default_commercial
 
-            if data["commercial_contact"] != default_commercial.email:
-                data["commercial_contact"] = self.repository.get_user(data.commercial_contact)
-            else:
-                data["commercial_contact"] = default_commercial
+                if commercial is None:
+                    self.view.prompt_error_message("L'utilisateur n'existe pas")
+                    continue
+                if commercial.departement == models.Departements.COMMERCIAL:
+                    break
+                self.view.prompt_error_message("Ce membre ne fait pas partis de l'équipe commercial")
 
+            data["commercial_contact"] = commercial
             client = models.Client(**data)
             response = self.repository.add(client)
+
         if response:
             self.repository.commit()
             self.view.prompt_client_info(client)
@@ -140,7 +151,7 @@ class Controller(menu.Menu):
         client = self.repository.list_client()
         choices = self.view.prompt_list_client(client)
         if choices == "q":
-            self.main_menu()
+            self.client_menu()
         try:
             choices = int(choices)
             if choices > len(client):
@@ -155,6 +166,7 @@ class Controller(menu.Menu):
                 f"Veuillez choisir une valeur entre 1 et {len(client)}",
                 "ou q pour quitter",
             )
+            self.client_opt_menu(client_picked)
 
     @check_user_auth
     def update_client(self, client):
@@ -171,7 +183,7 @@ class Controller(menu.Menu):
         response = self.repository.commit()
         if not response:
             self.view.prompt_error_message("erreur lors de la mise à jour")
-        self.main_menu()
+        self.client_menu()
 
     @check_user_auth
     def delete_client(self, client):
@@ -208,12 +220,12 @@ class Controller(menu.Menu):
             data = self.view.prompt_create_contract()
             data["client"] = self.repository.get_client(data["client"])
 
-        contrat = models.Contrat(**data)
-        response = self.repository.add(contrat)
+        contract = models.Contract(**data)
+        response = self.repository.add(contract)
 
         if response:
             self.repository.commit()
-            self.view.prompt_contract_info(contrat)
+            self.view.prompt_contract_info(contract)
             self.contract_menu()
 
     @check_user_auth
@@ -239,6 +251,7 @@ class Controller(menu.Menu):
                 f"Veuillez choisir une valeur entre 1 et {len(contract)}",
                 "ou q pour quitter",
             )
+            self.contract_opt_menu(contract_picked)
 
     @check_user_auth
     def filter_contract(self):
@@ -261,7 +274,7 @@ class Controller(menu.Menu):
         response = self.repository.commit()
         if not response:
             self.view.prompt_error_message("erreur lors de la mise à jour")
-        self.main_menu()
+        self.contract_menu()
 
     def delete_contract(self, contract):
         if not self.permissions.delete_contract(self._logged_user):
@@ -278,7 +291,7 @@ class Controller(menu.Menu):
         if not self.permissions.update_contract(self._logged_user, contract):
             self.view.prompt_error_message("accés non authorisé")
             self.contract_opt_menu(contract)
-        if contract.contrat_status == models.ContratStatus.SIGNED:
+        if contract.contract_status == models.ContractStatus.SIGNED:
             event_data = self.view.prompt_create_event(
                 contract=contract
             )
@@ -320,6 +333,7 @@ class Controller(menu.Menu):
                 f"Veuillez choisir une valeur entre 1 et {len(event)}",
                 "ou q pour quitter",
             )
+            self.event_opt_menu(event_picked)
 
     def filter_events(self):
         pass

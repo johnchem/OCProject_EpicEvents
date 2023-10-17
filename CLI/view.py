@@ -65,9 +65,9 @@ class Views:
         self._handler.clear()
         return self._handler.display_client_info(client_data)
 
-    def prompt_create_client(self, default_commercial):
+    def prompt_create_client(self):
         self._handler.clear()
-        return self._handler.display_create_client_form(default_commercial)
+        return self._handler.display_create_client_form()
 
     def prompt_update_client(self, client_data):
         self._handler.clear()
@@ -76,6 +76,9 @@ class Views:
     def prompt_list_client(self, client_list):
         self._handler.clear()
         return self._handler.display_list_client(client_list)
+
+    def prompt_ask_commercial(self, default_commercial):
+        return self._handler.display_ask_commercial(default_commercial)
 
     # -------- Contract views --------------
     def prompt_contract_menu(self, menu_item):

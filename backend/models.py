@@ -5,9 +5,12 @@ from sqlalchemy import Enum
 from sqlalchemy.orm import DeclarativeBase, relationship
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import validates
 from typing import List
 
 import sqlalchemy.sql.functions as func
+
+DT_STRING = "%d/%m/%Y %H:%M:%S"
 
 
 class Departements(enum.Enum):
@@ -21,7 +24,7 @@ class Departements(enum.Enum):
         return set(i.value for i in cls)
 
 
-class ContratStatus(enum.Enum):
+class ContractStatus(enum.Enum):
     SIGNED = "Contrat signé"
     NOT_SIGNED = "Contrat en cours"
 
@@ -50,7 +53,7 @@ class User(Base):
         )
 
     client_portfolio: Mapped[List["Client"]] = relationship(back_populates="commercial_contact")
-    contrat_portfolio: Mapped[List["Contrat"]] = relationship(back_populates="commercial")
+    contract_portfolio: Mapped[List["Contract"]] = relationship(back_populates="commercial")
     evenements: Mapped[List["Evenement"]] = relationship(back_populates="contact_support")
 
     def __repr__(self) -> str:
@@ -65,16 +68,24 @@ class Client(Base):
     email: Mapped[str] = mapped_column(String(30))
     phone: Mapped[str] = mapped_column(String(10))
     company_name: Mapped[str] = mapped_column(String(60))
-    creation_date: Mapped[datetime] = mapped_column(DateTime, default=func.now())
-    last_update: Mapped[datetime] = mapped_column(DateTime, default=func.now(), onupdate=func.now())
+    creation_date: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now()
+        )
+    last_update: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+        server_onupdate=func.now()
+        )
     commercial_contact_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
 
-    contrat: Mapped[List["Contrat"]] = relationship(
+    contract: Mapped[List["Contract"]] = relationship(
         back_populates="client",
         lazy="joined",
         cascade="save-update, delete, delete-orphan")
     commercial_contact: Mapped["User"] = relationship(
         back_populates="client_portfolio",
+        foreign_keys=[commercial_contact_id],
         lazy="joined",
         cascade="save-update")
     evenements: Mapped[list["Evenement"]] = relationship(
@@ -82,36 +93,54 @@ class Client(Base):
         lazy="joined",
         cascade="save-update, delete, delete-orphan")
 
+    @validates("commercial_contact")
+    def validate_commercial_contact(self, key, commercial):
+        if commercial.departement is not Departements.COMMERCIAL:
+            raise ValueError("Ce membre ne fait pas partis de l'équipe commercial")
+        return commercial
 
-class Contrat(Base):
-    __tablename__ = "contrat"
+
+class Contract(Base):
+    __tablename__ = "contract"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     client_id: Mapped[int] = mapped_column(ForeignKey("client.id"))
     commercial_contact_id: Mapped[str] = mapped_column(ForeignKey("user.id"))
     total_amount: Mapped[int] = mapped_column(Integer)
     remaining_amount: Mapped[int] = mapped_column(Integer)
-    creation_date: Mapped[datetime] = mapped_column(DateTime, default=func.now())
-    contrat_status: Mapped[str] = mapped_column(
+    _creation_date: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now()
+        )
+    contract_status: Mapped[str] = mapped_column(
         Enum(
-            ContratStatus,
+            ContractStatus,
             values_callable=lambda m: list(m.values())
             )
         )
 
-    client: Mapped["Client"] = relationship(back_populates="contrat", lazy="joined")
-    commercial: Mapped["User"] = relationship(back_populates="contrat_portfolio", lazy="joined")
-    evenements: Mapped["Evenement"] = relationship(back_populates="contrat", lazy="joined")
+    client: Mapped["Client"] = relationship(back_populates="contract", lazy="joined")
+    commercial: Mapped["User"] = relationship(back_populates="contract_portfolio", lazy="joined")
+    evenement: Mapped["Evenement"] = relationship(back_populates="contract", lazy="joined")
 
-    def __init__(self, client, total_amount, remaining_amount, contrat_status):
+    def __init__(self, client, total_amount, remaining_amount, contract_status):
         self.total_amount = total_amount
         self.remaining_amount = remaining_amount
-        self.contrat_status = contrat_status
+        self.contract_status = contract_status
         self.client = client
         self.commercial = client.commercial_contact
 
     def __repr__(self):
         return f"{self.creation_date} - {self.remaining_amount}/{self.total_amount}"
+
+    @property
+    def creation_date(self):
+        return self._creation_date.format(DT_STRING)
+
+    @creation_date.setter
+    def creation_date(self, date_time):
+        date_time = date_time.strftime(DT_STRING)
+        self._creation_date = date_time
 
 
 class Evenement(Base):
@@ -119,7 +148,7 @@ class Evenement(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(60), nullable=False)
-    contrat_id: Mapped[int] = mapped_column(ForeignKey("contrat.id"))
+    contract_id: Mapped[int] = mapped_column(ForeignKey("contract.id"))
     client_id: Mapped["Client"] = mapped_column(ForeignKey("client.id"))
     event_date_start: Mapped[datetime] = mapped_column(DateTime)
     event_date_end: Mapped[datetime] = mapped_column(DateTime)
@@ -129,8 +158,26 @@ class Evenement(Base):
     note: Mapped[str] = mapped_column(Text)
 
     client: Mapped["Client"] = relationship(back_populates="evenements", lazy="joined")
-    contrat: Mapped["Contrat"] = relationship(back_populates="evenements", lazy="joined")
+    contract: Mapped["Contract"] = relationship(back_populates="evenement", lazy="joined")
     contact_support: Mapped["User"] = relationship(back_populates="evenements", lazy="joined")
+
+    @property
+    def event_date_start(self):
+        return self._event_date_start.format(DT_STRING)
+
+    @event_date_start.setter
+    def event_date_start(self, date_time):
+        date_time = date_time.strftime(DT_STRING)
+        self._event_date_start = date_time
+
+    @property
+    def event_date_end(self):
+        return self._event_date_end.format(DT_STRING)
+
+    @event_date_end.setter
+    def event_date_end(self, date_time):
+        date_time = date_time.strftime(DT_STRING)
+        self._event_date_end = date_time
 
     # @property
     # def client_name(self):
@@ -140,9 +187,9 @@ class Evenement(Base):
     # def client_contact(self) -> str:
     #     return self.client.full_name
 
-    # def __init__(self, contrat, event_date_start, event_date_end, location, attendees, contact_support, note):
-    #     self.contrat = contrat
-    #     self.client = contrat.client
+    # def __init__(self, contract, event_date_start, event_date_end, location, attendees, contact_support, note):
+    #     self.contract = contract
+    #     self.client = contract.client
     #     self.contact_support = contact_support
     #     self.event_date_start = event_date_start
     #     self.event_date_end = event_date_end

@@ -1,6 +1,6 @@
 import os
 from typing import Optional
-from backend.models import ContratStatus, Departements
+from backend.models import ContractStatus, Departements
 
 from rich import box
 from rich.console import Console
@@ -66,9 +66,9 @@ class cli_handler:
 
         return int(choice)
 
-    def display_error_msg(self, msg):
+    def display_error_msg(self, msg, pause=True):
         self._display.error(msg)
-        os.system("pause")
+        if pause: os.system("pause")
 
     def display_login(self):
         self._display.clear()
@@ -145,9 +145,12 @@ class cli_handler:
         user_data.email = self._display.ask("[green]email [/green]", default=user_data.email)
         self._display.print("[green]Departement [/green]")
         for pos, item in enumerate(Departements, start=1):
+            if item == user_data.departement:
+                default_pos = pos
             self._display.print(f"[green][{pos}] : [/green]{item.value}")
         dpt_choices = self._display.ask(
             f"[green]Departement [/green][blue]{user_data.departement.value}[/blue]",
+            default=default_pos,
             int=True
         )
         user_data.departement = [x for x in Departements][dpt_choices-1]
@@ -187,10 +190,10 @@ class cli_handler:
         self._display.print(grid)
 
         self._display.print(Padding("[green u]Contrats actif[/green u]", (1, 0, 0, 0)))
-        if client_data.contrat:
-            # self._display.print(f"{client_data.contrat}")
-            for contrat in client_data.contrat:
-                self._display.print(f"{contrat}")
+        if client_data.contract:
+            # self._display.print(f"{client_data.contract}")
+            for contract in client_data.contract:
+                self._display.print(f"{contract}")
         else:
             self._display.print("[i] ... pas de contrat[/i]")
 
@@ -244,22 +247,24 @@ class cli_handler:
         self._display.print("Selectionner un client ou q pour revenir")
         return self._display.input()
 
-    def display_create_client_form(self, commercial_contact):
+    def display_create_client_form(self):
         full_name = self._display.ask("[green]Nom client[/green]")
         email = self._display.ask("[green]Mail de contact[/green]")
         phone = self._display.ask("[green]Telephone[/green]")
         company_name = self._display.ask("[green]Nom de la société[/green]")
-        commercial_contact = self._display.ask(
-            "[green]Email du commercial en charge[/green]",
-            default=commercial_contact
-        )
         return {
             "full_name": full_name,
             "email": email,
             "phone": phone,
             "company_name": company_name,
-            "commercial_contact": commercial_contact,
         }
+
+    def display_ask_commercial(self, default_commercial):
+        commercial = self._display.ask(
+            "[green]Email du commercial en charge[/green]",
+            default=default_commercial
+        )
+        return commercial
 
     def display_update_client_form(self, client_data):
         client_data.full_name = self._display.ask(
@@ -298,16 +303,16 @@ class cli_handler:
         total_amount = self._display.ask("[green]Montant global[/green]")
         remaining_amount = self._display.ask("[green]Montant restant[/green]")
 
-        for pos, item in enumerate(ContratStatus, start=1):
+        for pos, item in enumerate(ContractStatus, start=1):
             self._display.print(f"[green][{pos}] : [/green]{item.value}")
         status_choices = int(self._display.input())
-        contrat_status = [x for x in ContratStatus][status_choices-1]
+        contract_status = [x for x in ContractStatus][status_choices-1]
 
         return {
             "client": client_full_name,
             "total_amount": total_amount,
             "remaining_amount": remaining_amount,
-            "contrat_status": contrat_status,
+            "contract_status": contract_status,
         }
 
     def display_contract_info(self, contract):
@@ -327,7 +332,7 @@ class cli_handler:
             f"[blue]{contract.creation_date}[/blue]"
         )
         grid.add_row(
-            f"[blue]{contract.contrat_status.value}[/blue]",
+            f"[blue]{contract.contract_status.value}[/blue]",
             ""
         )
         self._display.print(grid)
@@ -348,10 +353,10 @@ class cli_handler:
         grid.add_row(
             "montant", f"{contract.remaining_amount}/{contract.total_amount}"
         )
-        if contract.contrat_status == ContratStatus.SIGNED:
-            grid.add_row(f"[green]{contract.contrat_status.value}[/green]", "")
+        if contract.contract_status == ContractStatus.SIGNED:
+            grid.add_row(f"[green]{contract.contract_status.value}[/green]", "")
         else:
-            grid.add_row(f"[light red]{contract.contrat_status.value}[/light red]", "")
+            grid.add_row(f"[light red]{contract.contract_status.value}[/light red]", "")
         self.display.print(grid)
 
     def display_update_contract_form(self, contract, client_fullname, commercial_email):
@@ -366,13 +371,16 @@ class cli_handler:
             contract.remaining_amount
             )
 
-        for pos, item in enumerate(ContratStatus, start=1):
+        for pos, item in enumerate(ContractStatus, start=1):
+            if item == contract.contract_status:
+                default_pos = pos
             self._display.print(f"[green][{pos}] : [/green]{item.value}")
         dpt_choices = self._display.ask(
-            f"[green]Statut du contrat [/green][blue]{contract.contrat_status.value}[/blue]",
+            f"[green]Statut du contrat [/green][blue]{contract.contract_status.value}[/blue]",
+            default=default_pos,
             int=True
         )
-        contract.contrat_status = [x for x in Departements][dpt_choices-1]
+        contract.contract_status = [x for x in Departements][dpt_choices-1]
         return contract
 
     # ------------------- Event display -----------------------
