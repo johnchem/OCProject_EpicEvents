@@ -54,7 +54,7 @@ class SqlAlchemyRepository():
 
     def list_client(self):
         stmt = select(Client).order_by(Client.id)
-        return self.session.scalars(stmt).all()
+        return self.session.scalars(stmt).unique().all()
         # return self.session.query(Client).all()
 
     def delete_client(self, client_id: int):

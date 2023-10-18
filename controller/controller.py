@@ -174,13 +174,23 @@ class Controller(menu.Menu):
             self.view.prompt_error_message("besoin d'un accés admin pour cette opération")
             self.client_opt_menu(client)
 
-        client_data = self.view.prompt_update_client(
-            client,
-            commercial_email=client.commercial.email)
-        client_data["commercial"] = self.repository.get_user(client_data.email)
+        updated_client = self.view.prompt_update_client(client)
+        while True:
+            commercial_mail = self.view.prompt_ask_commercial(updated_client.commercial_contact.email)
+            if commercial_mail == client.commercial_contact.email:
+                break
+            commercial = self.repository.get_user(commercial_mail)
+            if commercial is None:
+                self.view.prompt_error_message("L'utilisateur n'existe pas")
+                continue
+            if commercial.departement == models.Departements.COMMERCIAL:
+                updated_client.commercial_contact = commercial
+                break
+            self.view.prompt_error_message("Ce membre ne fait pas partis de l'équipe commercial")
 
         # response = update_user_gen.send(user_data)
         response = self.repository.commit()
+        self.view.prompt_client_info(updated_client)
         if not response:
             self.view.prompt_error_message("erreur lors de la mise à jour")
         self.client_menu()

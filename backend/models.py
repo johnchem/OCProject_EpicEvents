@@ -5,7 +5,7 @@ from sqlalchemy import Enum
 from sqlalchemy.orm import DeclarativeBase, relationship
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
-from sqlalchemy.orm import validates
+# from sqlalchemy.orm import validates
 from typing import List
 
 import sqlalchemy.sql.functions as func
@@ -93,11 +93,11 @@ class Client(Base):
         lazy="joined",
         cascade="save-update, delete, delete-orphan")
 
-    @validates("commercial_contact")
-    def validate_commercial_contact(self, key, commercial):
-        if commercial.departement is not Departements.COMMERCIAL:
-            raise ValueError("Ce membre ne fait pas partis de l'équipe commercial")
-        return commercial
+    # @validates("commercial_contact")
+    # def validate_commercial_contact(self, key, commercial):
+    #     if commercial.departement is not Departements.COMMERCIAL:
+    #         raise ValueError("Ce membre ne fait pas partis de l'équipe commercial")
+    #     return commercial
 
 
 class Contract(Base):
@@ -135,7 +135,7 @@ class Contract(Base):
 
     @property
     def creation_date(self):
-        return self._creation_date.format(DT_STRING)
+        return self._creation_date.strftime(DT_STRING)
 
     @creation_date.setter
     def creation_date(self, date_time):

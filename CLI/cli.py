@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 from typing import Optional
 from backend.models import ContractStatus, Departements
@@ -8,6 +9,8 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.prompt import Prompt, IntPrompt
 from rich.padding import Padding
+
+from backend.models import DT_STRING
 
 
 class Display:
@@ -47,7 +50,6 @@ class Display:
 
 
 class cli_handler:
-    
     def __init__(self):
         self._display = Display()
 
@@ -177,11 +179,11 @@ class cli_handler:
             )
         grid.add_row(
             "[green]Date de creation :[/green]",
-            f"[blue]{client_data.creation_date}[/blue]"
+            f"[blue]{client_data.creation_date.strftime(DT_STRING)}[/blue]"
         )
         grid.add_row(
             "[green]Derniére mise à jour :[/green]",
-            f"[blue]{client_data.last_update}[/blue]"
+            f"[blue]{client_data.last_update.strftime(DT_STRING)}[/blue]"
         )
         grid.add_row(
             "[green]Responsable client[/green]",
@@ -241,7 +243,7 @@ class cli_handler:
                 f"{client.phone}",
                 f"{client.commercial_contact.name.upper()} {client.commercial_contact.forname}",
                 f"{client.company_name}",
-                f"{client.creation_date}",
+                f"{client.creation_date.strftime(DT_STRING)}",
             )
         self._display.print(table)
         self._display.print("Selectionner un client ou q pour revenir")
@@ -283,10 +285,10 @@ class cli_handler:
             "[green]Nom de la société[/green]",
             client_data.company_name
             )
-        client_data.commercial_contact = self._display.ask(
-            "[green]Email du commercial en charge[/green]",
-            default=client_data.commercial_contact.email
-        )
+        # client_data.commercial_contact = self._display.ask(
+        #     "[green]Email du commercial en charge[/green]",
+        #     default=client_data.commercial_contact.email
+        # )
         return client_data
 
     # -------- Contract views --------------
@@ -329,7 +331,7 @@ class cli_handler:
             )
         grid.add_row(
             "[green]Date de creation :[/green]",
-            f"[blue]{contract.creation_date}[/blue]"
+            f"[blue]{contract.creation_date.strftime(DT_STRING)}[/blue]"
         )
         grid.add_row(
             f"[blue]{contract.contract_status.value}[/blue]",
@@ -396,7 +398,8 @@ class cli_handler:
             f"{client.email}\n{client.phone}"
         )
         grid.add_row(
-            f"Début : {event.event_date_start}", f"Fin : {event.event_date_end}"
+            f"Début : {event.event_date_start.strftime(DT_STRING)}",
+            f"Fin : {event.event_date_end.strftime(DT_STRING)}"
         )
         self._display.print(grid)
 
@@ -411,8 +414,8 @@ class cli_handler:
             f"{event.client.email}\n{event.client.phone}"
         )
         grid.add_row(f"id : {event.contract.id}", f"{event.contract.status}")
-        grid.add_row("Date début", f"{event.event_date_start}")
-        grid.add_row("Date fin", f"{event.event_date_end}")
+        grid.add_row("Date début", f"{event.event_date_start.strftime(DT_STRING)}")
+        grid.add_row("Date fin", f"{event.event_date_end.strftime(DT_STRING)}")
         grid.add_row(
             "Contact support",
             f"{event.contact_support.name.upper()} {event.contact_support.forname}"
@@ -433,8 +436,10 @@ class cli_handler:
             f"{contract.client.email}\n{contract.client.phone}"
         )
         name = self._display.ask("[green]Nom[/green]")
-        event_data_start = self._display.ask("[green]Date début[/green]")
+        event_data_start = self._display.ask("[green]Date début[/green] [red]{DT_STRING}[/red]")
+        event_data_start = datetime.strptime(event_data_start, DT_STRING)
         event_date_end = self._display.ask("[green]Date de fin[/green]")
+        event_date_end = datetime.strptime(event_date_end, DT_STRING)
         location = self._display.ask("[green]lieu[/green]")
         attendees = self._display.ask("[green]Nombres de participant[/green]")
         note = self._display.ask("[green]Note additionnelle[/green]")
@@ -452,11 +457,16 @@ class cli_handler:
         grid.add_column(justify="center")
         grid.add_column(justify="center")
         event.name = self._display.ask("[green]Nom[/green]", default=event.name)
-        event.event_date_start = self._display.ask(
+        event_date_start = self._display.ask(
             "[green]Date début[/green]",
-            default=event.event_date_start
+            default=event.event_date_start.strftime(DT_STRING)
         )
-        event.event_date_end = self._display.ask("[green]Date de fin[/green]", default=event.event_date_end)
+        event.event_date_start = datetime.strptime(event_date_start, DT_STRING)
+        event_date_end = self._display.ask(
+            "[green]Date de fin[/green]",
+            default=event.event_date_end.strftime(DT_STRING)
+        )
+        event.event_date_end = datetime.strptime(event_date_end, DT_STRING)
         event.location = self._display.ask("[green]lieu[/green]", default=event.location)
         event.attendees = self._display.ask("[green]Nombres de participant[/green]", dafault=event.attendees)
         event.note = self._display.ask("[green]Note additionnelle[/green]", default=event.note)
