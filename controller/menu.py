@@ -100,7 +100,7 @@ class Menu(ABC):
 
         menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
         user_answer = (
-            self.view.prompt_display_menu(menu_item_list)-1
+            self.view.prompt_contract_menu(menu_item_list)-1
         )
         # convert the answer to the function
         function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]

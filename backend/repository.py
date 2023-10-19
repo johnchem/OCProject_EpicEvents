@@ -78,7 +78,7 @@ class SqlAlchemyRepository():
 
     def list_contract(self):
         stmt = select(Contract).order_by(Contract.id)
-        return self.session.scalars(stmt).all()
+        return self.session.scalars(stmt).unique().all()
         # return self.session.query(contract).all()
 
     def delete_contract(self, contract_id: int):

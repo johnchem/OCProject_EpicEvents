@@ -324,7 +324,7 @@ class cli_handler:
 
         grid.add_row(
             f"[purple]{contract.client.full_name}[/purple]",
-            f"[purple]{contract.commercial.name} {contract.commercial.forname.upper()}[/purple]",
+            f"[purple]{contract.commercial.name.upper()} {contract.commercial.forname}[/purple]",
             )
         grid.add_row(
             f"[purple]{contract.remaining_amount}/{contract.total_amount}[/purple]", "",
@@ -339,6 +339,36 @@ class cli_handler:
         )
         self._display.print(grid)
         os.system("pause")
+
+    def display_list_contract(self, contract_list):
+        table = Table(title="Contrats")
+        table.add_column("Id", justify="center", style="red")
+        table.add_column("Client", justify="center", style="cyan")
+        table.add_column("Société", justify="center")
+        table.add_column("Commercial", justify="center")
+        table.add_column("Somme restante", justify="center", style="red")
+        table.add_column("Date création", justify="center", style="cyan")
+        table.add_column("Statut", justify="center", style="cyan")
+
+        for pos, contract in enumerate(contract_list, start=1):
+            if contract.contract_status == ContractStatus.SIGNED:
+                status_color = "green"
+            else:
+                status_color = "red"
+
+            table.add_row(
+                f"{pos}",
+                f"[purple]{contract.client.full_name}[/purple]",
+                f"[purple]{contract.client.company_name}",
+                f"[purple]{contract.commercial.name.upper()} {contract.commercial.forname}[/purple]",
+                f"[red]{contract.remaining_amount}[/red]/[purple]{contract.total_amount}[/purple]",
+                f"[blue]{contract.creation_date}[/blue]",
+                f"[{status_color}]{contract.contract_status.value}[/{status_color}]",
+            )
+
+        self._display.print(table)
+        self._display.print("Selectionner un contrat ou q pour revenir")
+        return self._display.input()
 
     def display_contract_header(self, contract):
         client = contract.client

@@ -68,11 +68,11 @@ class Client(Base):
     email: Mapped[str] = mapped_column(String(30))
     phone: Mapped[str] = mapped_column(String(10))
     company_name: Mapped[str] = mapped_column(String(60))
-    creation_date: Mapped[datetime] = mapped_column(
+    _creation_date: Mapped[datetime] = mapped_column(
         DateTime,
         server_default=func.now()
         )
-    last_update: Mapped[datetime] = mapped_column(
+    _last_update: Mapped[datetime] = mapped_column(
         DateTime,
         server_default=func.now(),
         server_onupdate=func.now()
@@ -92,6 +92,24 @@ class Client(Base):
         back_populates="client",
         lazy="joined",
         cascade="save-update, delete, delete-orphan")
+
+    @property
+    def creation_date(self):
+        return self._creation_date.strftime(DT_STRING)
+
+    @creation_date.setter
+    def creation_date(self, date_time):
+        date_time = date_time.strftime(DT_STRING)
+        self._creation_date = date_time
+
+    @property
+    def last_update(self):
+        return self._last_update.strftime(DT_STRING)
+
+    @last_update.setter
+    def last_update(self, date_time):
+        last_update = date_time.strftime(DT_STRING)
+        self._last_update = last_update
 
     # @validates("commercial_contact")
     # def validate_commercial_contact(self, key, commercial):
@@ -150,8 +168,8 @@ class Evenement(Base):
     name: Mapped[str] = mapped_column(String(60), nullable=False)
     contract_id: Mapped[int] = mapped_column(ForeignKey("contract.id"))
     client_id: Mapped["Client"] = mapped_column(ForeignKey("client.id"))
-    event_date_start: Mapped[datetime] = mapped_column(DateTime)
-    event_date_end: Mapped[datetime] = mapped_column(DateTime)
+    _event_date_start: Mapped[datetime] = mapped_column(DateTime)
+    _event_date_end: Mapped[datetime] = mapped_column(DateTime)
     contact_support_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     location: Mapped[str] = mapped_column(String(60))
     attendees: Mapped[int] = mapped_column(Integer)
@@ -163,7 +181,7 @@ class Evenement(Base):
 
     @property
     def event_date_start(self):
-        return self._event_date_start.format(DT_STRING)
+        return self._event_date_start.strftime(DT_STRING)
 
     @event_date_start.setter
     def event_date_start(self, date_time):
@@ -172,7 +190,7 @@ class Evenement(Base):
 
     @property
     def event_date_end(self):
-        return self._event_date_end.format(DT_STRING)
+        return self._event_date_end.strftime(DT_STRING)
 
     @event_date_end.setter
     def event_date_end(self, date_time):
