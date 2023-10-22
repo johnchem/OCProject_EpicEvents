@@ -179,11 +179,11 @@ class cli_handler:
             )
         grid.add_row(
             "[green]Date de creation :[/green]",
-            f"[blue]{client_data.creation_date.strftime(DT_STRING)}[/blue]"
+            f"[blue]{client_data.creation_date}[/blue]"
         )
         grid.add_row(
             "[green]Derniére mise à jour :[/green]",
-            f"[blue]{client_data.last_update.strftime(DT_STRING)}[/blue]"
+            f"[blue]{client_data.last_update}[/blue]"
         )
         grid.add_row(
             "[green]Responsable client[/green]",
@@ -243,7 +243,7 @@ class cli_handler:
                 f"{client.phone}",
                 f"{client.commercial_contact.name.upper()} {client.commercial_contact.forname}",
                 f"{client.company_name}",
-                f"{client.creation_date.strftime(DT_STRING)}",
+                f"{client.creation_date}",
             )
         self._display.print(table)
         self._display.print("Selectionner un client ou q pour revenir")
@@ -331,7 +331,7 @@ class cli_handler:
             )
         grid.add_row(
             "[green]Date de creation :[/green]",
-            f"[blue]{contract.creation_date.strftime(DT_STRING)}[/blue]"
+            f"[blue]{contract.creation_date}[/blue]"
         )
         grid.add_row(
             f"[blue]{contract.contract_status.value}[/blue]",
@@ -374,22 +374,23 @@ class cli_handler:
         client = contract.client
         commercial = contract.commercial
 
+        if contract.contract_status == ContractStatus.SIGNED:
+            statut_color = "green"
+        else:
+            statut_color = "light red"
+
         grid = Table.grid(expand=False, padding=(0, 1, 1, 1))
         grid.add_column(justify="center")
         grid.add_column(justify="center")
-        grid.add_row("id", f"{contract.id}")
         grid.add_row(
-            f"{client.full_name}\n{client.email}\n{client.telephone}",
-            f"{commercial.name.upper()} {commercial.forname}\n{commercial.email}"
+            f"[purple]{client.full_name}\n{client.email}\n{client.phone}",
+            f"[blue]{commercial.name.upper()} {commercial.forname}\n{commercial.email}"
         )
         grid.add_row(
-            "montant", f"{contract.remaining_amount}/{contract.total_amount}"
+            f"montant : {contract.remaining_amount}/{contract.total_amount}",
+            f"[{statut_color}]{contract.contract_status.value}[/{statut_color}]"
         )
-        if contract.contract_status == ContractStatus.SIGNED:
-            grid.add_row(f"[green]{contract.contract_status.value}[/green]", "")
-        else:
-            grid.add_row(f"[light red]{contract.contract_status.value}[/light red]", "")
-        self.display.print(grid)
+        self._display.print(grid)
 
     def display_update_contract_form(self, contract, client_fullname, commercial_email):
         contract.client = self._display.print(f"[green]Nom du client [/green] : {client_fullname}")
@@ -428,8 +429,8 @@ class cli_handler:
             f"{client.email}\n{client.phone}"
         )
         grid.add_row(
-            f"Début : {event.event_date_start.strftime(DT_STRING)}",
-            f"Fin : {event.event_date_end.strftime(DT_STRING)}"
+            f"Début : {event.event_date_start}",
+            f"Fin : {event.event_date_end}"
         )
         self._display.print(grid)
 
@@ -444,8 +445,8 @@ class cli_handler:
             f"{event.client.email}\n{event.client.phone}"
         )
         grid.add_row(f"id : {event.contract.id}", f"{event.contract.status}")
-        grid.add_row("Date début", f"{event.event_date_start.strftime(DT_STRING)}")
-        grid.add_row("Date fin", f"{event.event_date_end.strftime(DT_STRING)}")
+        grid.add_row("Date début", f"{event.event_date_start}")
+        grid.add_row("Date fin", f"{event.event_date_end}")
         grid.add_row(
             "Contact support",
             f"{event.contact_support.name.upper()} {event.contact_support.forname}"
@@ -466,7 +467,7 @@ class cli_handler:
             f"{contract.client.email}\n{contract.client.phone}"
         )
         name = self._display.ask("[green]Nom[/green]")
-        event_data_start = self._display.ask("[green]Date début[/green] [red]{DT_STRING}[/red]")
+        event_data_start = self._display.ask(f"[green]Date début[/green] [red]{DT_STRING}[/red]")
         event_data_start = datetime.strptime(event_data_start, DT_STRING)
         event_date_end = self._display.ask("[green]Date de fin[/green]")
         event_date_end = datetime.strptime(event_date_end, DT_STRING)
@@ -489,12 +490,12 @@ class cli_handler:
         event.name = self._display.ask("[green]Nom[/green]", default=event.name)
         event_date_start = self._display.ask(
             "[green]Date début[/green]",
-            default=event.event_date_start.strftime(DT_STRING)
+            default=event.event_date_start
         )
         event.event_date_start = datetime.strptime(event_date_start, DT_STRING)
         event_date_end = self._display.ask(
             "[green]Date de fin[/green]",
-            default=event.event_date_end.strftime(DT_STRING)
+            default=event.event_date_end
         )
         event.event_date_end = datetime.strptime(event_date_end, DT_STRING)
         event.location = self._display.ask("[green]lieu[/green]", default=event.location)

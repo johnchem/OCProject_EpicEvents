@@ -120,7 +120,7 @@ class Views:
 
     def prompt_create_event(self, contract):
         self._handler.clear()
-        return self._handler.dipslay_create_event(contract)
+        return self._handler.display_create_event(contract)
 
     def prompt_list_event(self, event_list):
         self._handler.clear()

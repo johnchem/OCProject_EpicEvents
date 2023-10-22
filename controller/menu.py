@@ -107,7 +107,7 @@ class Menu(ABC):
         # Call the function
         function_called_by_user()
 
-    def contract_opt_menu(self):
+    def contract_opt_menu(self, contract_data):
         MENU_ITEM_DICT = {
             "Modifier": self.update_contract,
             "Créer evenement": self.create_event,
@@ -117,12 +117,12 @@ class Menu(ABC):
 
         menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
         user_answer = (
-            self.view.prompt_display_menu(menu_item_list)-1
+            self.view.prompt_contract_opt_menu(menu_item_list, contract_data)-1
         )
         # convert the answer to the function
         function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
         # Call the function
-        function_called_by_user()
+        function_called_by_user(contract=contract_data)
 
     def event_menu(self):
         MENU_ITEM_DICT = {
@@ -133,14 +133,14 @@ class Menu(ABC):
 
         menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
         user_answer = (
-            self.view.prompt_display_menu(menu_item_list)-1
+            self.view.prompt_event_menu(menu_item_list)-1
         )
         # convert the answer to the function
         function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
         # Call the function
         function_called_by_user()
 
-    def event_opt_menu(self):
+    def event_opt_menu(self, event):
         MENU_ITEM_DICT = {
             "Modifier": self.update_event,
             "Supprimer": self.delete_event,
@@ -149,7 +149,7 @@ class Menu(ABC):
 
         menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
         user_answer = (
-            self.view.prompt_display_menu(menu_item_list)-1
+            self.view.prompt_event_opt_menu(menu_item_list, event)-1
         )
         # convert the answer to the function
         function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
