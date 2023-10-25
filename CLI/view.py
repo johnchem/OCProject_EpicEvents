@@ -110,7 +110,7 @@ class Views:
     # -------- Event views --------------
     def prompt_event_menu(self, menu_item):
         self._handler.clear()
-        self._handler.print("[1]Menu Evenements")
+        self._handler.print("[i]Menu Evenements")
         return self._handler.display_menu(menu_item)
 
     def prompt_event_opt_menu(self, menu_item, event):

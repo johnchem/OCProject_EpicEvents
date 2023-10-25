@@ -111,12 +111,6 @@ class Client(Base):
         last_update = date_time.strftime(DT_STRING)
         self._last_update = last_update
 
-    # @validates("commercial_contact")
-    # def validate_commercial_contact(self, key, commercial):
-    #     if commercial.departement is not Departements.COMMERCIAL:
-    #         raise ValueError("Ce membre ne fait pas partis de l'équipe commercial")
-    #     return commercial
-
 
 class Contract(Base):
     __tablename__ = "contract"
@@ -133,13 +127,26 @@ class Contract(Base):
     contract_status: Mapped[str] = mapped_column(
         Enum(
             ContractStatus,
-            values_callable=lambda m: list(m.values())
+            # values_callable=lambda m: list(m.values())
             )
         )
 
-    client: Mapped["Client"] = relationship(back_populates="contract", lazy="joined")
-    commercial: Mapped["User"] = relationship(back_populates="contract_portfolio", lazy="joined")
-    evenement: Mapped["Evenement"] = relationship(back_populates="contract", lazy="joined")
+    client: Mapped["Client"] = relationship(
+        back_populates="contract",
+        foreign_keys=[client_id],
+        lazy="joined",
+        cascade="save-update",
+        )
+    commercial: Mapped["User"] = relationship(
+        back_populates="contract_portfolio",
+        foreign_keys=[commercial_contact_id],
+        lazy="joined",
+        cascade="save-update",
+        )
+    evenement: Mapped["Evenement"] = relationship(
+        back_populates="contract",
+        lazy="joined"
+        )
 
     def __init__(self, client, total_amount, remaining_amount, contract_status):
         self.total_amount = total_amount
@@ -149,7 +156,7 @@ class Contract(Base):
         self.commercial = client.commercial_contact
 
     def __repr__(self):
-        return f"{self.creation_date} - {self.remaining_amount}/{self.total_amount}"
+        return f"{self.client.full_name} - {self.contract_status.value}"
 
     @property
     def creation_date(self):

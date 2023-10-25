@@ -393,27 +393,29 @@ class cli_handler:
         self._display.print(grid)
 
     def display_update_contract_form(self, contract, client_fullname, commercial_email):
-        contract.client = self._display.print(f"[green]Nom du client [/green] : {client_fullname}")
-        contract.commercial = self._display.print(f"[green]Mail commercial [/green : {commercial_email}]")
+        self._display.print(f"[green]Nom du client [/green] : {client_fullname}")
+        self._display.print(f"[green]Mail commercial [/green] : {commercial_email}")
         contract.total_amount = self._display.ask(
             "[green]Montant total [/green]",
-            default=contract.total_amount
+            default=contract.total_amount,
+            int=True
             )
         contract.remaining_amount = self._display.ask(
             "[green]Montant restant [/green]",
-            contract.remaining_amount
+            default=contract.remaining_amount,
+            int=True
             )
 
         for pos, item in enumerate(ContractStatus, start=1):
             if item == contract.contract_status:
                 default_pos = pos
-            self._display.print(f"[green][{pos}] : [/green]{item.value}")
+            self._display.print(f"[red][{pos}] : [/red]{item.value}")
         dpt_choices = self._display.ask(
-            f"[green]Statut du contrat [/green][blue]{contract.contract_status.value}[/blue]",
+            f"[green]Statut du contrat [/green][cyan b]{contract.contract_status.value}[/cyan bold]",
             default=default_pos,
             int=True
         )
-        contract.contract_status = [x for x in Departements][dpt_choices-1]
+        contract.contract_status = [x for x in ContractStatus][dpt_choices-1]
         return contract
 
     # ------------------- Event display -----------------------
@@ -467,16 +469,16 @@ class cli_handler:
             f"{contract.client.email}\n{contract.client.phone}"
         )
         name = self._display.ask("[green]Nom[/green]")
-        event_data_start = self._display.ask(f"[green]Date début[/green] [red]{DT_STRING}[/red]")
-        event_data_start = datetime.strptime(event_data_start, DT_STRING)
-        event_date_end = self._display.ask("[green]Date de fin[/green]")
+        event_date_start = self._display.ask(f"[green]Date et heure de début[/green] - [red]{DT_STRING}[/red]")
+        event_date_start = datetime.strptime(event_date_start, DT_STRING)
+        event_date_end = self._display.ask(f"[green]Date et heure de fin[/green] - [red]{DT_STRING}[/red]")
         event_date_end = datetime.strptime(event_date_end, DT_STRING)
         location = self._display.ask("[green]lieu[/green]")
         attendees = self._display.ask("[green]Nombres de participant[/green]")
         note = self._display.ask("[green]Note additionnelle[/green]")
         return {
             "name": name,
-            "event_data_start": event_data_start,
+            "event_date_start": event_date_start,
             "event_date_end": event_date_end,
             "location": location,
             "attendees": attendees,

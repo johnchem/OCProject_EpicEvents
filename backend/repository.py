@@ -68,14 +68,6 @@ class SqlAlchemyRepository():
         stmt = select(Contract).filter_by(contract_id)
         return self.session.scalars(stmt).first()
 
-    # def get_contract(self, contract_status, client_name):
-    #     client = self.session.query(Client).filter_by(full_name=client_name).first()
-    #     stmt = select(Contract).\
-    #         options(joinedload(Contract.client)).\
-    #         filter_by(contract_status=contract_status).\
-    #         filter_by(client=client)
-    #     return self.session.scalars(stmt).unique().first()
-
     def list_contract(self):
         stmt = select(Contract).order_by(Contract.id)
         return self.session.scalars(stmt).unique().all()

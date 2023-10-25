@@ -258,8 +258,7 @@ class Controller(menu.Menu):
         except Exception as err:
             self.view.print(err)
             self.view.prompt_error_message(
-                f"Veuillez choisir une valeur entre 1 et {len(contracts)}",
-                "ou q pour quitter",
+                f"Veuillez choisir une valeur entre 1 et {len(contracts)} ou q pour quitter",
             )
             self.contract_opt_menu(contract_picked)
 
@@ -272,13 +271,13 @@ class Controller(menu.Menu):
         if not self.permissions.update_contract(self._logged_user, contract):
             self.view.prompt_error_message("accés non authorisé")
             self.contract_opt_menu(contract)
-        contract_data = self.view.prompt_update_contract(
+        contract = self.view.prompt_update_contract(
             contract,
             client_fullname=contract.client.full_name,
             commercial_email=contract.commercial.email,
             )
-        contract_data["commercial"] = self.repository.get_user(contract_data["commercial_email"])
-        contract_data["client"] = self.repository.get_client(contract_data["client_fullname"])
+        # contract_data.commercial = self.repository.get_user(commercial_email)
+        # contract_data.client = self.repository.get_client(client_fullname)
 
         # response = update_user_gen.send(user_data)
         response = self.repository.commit()
