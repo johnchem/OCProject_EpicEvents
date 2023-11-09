@@ -10,7 +10,7 @@ from typing import List
 
 import sqlalchemy.sql.functions as func
 
-DT_STRING = "%d/%m/%Y %H:%M:%S"
+DT_STRING = "%d/%m/%Y %H:%M"
 
 
 class Departements(enum.Enum):
@@ -52,9 +52,21 @@ class User(Base):
             )
         )
 
-    client_portfolio: Mapped[List["Client"]] = relationship(back_populates="commercial_contact")
-    contract_portfolio: Mapped[List["Contract"]] = relationship(back_populates="commercial")
-    evenements: Mapped[List["Evenement"]] = relationship(back_populates="contact_support")
+    client_portfolio: Mapped[List["Client"]] = relationship(
+        back_populates="commercial_contact",
+        lazy="joined",
+        cascade="save-update",
+        )
+    contract_portfolio: Mapped[List["Contract"]] = relationship(
+        back_populates="commercial",
+        lazy="joined",
+        cascade="save-update",
+        )
+    evenements: Mapped[List["Evenement"]] = relationship(
+        back_populates="contact_support",
+        lazy="joined",
+        cascade="save-update",
+        )
 
     def __repr__(self) -> str:
         return f'User(id={self.id}, name={self.name}, forname={self.forname}, dpt={self.departement})'
@@ -177,14 +189,31 @@ class Evenement(Base):
     client_id: Mapped["Client"] = mapped_column(ForeignKey("client.id"))
     _event_date_start: Mapped[datetime] = mapped_column(DateTime)
     _event_date_end: Mapped[datetime] = mapped_column(DateTime)
-    contact_support_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    contact_support_id: Mapped[int] = mapped_column(
+        ForeignKey("user.id"),
+        nullable=True
+        )
     location: Mapped[str] = mapped_column(String(60))
     attendees: Mapped[int] = mapped_column(Integer)
     note: Mapped[str] = mapped_column(Text)
 
-    client: Mapped["Client"] = relationship(back_populates="evenements", lazy="joined")
-    contract: Mapped["Contract"] = relationship(back_populates="evenement", lazy="joined")
-    contact_support: Mapped["User"] = relationship(back_populates="evenements", lazy="joined")
+    client: Mapped["Client"] = relationship(
+        back_populates="evenements",
+        foreign_keys=[client_id],
+        lazy="joined",
+        cascade="save-update",
+        )
+    contract: Mapped["Contract"] = relationship(
+        back_populates="evenement",
+        foreign_keys=[contract_id],
+        lazy="joined",
+        cascade="save-update",
+        )
+    contact_support: Mapped["User"] = relationship(
+        back_populates="evenements",
+        lazy="joined",
+        cascade="save-update",
+        )
 
     @property
     def event_date_start(self):

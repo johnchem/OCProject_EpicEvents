@@ -38,7 +38,7 @@ class SqlAlchemyRepository():
 
     def list_user(self):
         stmt = select(User).order_by(User.id)
-        return self.session.scalars(stmt).all()
+        return self.session.scalars(stmt).unique().all()
         # return self.session.query(User).all()
 
     def delete_user(self, user_data):

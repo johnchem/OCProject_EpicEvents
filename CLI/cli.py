@@ -459,6 +459,32 @@ class cli_handler:
         self._display.print(grid)
         os.system("pause")
 
+    def display_list_event(self, event_list):
+        table = Table(title="Evenement")
+        table.add_column("Id", justify="center", style="red")
+        table.add_column("Client", justify="center", style="cyan")
+        table.add_column("Date début", justify="center")
+        table.add_column("Date fin", justify="center")
+        table.add_column("Contact support", justify="center", style="red")
+        table.add_column("Lieu", justify="center", style="cyan")
+        table.add_column("Nombre participant", justify="center", style="cyan")
+
+        for pos, event in enumerate(event_list, start=1):
+            table.add_row(
+                f"{pos}",
+                f"{event.id}",
+                f"[purple]{event.client.full_name}",
+                f"[purple]{event.event_date_start}[/purple]",
+                f"[purple]{event.event_end_date}[/purple]",
+                f"[blue]{event.contact_support.name.upper()} {event.contact_support.forname}[/blue]",
+                f"{event.location}",
+                f"[purple]{event.attendees}[/purple]",
+            )
+
+        self._display.print(table)
+        self._display.print("Selectionner un evenement ou q pour revenir")
+        return self._display.input()
+
     def display_create_event(self, contract):
         grid = Table.grid(expand=False, padding=(0, 1, 1, 1))
         grid.add_column(justify="center")
