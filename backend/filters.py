@@ -17,4 +17,6 @@ class Filters:
         return contracts
 
     def by_commercial(self, session, commercial):
-        pass
+        stmt = select(Contract).where(Contract.commercial == commercial)
+        contracts = session.scalars(stmt).all()
+        return contracts

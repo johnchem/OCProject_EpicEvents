@@ -1,6 +1,9 @@
 import functools
-import backend.models as models
+from CLI.view import Views
+from backend.repository import SqlAlchemyRepository
+import backend.models as models 
 import controller.menu as menu
+from controller.permissions import Permissions
 
 
 def check_user_auth(func):
@@ -15,7 +18,12 @@ def check_user_auth(func):
 class Controller(menu.Menu):
     """Controlleur principal"""
 
-    def __init__(self, repository, view, permissions):
+    def __init__(
+            self,
+            repository: SqlAlchemyRepository,
+            view: Views,
+            permissions: Permissions,
+            ):
         menu.Menu.__init__(self, view)
         self.repository = repository
         self.permissions = permissions
