@@ -7,6 +7,7 @@ from CLI.cli import cli_handler
 
 # backend
 from backend.repository import SqlAlchemyRepository
+from backend.filters import Filters
 import setup
 
 # controller
@@ -24,7 +25,8 @@ def create_session():
 def run():
     # views = Views()
     session = create_session()
-    repository = SqlAlchemyRepository(session)
+    filter = Filters()
+    repository = SqlAlchemyRepository(session, filter)
     handler = cli_handler()
 
     views = Views(handler)

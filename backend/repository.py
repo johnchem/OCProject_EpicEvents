@@ -7,8 +7,9 @@ import authentification as auth
 
 
 class SqlAlchemyRepository():
-    def __init__(self, session: Session):
+    def __init__(self, session: Session, filter):
         self.session = session
+        self.filter = filter
 
     def add(self, data):
         self.session.add(data)
@@ -92,6 +93,22 @@ class SqlAlchemyRepository():
         event = self.session.scalars(stmt).first()
         self.session.delete(event)
         return True
+    
+    def filter_by_signed_contract(self):
+        contracts = self.filter.by_signed_contract(self.session)
+        return contracts
+    
+    def filter_by_not_signed_contract(self):
+        contracts = self.filter.by_not_signed_contract(self.session)
+        return contracts
+    
+    def filter_contract_by_commercial(self, commercial):
+        contracts = self.filter.by_commercial(self.session, commercial)
+        return contracts
+    
+    
+    
+
 
     # def get_event_by_client(self, session: Session, client_name):
     #     client = session.query(Client).filter(full_name=client_name)
