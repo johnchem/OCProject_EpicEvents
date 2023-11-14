@@ -271,8 +271,76 @@ class Controller(menu.Menu):
             self.contract_opt_menu(contract_picked)
 
     @check_user_auth
-    def filter_contract(self):
-        pass
+    def filter_contract_signed(self, *args, **kwargs):
+        if not self.permissions.filter_contract(self._logged_user):
+            self.view.prompt_error_message("accés non authorisé")
+            self.contract_menu()
+        contracts = self.repository.filter_by_signed_contract()
+        choices = self.view.prompt_list_contract(contracts)
+        if choices == "q":
+            self.contract_menu()
+        try:
+            choices = int(choices)
+            if choices > len(contracts):
+                self.list_user
+            contract_picked = contracts[choices-1]
+            self.view.prompt_contract_info(contract_picked)
+            self.contract_opt_menu(contract_picked)
+
+        except Exception as err:
+            self.view.print(err)
+            self.view.prompt_error_message(
+                f"Veuillez choisir une valeur entre 1 et {len(contracts)} ou q pour quitter",
+            )
+            self.contract_opt_menu(contract_picked)
+
+    @check_user_auth
+    def filter_contract_not_signed(self, *args, **kwargs):
+        if not self.permissions.filter_contract(self._logged_user):
+            self.view.prompt_error_message("accés non authorisé")
+            self.contract_menu()
+        contracts = self.repository.filter_by_not_signed_contract()
+        choices = self.view.prompt_list_contract(contracts)
+        if choices == "q":
+            self.contract_menu()
+        try:
+            choices = int(choices)
+            if choices > len(contracts):
+                self.list_user
+            contract_picked = contracts[choices-1]
+            self.view.prompt_contract_info(contract_picked)
+            self.contract_opt_menu(contract_picked)
+
+        except Exception as err:
+            self.view.print(err)
+            self.view.prompt_error_message(
+                f"Veuillez choisir une valeur entre 1 et {len(contracts)} ou q pour quitter",
+            )
+            self.contract_opt_menu(contract_picked)
+
+    @check_user_auth
+    def filter_contract_by_commercial(self, commercial, *args, **kwargs):
+        if not self.permissions.filter_contract(self._logged_user):
+            self.view.prompt_error_message("accés non authorisé")
+            self.contract_menu()
+        contracts = self.repository.filter_contract_by_commercial(commercial)
+        choices = self.view.prompt_list_contract(contracts)
+        if choices == "q":
+            self.contract_menu()
+        try:
+            choices = int(choices)
+            if choices > len(contracts):
+                self.list_user
+            contract_picked = contracts[choices-1]
+            self.view.prompt_contract_info(contract_picked)
+            self.contract_opt_menu(contract_picked)
+
+        except Exception as err:
+            self.view.print(err)
+            self.view.prompt_error_message(
+                f"Veuillez choisir une valeur entre 1 et {len(contracts)} ou q pour quitter",
+            )
+            self.contract_opt_menu(contract_picked)
 
     @check_user_auth
     def update_contract(self, contract):

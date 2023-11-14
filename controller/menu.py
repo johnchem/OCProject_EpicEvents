@@ -93,7 +93,7 @@ class Menu(ABC):
     def contract_menu(self):
         MENU_ITEM_DICT = {
             "Liste des contrats": self.list_contract,
-            "Filter les contrats": self.filter_contract,
+            "Filter les contrats": self.filter_contract_menu,
             "Créer un contrat": self.create_contract,
             "Retour": self.main_menu,
         }
@@ -123,6 +123,39 @@ class Menu(ABC):
         function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
         # Call the function
         function_called_by_user(contract=contract_data)
+
+    def filter_contract_menu(self):
+        if not self.permissions.filter_contract(self._logged_user):
+            self.view.prompt_error_message("accés non authorisé")
+            self.contract_menu()
+        
+        MENU_ITEM_DICT = {
+            "Contrat en cours": self.filter_contract_not_signed,
+            "Contrat en signés": self.filter_contract_signed,
+            "Mes contrats": self.filter_contract_by_commercial,
+            "Filtrer par commerciaux": self.filter_by_commercial_menu,
+        }
+
+        menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
+        user_answer = (
+            self.view.prompt_filter_contract_menu(menu_item_list)-1
+        )
+        # convert the answer to the function
+        function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
+        # Call the function
+        function_called_by_user(commercial=self._logged_user)
+
+    def filter_by_commercial_menu(self, *args, **kwargs):
+        commercials = self.repository.list_commercial_with_contract()
+
+        menu_item_list = [x.email for x in commercials]
+        user_answer = int(
+            self.view.prompt_filter_contract_menu(menu_item_list)-1
+        )
+        # convert the answer to the function
+        commercial = commercials[user_answer]
+        # Call the function
+        self.filter_contract_by_commercial(commercial=commercial)
 
     def event_menu(self):
         MENU_ITEM_DICT = {
@@ -194,10 +227,6 @@ class Menu(ABC):
 
     @abstractmethod
     def list_contract(self):
-        pass
-
-    @abstractmethod
-    def filter_contract(self):
         pass
 
     @abstractmethod

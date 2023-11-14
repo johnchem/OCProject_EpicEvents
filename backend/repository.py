@@ -105,10 +105,10 @@ class SqlAlchemyRepository():
     def filter_contract_by_commercial(self, commercial):
         contracts = self.filter.by_commercial(self.session, commercial)
         return contracts
-    
-    
-    
 
+    def list_commercial_with_contract(self):
+        commercials = self.filter.commercial_with_contract(self.session)
+        return commercials
 
     # def get_event_by_client(self, session: Session, client_name):
     #     client = session.query(Client).filter(full_name=client_name)

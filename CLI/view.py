@@ -106,6 +106,16 @@ class Views:
     def prompt_list_contract(self, contract_list):
         self._handler.clear()
         return self._handler.display_list_contract(contract_list)
+    
+    def prompt_filter_contract_menu(self, menu_item):
+        self._handler.clear()
+        self._handler.print("[i]Menu filtrage de contrat[/i]")
+        return self._handler.display_menu(menu_item)
+
+    def prompt_contract_filter_by_commercial_menu(self, list_commercial):
+        self._handler.clear()
+        self._handler.print("[i]Selection commercial[/i]")
+        return self._handler.display_menu(list_commercial)
 
     # -------- Event views --------------
     def prompt_event_menu(self, menu_item):
