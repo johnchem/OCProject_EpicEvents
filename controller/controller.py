@@ -1,6 +1,9 @@
 import functools
 import inspect
+from sentry_sdk import capture_exception, capture_message
+
 from CLI.view import Views
+
 from backend.repository import SqlAlchemyRepository
 import backend.models as models 
 import controller.menu as menu
@@ -11,30 +14,50 @@ import authentification as auth
 def check_user_auth(func):
     @functools.wraps(func)
     def inner(self, *args, **kwargs):
-        while not self._logged_user:
-            self.user_login()
-        func(self, *args, **kwargs)
+        try:
+            received_token = auth.read_token_from_file()
+            auth_user_email, error = auth.verify_jwt_token(received_token)
+        
+            while not auth_user_email:
+                self.view.prompt_error_message(f"Erreur d'authentification : {error}")
+                self.user_login()
+            auth_user = self.repository.get_user(auth_user_email)
+            self._logged_user = auth_user
+            func(self, *args, **kwargs)
+        except Exception as err:
+            capture_exception(err)
+            # self.user_login()
     return inner
 
 
-def decorate_all_with(decorator, predicate=None):
-    """Apply a decorator to all methods that satisfy a predicate, if given."""
+def visitor_allowed(function):
+    function.request_login = False
+    return function
 
+
+def should_be_auth(function):
+    try:
+        return bool(function.request_login)
+    except AttributeError:
+        return True
+
+
+def decorate_all_with(decorator, predicate=None):
     if predicate is None:
         predicate = lambda _: True
-
     def decorate_all(cls):
         for name, method in inspect.getmembers(cls, inspect.isfunction):
             if predicate(method):
                 setattr(cls, name, decorator(method))
-
         return cls
     return decorate_all
 
 
+@decorate_all_with(check_user_auth, should_be_auth)
 class Controller(menu.Menu):
     """Controlleur principal"""
 
+    @visitor_allowed
     def __init__(
             self,
             repository: SqlAlchemyRepository,
@@ -46,35 +69,46 @@ class Controller(menu.Menu):
         self.permissions = permissions
         self._logged_user = None
 
-    def start(self):
-        self.welcome_page()
-        if not self._logged_user:
-            self.user_login
-        self.user_info()
-        self.main_menu()
-
+    @visitor_allowed
     def welcome_page(self):
         self.view.prompt_welcome_page()
 
+    @visitor_allowed
+    def start(self):
+        self.welcome_page()
+        if not self._logged_user:
+            self.user_login()
+        self.user_info()
+        self.main_menu()
+
+    @visitor_allowed
     def user_login(self):
         token = self.view.prompt_login()
-        print(token)
         data = auth.decode(token)
         email = data.get("email", None)
         password = data.get("password", None)
         
-        user = self.repository.user_login(email, password)
-        if user:
-            self._logged_user = user
-            print("successfull")
+        user = self.repository.get_user(email)
+        if not user:
+            capture_message(f"wrong user id :{email}", "error")
+            self.view.prompt_error_message(f"L'utilisateur {email} n'existe pas")
+            self.user_login()
+        try:
+            access_granted = auth.authenticate_user(user, password)
+        except Exception as err:
+            capture_exception(err)
+
+        if access_granted:
+            token = auth.create_id_token(user)
+            auth.save_token_to_file(token)
         else:
-            print(f"error {user}")
+            capture_message(f"wrong password for :{email}", "error")
+            self.view.prompt_error_message(f"Mot de passe incorrect")
 
-    @check_user_auth
     def user_info(self, *args, **kwargs):
-        self.view.prompt_user_info(self._logged_user)
+        token = auth.encode(self._logged_user)
+        self.view.prompt_user_info(token)
 
-    @check_user_auth
     def create_user(self, *args, **kwargs):
         if not self.permissions.create_user(self._logged_user):
             self.view.prompt_error_message("besoin d'un accés admin ou commercial pour cette opération")
@@ -88,7 +122,6 @@ class Controller(menu.Menu):
             self.repository.commit()
             self.user_menu()
 
-    @check_user_auth
     def list_user(self, *args, **kwargs):
         users = self.repository.list_user()
         choices = self.view.prompt_list_users(users)
@@ -112,7 +145,6 @@ class Controller(menu.Menu):
             )
             self.user_opt_menu(user_picked)
 
-    @check_user_auth
     def update_user(self, user):
         if not self.permissions.update_user(self._logged_user, user):
             self.view.prompt_error_message("besoin d'un accés admin pour cette opération")
@@ -128,7 +160,6 @@ class Controller(menu.Menu):
             self.view.prompt_error_message("erreur lors de la mise à jour")
         self.user_menu()
 
-    @check_user_auth
     def delete_user(self, user_data, *args, **kwargs):
         if not self.permissions.delete_user(self._logged_user):
             self.view.prompt_error_message(
@@ -140,7 +171,6 @@ class Controller(menu.Menu):
         self.view.print("L'utilisateur à bien été supprimé")
         self.user_menu()
 
-    @check_user_auth
     def create_client(self):
         if not self.permissions.create_client(self._logged_user):
             self.view.prompt_error_message(
@@ -172,7 +202,6 @@ class Controller(menu.Menu):
             self.view.prompt_client_info(client)
             self.main_menu()
 
-    @check_user_auth
     def list_client(self):
         if not self.permissions.read_client(self._logged_user):
             self.view.prompt_error_message("accés non authorisé")
@@ -198,7 +227,6 @@ class Controller(menu.Menu):
             )
             self.client_opt_menu(client_picked)
 
-    @check_user_auth
     def update_client(self, client):
         if not self.permissions.update_client(self._logged_user):
             self.view.prompt_error_message("besoin d'un accés admin pour cette opération")
@@ -475,8 +503,13 @@ class Controller(menu.Menu):
         self.view.print("L'évenement à bien été supprimé")
         self.event_menu()
 
+    def logoff(self):
+        auth.remove_token_file()
+        self.user_login()
+
     def quit(self):
         # self.view.exit_message()
+        auth.remove_token_file()
         exit()
 
 

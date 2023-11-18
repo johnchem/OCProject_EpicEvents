@@ -32,7 +32,6 @@ def run():
     views = Views(handler)
     permissions = Permissions()
     app = Controller(repository, views, permissions)
-    division_by_zero = 1 / 0
     app.start()
 
 

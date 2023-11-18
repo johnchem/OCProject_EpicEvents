@@ -1,5 +1,6 @@
 from datetime import datetime
 import enum
+import json
 from sqlalchemy import Integer, String, ForeignKey, DateTime, Text
 from sqlalchemy import Enum
 from sqlalchemy.orm import DeclarativeBase, relationship
@@ -70,6 +71,17 @@ class User(Base):
 
     def __repr__(self) -> str:
         return f'User(id={self.id}, name={self.name}, forname={self.forname}, dpt={self.departement})'
+    
+    def default(self):
+        try:
+            iterable = iter(self)
+        except TypeError:
+            pass
+        else:
+            return list(iterable)
+        # Let the base class default method raise the TypeError
+        return json.JSONEncoder.default(self, o)
+
 
 
 class Client(Base):

@@ -32,6 +32,7 @@ TEST_CREDENTIAL = {
     "port": PORT,
 }
 
+
 sentry_sdk.init(
     dsn="https://b4795911860f3077a355553b79dd010a@o4506247812546560.ingest.sentry.io/4506247817330688",
     # Set traces_sample_rate to 1.0 to capture 100%

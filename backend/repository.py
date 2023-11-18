@@ -1,6 +1,8 @@
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 from sqlalchemy.orm import Session
+import sentry_sdk
+from sentry_sdk import capture_exception, capture_message
 
 from backend.models import User, Client, Contract, Evenement
 import authentification as auth
@@ -25,17 +27,9 @@ class SqlAlchemyRepository():
         return True
 
     def get_user(self, user_email: str):
-        return self.session.query(User).filter_by(email=user_email).first()
-
-    def user_login(self, user_email, password):
-        try:
-            user = self.get_user(user_email)
-            if auth.authenticate_user(user, password):
-                return user
-            return False
-        except Exception as err:
-            print(err)
-            print("ce compte n'existe pas")
+        with sentry_sdk.start_transaction(name="get_user"):
+            user = self.session.query(User).filter_by(email=user_email).first()
+            return user
 
     def list_user(self):
         stmt = select(User).order_by(User.id)
