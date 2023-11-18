@@ -6,9 +6,9 @@ from CLI.view import Views
 from CLI.cli import cli_handler
 
 # backend
+import setup
 from backend.repository import SqlAlchemyRepository
 from backend.filters import Filters
-import setup
 
 # controller
 from controller.controller import Controller
@@ -32,6 +32,7 @@ def run():
     views = Views(handler)
     permissions = Permissions()
     app = Controller(repository, views, permissions)
+    division_by_zero = 1 / 0
     app.start()
 
 

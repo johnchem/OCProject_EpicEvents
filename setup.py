@@ -2,6 +2,7 @@ import subprocess
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+import sentry_sdk
 from backend.models import User, Departements
 
 from settings import (
@@ -13,7 +14,7 @@ from settings import (
     PGPASSWORD,
     TEST_DATABASE_NAME,
     TEST_ADMIN_LOGIN,
-    TEST_PGPASSWORD
+    TEST_PGPASSWORD,
     )
 from backend.models import Base
 
@@ -31,6 +32,17 @@ TEST_CREDENTIAL = {
     "port": PORT,
 }
 
+sentry_sdk.init(
+    dsn="https://b4795911860f3077a355553b79dd010a@o4506247812546560.ingest.sentry.io/4506247817330688",
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    traces_sample_rate=1.0,
+    # Set profiles_sample_rate to 1.0 to profile 100%
+    # of sampled transactions.
+    # We recommend adjusting this value in production.
+    profiles_sample_rate=1.0,
+    enable_tracing=True,
+)
 
 def _create_engine(user, password, port, database):
     engine = create_engine(f"postgresql+psycopg2://{user}:{password}@localhost:{port}/{database}", echo=False)

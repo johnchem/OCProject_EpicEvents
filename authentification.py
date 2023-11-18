@@ -1,9 +1,12 @@
+import functools
 from sqlalchemy import event
 import jwt
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from backend.models import User
-from settings import SECRET_KEY
+# from settings import EXPIRATION_TIME_TOKEN
+from settings import PRIVATE_KEY, PUBLIC_KEY, EXPIRATION_TIME_TOKEN
+
 
 
 def authenticate_user(user, password):
@@ -21,43 +24,32 @@ def hash_user_password(target, value, oldvalue, initiator):
 
 
 # Fonction pour générer un token JWT
-def generate_jwt(payload):
-    payload['exp'] = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
-    return jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+def encode(payload):
+    payload['exp'] = datetime.datetime.utcnow() + datetime.timedelta(seconds=int(EXPIRATION_TIME_TOKEN))
+    return jwt.encode(payload, PRIVATE_KEY, algorithm='RS256')
 
 
 # Fonction pour vérifier un token JWT
-def verify_jwt(token):
+def decode(token):
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+        payload = jwt.decode(token, PUBLIC_KEY, algorithms=['RS256'])
         return payload
     except jwt.ExpiredSignatureError:
         return "Le token a expiré."
     except jwt.InvalidTokenError:
         return "Token invalide."
-
-# from sqlalchemy import create_engine, Column, Integer, String
-# from sqlalchemy.ext.declarative import declarative_base
-# from sqlalchemy.orm import sessionmaker
-
-# Base = declarative_base()
-
-# class User(Base):
-#     __tablename__ = 'users'
-
-#     id = Column(Integer, primary_key=True, autoincrement=True)
-#     username = Column(String, unique=True)
-#     password = Column(String)
-
-# # Créer la base de données SQLite en mémoire (vous pouvez choisir un emplacement de fichier différent)
-# engine = create_engine('sqlite:///jwt_auth.db')
-
-# # Créer les tables dans la base de données
-# Base.metadata.create_all(engine)
-
-# # Créer une session SQLAlchemy
-# Session = sessionmaker(bind=engine)
-# session = Session()
+    
+def encode_decode_jwt(function):
+    @functools.wraps(function)
+    def inner(self, token=None, *args, **kwargs):
+        if token:
+            decoded_data = decode(token)
+            data = function(self, decoded_data, *args, **kwargs)
+        else:
+            data = function(self, *args, **kwargs)
+        token = encode(data)
+        return token
+    return inner
 
 
 
@@ -87,18 +79,4 @@ if __name__ == '__main__':
         print(f"Résultat de la vérification : {result}")
     else:
         print("Action invalide.")
-
-# if __name__ == '__main__':
-#     action = input("Voulez-vous générer (g) ou vérifier (v) un JWT ? ")
-    
-#     if action == 'g':
-#         user_id = input("Entrez l'ID de l'utilisateur : ")
-#         token = generate_jwt({'user_id': user_id})
-#         print(f"Token JWT généré : {token}")
-#     elif action == 'v':
-#         token = input("Entrez le token JWT à vérifier : ")
-#         result = verify_jwt(token)
-#         print(f"Résultat de la vérification : {result}")
-#     else:
-#         print("Action invalide.")
 

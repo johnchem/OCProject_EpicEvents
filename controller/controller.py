@@ -1,9 +1,11 @@
 import functools
+import inspect
 from CLI.view import Views
 from backend.repository import SqlAlchemyRepository
 import backend.models as models 
 import controller.menu as menu
 from controller.permissions import Permissions
+import authentification as auth
 
 
 def check_user_auth(func):
@@ -13,6 +15,21 @@ def check_user_auth(func):
             self.user_login()
         func(self, *args, **kwargs)
     return inner
+
+
+def decorate_all_with(decorator, predicate=None):
+    """Apply a decorator to all methods that satisfy a predicate, if given."""
+
+    if predicate is None:
+        predicate = lambda _: True
+
+    def decorate_all(cls):
+        for name, method in inspect.getmembers(cls, inspect.isfunction):
+            if predicate(method):
+                setattr(cls, name, decorator(method))
+
+        return cls
+    return decorate_all
 
 
 class Controller(menu.Menu):
@@ -40,7 +57,12 @@ class Controller(menu.Menu):
         self.view.prompt_welcome_page()
 
     def user_login(self):
-        email, password = self.view.prompt_login()
+        token = self.view.prompt_login()
+        print(token)
+        data = auth.decode(token)
+        email = data.get("email", None)
+        password = data.get("password", None)
+        
         user = self.repository.user_login(email, password)
         if user:
             self._logged_user = user

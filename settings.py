@@ -1,5 +1,6 @@
 import environ
 import os
+from RSA_gen import generate_RSA_pair
 
 env = environ.Env()
 
@@ -35,4 +36,7 @@ LOGIN = env("DATABASE_LOGIN")
 PWD = env("DATABASE_PWD")
 
 # Clé secrète pour signer le token
-SECRET_KEY = env("JWT_SECRET")
+generate_RSA_pair()
+PRIVATE_KEY = env("PRIVATE_KEY")
+PUBLIC_KEY = env("PUBLIC_KEY")
+EXPIRATION_TIME_TOKEN = env("EXPIRATION_TIME_TOKEN")
