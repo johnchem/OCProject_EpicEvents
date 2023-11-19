@@ -17,7 +17,7 @@ def check_user_auth(func):
         try:
             received_token = auth.read_token_from_file()
             auth_user_email, error = auth.verify_jwt_token(received_token)
-        
+
             while not auth_user_email:
                 self.view.prompt_error_message(f"Erreur d'authentification : {error}")
                 self.user_login()
@@ -97,6 +97,8 @@ class Controller(menu.Menu):
             access_granted = auth.authenticate_user(user, password)
         except Exception as err:
             capture_exception(err)
+            self.view.prompt_error_message(f"Mot de passe incorrect")
+            self.user_login()
 
         if access_granted:
             token = auth.create_id_token(user)
