@@ -63,10 +63,20 @@ class cli_handler:
         for pos, item in enumerate(menu_item, start=1):
             self._display.print(f"[red][{pos}] : [/red][green]{item}[/green]")
         choice = ""
-        while not choice.isnumeric():
+        correct_answer = False
+        while not correct_answer:
             choice = self._display.input("Selection : ")
-
-        return int(choice)
+            if choice.isnumeric():
+                choice = int(choice)
+            else:
+                choice = self._display.error("Introduire un nombre")
+                continue
+            if choice==0 or choice>len(menu_item):
+                self._display.error(f"Veuillez choisir une valeur entre 1 et {len(menu_item)}")
+                continue
+            correct_answer = True
+                
+        return choice
 
     def display_error_msg(self, msg, pause=True):
         self._display.error(msg)

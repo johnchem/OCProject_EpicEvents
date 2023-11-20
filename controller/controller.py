@@ -121,6 +121,7 @@ class Controller(menu.Menu):
 
         if response:
             self.view.prompt_user_info(user)
+            capture_message(f"Creation user : {user.email}", "info")
             self.repository.commit()
             self.user_menu()
 
@@ -139,6 +140,7 @@ class Controller(menu.Menu):
 
         except Exception as err:
             self.view.print(err)
+            capture_exception(err)
             self.view.prompt_error_message(
                 (
                     f"Veuillez choisir une valeur entre 1 et {len(users)}"
