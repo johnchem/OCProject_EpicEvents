@@ -121,7 +121,7 @@ class Controller(menu.Menu):
 
         if response:
             self.view.prompt_user_info(user)
-            capture_message(f"Creation user : {user.email}", "info")
+            capture_message(f"{self._logged_user.email} - {self._logged_user.departement.value} - Creation user : {user.email}", "info")
             self.repository.commit()
             self.user_menu()
 
@@ -160,6 +160,7 @@ class Controller(menu.Menu):
 
         # response = update_user_gen.send(user_data)
         response = self.repository.commit()
+        capture_message(f"{self._logged_user.email} - {self._logged_user.departement.value} - update user :{user.email}", "info")
         if not response:
             self.view.prompt_error_message("erreur lors de la mise à jour")
         self.user_menu()
@@ -172,6 +173,7 @@ class Controller(menu.Menu):
         response = self.repository.delete_user(user_data)
         if not response:
             self.view.prompt_error_message("erreur lors de la suppression")
+        capture_message(f"{self._logged_user.email} - {self._logged_user.departement.value} - user deletion : {user_data.email}", "info")
         self.view.print("L'utilisateur à bien été supprimé")
         self.user_menu()
 
@@ -203,6 +205,7 @@ class Controller(menu.Menu):
 
         if response:
             self.repository.commit()
+            capture_message(f"{self._logged_user.email} - {self._logged_user.departement.value} - client creation {client.full_name}", "info")
             self.view.prompt_client_info(client)
             self.main_menu()
 
@@ -225,6 +228,7 @@ class Controller(menu.Menu):
 
         except Exception as err:
             self.view.print(err)
+            capture_exception(err)
             self.view.prompt_error_message(
                 f"Veuillez choisir une valeur entre 1 et {len(client)}",
                 "ou q pour quitter",
@@ -255,6 +259,7 @@ class Controller(menu.Menu):
         self.view.prompt_client_info(updated_client)
         if not response:
             self.view.prompt_error_message("erreur lors de la mise à jour")
+        capture_message(f"{self._logged_user.email} - {self._logged_user.departement.value} - update client {updated_client.full_name}", "info")
         self.client_menu()
 
     @check_user_auth
@@ -266,6 +271,7 @@ class Controller(menu.Menu):
         response = self.repository.delete_user(client)
         if not response:
             self.view.prompt_error_message("erreur lors de la suppression")
+        capture_message(f"{self._logged_user.email} - {self._logged_user.departement.value} - client deletion :{client.full_name}", "info")
         self.view.print("Le client à bien été supprimé")
         self.client_menu()
 
@@ -297,6 +303,7 @@ class Controller(menu.Menu):
 
         if response:
             self.repository.commit()
+            capture_message(f"{self._logged_user.email} - {self._logged_user.departement.value} - contract creation for :{contract.client.full_name}", "info")
             self.view.prompt_contract_info(contract)
             self.contract_menu()
 
@@ -319,6 +326,7 @@ class Controller(menu.Menu):
 
         except Exception as err:
             self.view.print(err)
+            capture_exception(err)
             self.view.prompt_error_message(
                 f"Veuillez choisir une valeur entre 1 et {len(contracts)} ou q pour quitter",
             )
@@ -343,6 +351,7 @@ class Controller(menu.Menu):
 
         except Exception as err:
             self.view.print(err)
+            capture_exception(err)
             self.view.prompt_error_message(
                 f"Veuillez choisir une valeur entre 1 et {len(contracts)} ou q pour quitter",
             )
@@ -367,6 +376,7 @@ class Controller(menu.Menu):
 
         except Exception as err:
             self.view.print(err)
+            capture_exception(err)
             self.view.prompt_error_message(
                 f"Veuillez choisir une valeur entre 1 et {len(contracts)} ou q pour quitter",
             )
@@ -391,6 +401,7 @@ class Controller(menu.Menu):
 
         except Exception as err:
             self.view.print(err)
+            capture_exception(err)
             self.view.prompt_error_message(
                 f"Veuillez choisir une valeur entre 1 et {len(contracts)} ou q pour quitter",
             )
@@ -411,6 +422,7 @@ class Controller(menu.Menu):
 
         # response = update_user_gen.send(user_data)
         response = self.repository.commit()
+        capture_message(f"{self._logged_user.email} - {self._logged_user.departement.value} - update contract {contract.client.full_name}", "info")
         if not response:
             self.view.prompt_error_message("erreur lors de la mise à jour")
         self.contract_menu()
@@ -423,6 +435,7 @@ class Controller(menu.Menu):
         response = self.repository.delete_contract(contract)
         if not response:
             self.view.prompt_error_message("erreur lors de la suppression")
+        capture_message(f"{self._logged_user.email} - {self._logged_user.departement.value} - contract deletion :{contract.full_name}", "info")
         self.view.print("Le contrat à bien été supprimé")
         self.contract_menu()
 
@@ -440,6 +453,7 @@ class Controller(menu.Menu):
 
             if response:
                 self.repository.commit()
+                capture_message(f"{self._logged_user.email} - {self._logged_user.departement.value} - event creation {event.name}", "info")
                 self.view.prompt_event_info(event)
                 self.contract_opt_menu(contract)
             else:
@@ -468,6 +482,7 @@ class Controller(menu.Menu):
 
         except Exception as err:
             self.view.print(err)
+            capture_exception(err)
             self.view.prompt_error_message(
                 f"Veuillez choisir une valeur entre 1 et {len(event)}",
                 "ou q pour quitter",
@@ -494,6 +509,7 @@ class Controller(menu.Menu):
         response = self.repository.commit()
         if not response:
             self.view.prompt_error_message("erreur lors de la mise à jour")
+        capture_message(f"{self._logged_user.email} - {self._logged_user.departement.value} - update event {event.name}", "info")
         self.event_opt_menu(event)
 
     def delete_event(self, event):
@@ -504,6 +520,7 @@ class Controller(menu.Menu):
         response = self.repository.delete_event(event)
         if not response:
             self.view.prompt_error_message("erreur lors de la suppression")
+        capture_message(f"{self._logged_user.email} - {self._logged_user.departement.value} - event deletion {event.name}", "info")
         self.view.print("L'évenement à bien été supprimé")
         self.event_menu()
 
