@@ -74,14 +74,14 @@ def verify_jwt_token(token):
 
         # Vérification de l'expiration
         if datetime.datetime.fromtimestamp(expiration) < datetime.datetime.utcnow():
-            return None, "Token expiré"
+            return None, "expired token"
 
         return user, None  # Utilisateur authentifié
 
     except jwt.ExpiredSignatureError:
-        return None, "Token expiré"
+        return None, "expired token"
     except jwt.InvalidTokenError:
-        return None, "Token invalide"
+        return None, "invalid token"
 
 
 # Fonction pour enregistrer le token dans un fichier local
@@ -92,9 +92,12 @@ def save_token_to_file(token):
 
 # Fonction pour lire le token depuis le fichier local
 def read_token_from_file():
-    with open(TOKEN_FILE, 'r') as file:
-        token = file.read()
-    return token
+    if os.path.isfile(TOKEN_FILE):
+        with open(TOKEN_FILE, 'r') as file:
+            token = file.read()
+        return token
+    else:
+        return None
 
 
 def remove_token_file():

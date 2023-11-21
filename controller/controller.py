@@ -15,14 +15,39 @@ def check_user_auth(func):
     @functools.wraps(func)
     def inner(self, *args, **kwargs):
         try:
-            received_token = auth.read_token_from_file()
-            auth_user_email, error = auth.verify_jwt_token(received_token)
+            # get the current token if any
+            if self.id_token:
+                token = self.id_token
+            else:
+                token = auth.read_token_from_file()
+            
+            if token:
+                # check the validity of the token
+                auth_user_email, error = auth.verify_jwt_token(token)
 
-            while not auth_user_email:
-                self.view.prompt_error_message(f"Erreur d'authentification : {error}")
+                if error == "expired token":
+                    # delete old token and refresh it
+                    auth.remove_token_file()
+                    
+                    token = auth.create_id_token(self._logged_user)
+                    auth.save_token_to_file(token)
+                    self.id_token = token
+
+                elif error == "invalid token":
+                    # remove the invalid token and ask for a new authentification
+                    token = None
+                    self._logged_user = None
+                    self.user_login()
+            else:
+                # no token found : ask for identification
                 self.user_login()
-            auth_user = self.repository.get_user(auth_user_email)
-            self._logged_user = auth_user
+
+            # while not auth_user_email:
+            #     self.view.prompt_error_message(f"Erreur d'authentification : {error}")
+            #     self.user_login()
+            
+            # auth_user = self.repository.get_user(auth_user_email)
+            # self._logged_user = auth_user
             func(self, *args, **kwargs)
         except Exception as err:
             capture_exception(err)
@@ -68,6 +93,7 @@ class Controller(menu.Menu):
         self.repository = repository
         self.permissions = permissions
         self._logged_user = None
+        self.id_token = None
 
     @visitor_allowed
     def welcome_page(self):
@@ -93,21 +119,19 @@ class Controller(menu.Menu):
             capture_message(f"wrong user id :{email}", "error")
             self.view.prompt_error_message(f"L'utilisateur {email} n'existe pas")
             self.user_login()
-        try:
-            access_granted = auth.authenticate_user(user, password)
-        except Exception as err:
-            capture_exception(err)
-            self.view.prompt_error_message(f"Mot de passe incorrect")
-            self.user_login()
 
+        access_granted = auth.authenticate_user(user, password)
+        
         if access_granted:
-            token = auth.create_id_token(user)
-            auth.save_token_to_file(token)
+            self.id_token = auth.create_id_token(user)
+            self._logged_user = user
+            auth.save_token_to_file(self.id_token)
         else:
             capture_message(f"wrong password for :{email}", "error")
             self.view.prompt_error_message(f"Mot de passe incorrect")
+            self.user_login()
 
-    def user_info(self, *args, **kwargs):
+    def user_info(self):
         token = auth.encode(self._logged_user)
         self.view.prompt_user_info(token)
 
