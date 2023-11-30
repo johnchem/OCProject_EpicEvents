@@ -5,7 +5,7 @@ from sentry_sdk import capture_exception, capture_message
 from CLI.view import Views
 
 from backend.repository import SqlAlchemyRepository
-import backend.models as models 
+import backend.models as models
 import controller.menu as menu
 from controller.permissions import Permissions
 import authentification as auth
@@ -20,7 +20,7 @@ def check_user_auth(func):
                 token = self.id_token
             else:
                 token = auth.read_token_from_file()
-            
+
             if token:
                 # check the validity of the token
                 auth_user_email, error = auth.verify_jwt_token(token)
@@ -28,7 +28,7 @@ def check_user_auth(func):
                 if error == "expired token":
                     # delete old token and refresh it
                     auth.remove_token_file()
-                    
+
                     token = auth.create_id_token(self._logged_user)
                     auth.save_token_to_file(token)
                     self.id_token = token
@@ -45,13 +45,14 @@ def check_user_auth(func):
             # while not auth_user_email:
             #     self.view.prompt_error_message(f"Erreur d'authentification : {error}")
             #     self.user_login()
-            
+
             # auth_user = self.repository.get_user(auth_user_email)
             # self._logged_user = auth_user
             func(self, *args, **kwargs)
         except Exception as err:
             capture_exception(err)
             # self.user_login()
+
     return inner
 
 
@@ -70,11 +71,13 @@ def should_be_auth(function):
 def decorate_all_with(decorator, predicate=None):
     if predicate is None:
         predicate = lambda _: True
+
     def decorate_all(cls):
         for name, method in inspect.getmembers(cls, inspect.isfunction):
             if predicate(method):
                 setattr(cls, name, decorator(method))
         return cls
+
     return decorate_all
 
 
@@ -84,13 +87,13 @@ class Controller(menu.Menu):
 
     @visitor_allowed
     def __init__(
-            self,
-            repository: SqlAlchemyRepository,
-            view: Views,
-            permissions: Permissions,
-            ):
-        menu.Menu.__init__(self, view)
-        self.repository = repository
+        self,
+        repository: SqlAlchemyRepository,
+        view: Views,
+        permissions: Permissions,
+    ):
+        menu.Menu.__init__(self, view, repository)
+        # self.repository = repository
         self.permissions = permissions
         self._logged_user = None
         self.id_token = None
@@ -113,7 +116,7 @@ class Controller(menu.Menu):
         data = auth.decode(token)
         email = data.get("email", None)
         password = data.get("password", None)
-        
+
         user = self.repository.get_user(email)
         if not user:
             capture_message(f"wrong user id :{email}", "error")
@@ -121,7 +124,7 @@ class Controller(menu.Menu):
             self.user_login()
 
         access_granted = auth.authenticate_user(user, password)
-        
+
         if access_granted:
             self.id_token = auth.create_id_token(user)
             self._logged_user = user
@@ -145,7 +148,10 @@ class Controller(menu.Menu):
 
         if response:
             self.view.prompt_user_info(user)
-            capture_message(f"{self._logged_user.email} - {self._logged_user.departement.value} - Creation user : {user.email}", "info")
+            capture_message(
+                f"{self._logged_user.email} - {self._logged_user.departement.value} - Creation user : {user.email}",
+                "info",
+            )
             self.repository.commit()
             self.user_menu()
 
@@ -158,7 +164,7 @@ class Controller(menu.Menu):
             choices = int(choices)
             if choices > len(users):
                 self.list_user()
-            user_picked = users[choices-1]
+            user_picked = users[choices - 1]
             self.view.prompt_user_info(user_picked)
             self.user_opt_menu(user_picked)
 
@@ -166,10 +172,7 @@ class Controller(menu.Menu):
             self.view.print(err)
             capture_exception(err)
             self.view.prompt_error_message(
-                (
-                    f"Veuillez choisir une valeur entre 1 et {len(users)}"
-                    + "\n ou q pour quitter"
-                )
+                (f"Veuillez choisir une valeur entre 1 et {len(users)}" + "\n ou q pour quitter")
             )
             self.user_opt_menu(user_picked)
 
@@ -184,7 +187,9 @@ class Controller(menu.Menu):
 
         # response = update_user_gen.send(user_data)
         response = self.repository.commit()
-        capture_message(f"{self._logged_user.email} - {self._logged_user.departement.value} - update user :{user.email}", "info")
+        capture_message(
+            f"{self._logged_user.email} - {self._logged_user.departement.value} - update user :{user.email}", "info"
+        )
         if not response:
             self.view.prompt_error_message("erreur lors de la mise à jour")
         self.user_menu()
@@ -192,19 +197,24 @@ class Controller(menu.Menu):
     def delete_user(self, user_data, *args, **kwargs):
         if not self.permissions.delete_user(self._logged_user):
             self.view.prompt_error_message(
-                "besoin d'un accés admin ou faire partis \n de l'équipe gestion pour cette opération")
+                "besoin d'un accés admin ou faire partis \n de l'équipe gestion pour cette opération"
+            )
             self.user_opt_menu(user_data)
         response = self.repository.delete_user(user_data)
         if not response:
             self.view.prompt_error_message("erreur lors de la suppression")
-        capture_message(f"{self._logged_user.email} - {self._logged_user.departement.value} - user deletion : {user_data.email}", "info")
+        capture_message(
+            f"{self._logged_user.email} - {self._logged_user.departement.value} - user deletion : {user_data.email}",
+            "info",
+        )
         self.view.print("L'utilisateur à bien été supprimé")
         self.user_menu()
 
     def create_client(self):
         if not self.permissions.create_client(self._logged_user):
             self.view.prompt_error_message(
-                "besoin d'un accés admin ou faire partis \n de l'équipe gestion pour cette opération")
+                "besoin d'un accés admin ou faire partis \n de l'équipe gestion pour cette opération"
+            )
             self.user_menu()
         else:
             default_commercial = self._logged_user
@@ -229,7 +239,10 @@ class Controller(menu.Menu):
 
         if response:
             self.repository.commit()
-            capture_message(f"{self._logged_user.email} - {self._logged_user.departement.value} - client creation {client.full_name}", "info")
+            capture_message(
+                f"{self._logged_user.email} - {self._logged_user.departement.value} - client creation {client.full_name}",
+                "info",
+            )
             self.view.prompt_client_info(client)
             self.main_menu()
 
@@ -246,7 +259,7 @@ class Controller(menu.Menu):
             choices = int(choices)
             if choices > len(client):
                 self.list_user
-            client_picked = client[choices-1]
+            client_picked = client[choices - 1]
             self.view.prompt_client_info(client_picked)
             self.client_opt_menu(client_picked)
 
@@ -283,7 +296,10 @@ class Controller(menu.Menu):
         self.view.prompt_client_info(updated_client)
         if not response:
             self.view.prompt_error_message("erreur lors de la mise à jour")
-        capture_message(f"{self._logged_user.email} - {self._logged_user.departement.value} - update client {updated_client.full_name}", "info")
+        capture_message(
+            f"{self._logged_user.email} - {self._logged_user.departement.value} - update client {updated_client.full_name}",
+            "info",
+        )
         self.client_menu()
 
     @check_user_auth
@@ -295,7 +311,10 @@ class Controller(menu.Menu):
         response = self.repository.delete_user(client)
         if not response:
             self.view.prompt_error_message("erreur lors de la suppression")
-        capture_message(f"{self._logged_user.email} - {self._logged_user.departement.value} - client deletion :{client.full_name}", "info")
+        capture_message(
+            f"{self._logged_user.email} - {self._logged_user.departement.value} - client deletion :{client.full_name}",
+            "info",
+        )
         self.view.print("Le client à bien été supprimé")
         self.client_menu()
 
@@ -327,7 +346,10 @@ class Controller(menu.Menu):
 
         if response:
             self.repository.commit()
-            capture_message(f"{self._logged_user.email} - {self._logged_user.departement.value} - contract creation for :{contract.client.full_name}", "info")
+            capture_message(
+                f"{self._logged_user.email} - {self._logged_user.departement.value} - contract creation for :{contract.client.full_name}",
+                "info",
+            )
             self.view.prompt_contract_info(contract)
             self.contract_menu()
 
@@ -344,7 +366,7 @@ class Controller(menu.Menu):
             choices = int(choices)
             if choices > len(contracts):
                 self.list_user
-            contract_picked = contracts[choices-1]
+            contract_picked = contracts[choices - 1]
             self.view.prompt_contract_info(contract_picked)
             self.contract_opt_menu(contract_picked)
 
@@ -369,7 +391,7 @@ class Controller(menu.Menu):
             choices = int(choices)
             if choices > len(contracts):
                 self.list_user
-            contract_picked = contracts[choices-1]
+            contract_picked = contracts[choices - 1]
             self.view.prompt_contract_info(contract_picked)
             self.contract_opt_menu(contract_picked)
 
@@ -394,7 +416,7 @@ class Controller(menu.Menu):
             choices = int(choices)
             if choices > len(contracts):
                 self.list_user
-            contract_picked = contracts[choices-1]
+            contract_picked = contracts[choices - 1]
             self.view.prompt_contract_info(contract_picked)
             self.contract_opt_menu(contract_picked)
 
@@ -419,7 +441,7 @@ class Controller(menu.Menu):
             choices = int(choices)
             if choices > len(contracts):
                 self.list_user
-            contract_picked = contracts[choices-1]
+            contract_picked = contracts[choices - 1]
             self.view.prompt_contract_info(contract_picked)
             self.contract_opt_menu(contract_picked)
 
@@ -440,13 +462,16 @@ class Controller(menu.Menu):
             contract,
             client_fullname=contract.client.full_name,
             commercial_email=contract.commercial.email,
-            )
+        )
         # contract_data.commercial = self.repository.get_user(commercial_email)
         # contract_data.client = self.repository.get_client(client_fullname)
 
         # response = update_user_gen.send(user_data)
         response = self.repository.commit()
-        capture_message(f"{self._logged_user.email} - {self._logged_user.departement.value} - update contract {contract.client.full_name}", "info")
+        capture_message(
+            f"{self._logged_user.email} - {self._logged_user.departement.value} - update contract {contract.client.full_name}",
+            "info",
+        )
         if not response:
             self.view.prompt_error_message("erreur lors de la mise à jour")
         self.contract_menu()
@@ -459,25 +484,32 @@ class Controller(menu.Menu):
         response = self.repository.delete_contract(contract)
         if not response:
             self.view.prompt_error_message("erreur lors de la suppression")
-        capture_message(f"{self._logged_user.email} - {self._logged_user.departement.value} - contract deletion :{contract.full_name}", "info")
+        capture_message(
+            f"{self._logged_user.email} - {self._logged_user.departement.value} - contract deletion :{contract.full_name}",
+            "info",
+        )
         self.view.print("Le contrat à bien été supprimé")
         self.contract_menu()
 
     def create_event(self, contract):
-        if not self.permissions.update_contract(self._logged_user, contract):
+        if not self.permissions.create_event(self._logged_user) or not self.permissions.create_event_for_own_client(
+            self._logged_user, contract
+        ):
+            # if not self.permissions.update_contract(self._logged_user, contract):
             self.view.prompt_error_message("accés non authorisé")
             self.contract_opt_menu(contract)
         if contract.contract_status == models.ContractStatus.SIGNED:
-            event_data = self.view.prompt_create_event(
-                contract=contract
-            )
+            event_data = self.view.prompt_create_event(contract=contract)
             event_data["client"] = contract.client
             event = models.Evenement(**event_data)
             response = self.repository.add(event)
 
             if response:
                 self.repository.commit()
-                capture_message(f"{self._logged_user.email} - {self._logged_user.departement.value} - event creation {event.name}", "info")
+                capture_message(
+                    f"{self._logged_user.email} - {self._logged_user.departement.value} - event creation {event.name}",
+                    "info",
+                )
                 self.view.prompt_event_info(event)
                 self.contract_opt_menu(contract)
             else:
@@ -500,7 +532,7 @@ class Controller(menu.Menu):
             choices = int(choices)
             if choices > len(event):
                 self.list_user
-            event_picked = event[choices-1]
+            event_picked = event[choices - 1]
             self.view.prompt_event_info(event_picked)
             self.event_opt_menu(event_picked)
 
@@ -513,9 +545,6 @@ class Controller(menu.Menu):
             )
             self.event_opt_menu(event_picked)
 
-    def filter_events(self):
-        pass
-
     def update_event(self, event):
         if not self.permissions.update_event(self._logged_user):
             self.view.prompt_error_message("accés non authorisé")
@@ -523,9 +552,7 @@ class Controller(menu.Menu):
 
         if self._logged_user.departement == models.Departements.GESTION:
             support_email = self.view.prompt_update_event_support(event)
-            event.contact_support = self.repository.get_user(
-                support_email
-                )
+            event.contact_support = self.repository.get_user(support_email)
 
         if self._logged_user.departement == models.Departements.SUPPORT:
             event = self.view.prompt_update_event(event)
@@ -533,7 +560,9 @@ class Controller(menu.Menu):
         response = self.repository.commit()
         if not response:
             self.view.prompt_error_message("erreur lors de la mise à jour")
-        capture_message(f"{self._logged_user.email} - {self._logged_user.departement.value} - update event {event.name}", "info")
+        capture_message(
+            f"{self._logged_user.email} - {self._logged_user.departement.value} - update event {event.name}", "info"
+        )
         self.event_opt_menu(event)
 
     def delete_event(self, event):
@@ -544,9 +573,36 @@ class Controller(menu.Menu):
         response = self.repository.delete_event(event)
         if not response:
             self.view.prompt_error_message("erreur lors de la suppression")
-        capture_message(f"{self._logged_user.email} - {self._logged_user.departement.value} - event deletion {event.name}", "info")
+        capture_message(
+            f"{self._logged_user.email} - {self._logged_user.departement.value} - event deletion {event.name}", "info"
+        )
         self.view.print("L'évenement à bien été supprimé")
         self.event_menu()
+
+    def filter_events_without_support(self):
+        if not self.permissions.filter_contract(self._logged_user):
+            self.view.prompt_error_message("accés non authorisé")
+            self.contract_menu()
+        events = self.repository.filter_events_without_support()
+        choices = self.view.prompt_list_events(events)
+        if choices == "q":
+            self.contract_menu()
+        try:
+            choices = int(choices)
+            if choices > len(events):
+                # Bug à fixer
+                self.list_user
+            event_picked = events[choices - 1]
+            self.view.prompt_contract_info(event_picked)
+            self.event_opt_menu(event_picked)
+
+        except Exception as err:
+            self.view.print(err)
+            capture_exception(err)
+            self.view.prompt_error_message(
+                f"Veuillez choisir une valeur entre 1 et {len(events)} ou q pour quitter",
+            )
+            self.contract_opt_menu(event_picked)
 
     def logoff(self):
         auth.remove_token_file()
