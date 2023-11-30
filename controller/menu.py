@@ -2,8 +2,9 @@ from abc import ABC, abstractmethod
 
 
 class Menu(ABC):
-    def __init__(self, view):
+    def __init__(self, view, repository):
         self.view = view
+        self.repository = repository
 
     def main_menu(self, *args, **kwargs):
         MENU_ITEM_DICT = {
@@ -11,13 +12,12 @@ class Menu(ABC):
             "Client": self.client_menu,
             "Contrat": self.contract_menu,
             "Evenements": self.event_menu,
+            "Déconnection": self.logoff,
             "Quitter": self.quit,
         }
         # get the list of item for the main menu
         menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
-        user_answer = (
-            self.view.prompt_main_menu(menu_item_list)-1
-        )
+        user_answer = self.view.prompt_main_menu(menu_item_list) - 1
         # convert the answer to the function
         function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
         # Call the function
@@ -31,9 +31,7 @@ class Menu(ABC):
         }
 
         menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
-        user_answer = (
-            self.view.prompt_user_menu(menu_item_list)-1
-        )
+        user_answer = self.view.prompt_user_menu(menu_item_list) - 1
         # convert the answer to the function
         function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
         # Call the function
@@ -47,9 +45,7 @@ class Menu(ABC):
         }
         menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
 
-        user_answer = (
-            self.view.prompt_user_opt_menu(menu_item_list, user_data)-1
-        )
+        user_answer = self.view.prompt_user_opt_menu(menu_item_list, user_data) - 1
 
         # convert the answer to the function
         function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
@@ -64,9 +60,7 @@ class Menu(ABC):
         }
 
         menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
-        user_answer = (
-            self.view.prompt_client_menu(menu_item_list)-1
-        )
+        user_answer = self.view.prompt_client_menu(menu_item_list) - 1
         # convert the answer to the function
         function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
         # Call the function
@@ -82,9 +76,7 @@ class Menu(ABC):
         }
 
         menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
-        user_answer = (
-            self.view.prompt_client_opt_menu(menu_item_list, client_data)-1
-        )
+        user_answer = self.view.prompt_client_opt_menu(menu_item_list, client_data) - 1
         # convert the answer to the function
         function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
         # Call the function
@@ -99,9 +91,7 @@ class Menu(ABC):
         }
 
         menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
-        user_answer = (
-            self.view.prompt_contract_menu(menu_item_list)-1
-        )
+        user_answer = self.view.prompt_contract_menu(menu_item_list) - 1
         # convert the answer to the function
         function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
         # Call the function
@@ -116,9 +106,7 @@ class Menu(ABC):
         }
 
         menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
-        user_answer = (
-            self.view.prompt_contract_opt_menu(menu_item_list, contract_data)-1
-        )
+        user_answer = self.view.prompt_contract_opt_menu(menu_item_list, contract_data) - 1
         # convert the answer to the function
         function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
         # Call the function
@@ -128,7 +116,7 @@ class Menu(ABC):
         if not self.permissions.filter_contract(self._logged_user):
             self.view.prompt_error_message("accés non authorisé")
             self.contract_menu()
-        
+
         MENU_ITEM_DICT = {
             "Contrat en cours": self.filter_contract_not_signed,
             "Contrat en signés": self.filter_contract_signed,
@@ -137,9 +125,7 @@ class Menu(ABC):
         }
 
         menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
-        user_answer = (
-            self.view.prompt_filter_contract_menu(menu_item_list)-1
-        )
+        user_answer = self.view.prompt_filter_contract_menu(menu_item_list) - 1
         # convert the answer to the function
         function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
         # Call the function
@@ -149,9 +135,7 @@ class Menu(ABC):
         commercials = self.repository.list_commercial_with_contract()
 
         menu_item_list = [x.email for x in commercials]
-        user_answer = int(
-            self.view.prompt_filter_contract_menu(menu_item_list)-1
-        )
+        user_answer = int(self.view.prompt_filter_contract_menu(menu_item_list) - 1)
         # convert the answer to the function
         commercial = commercials[user_answer]
         # Call the function
@@ -165,9 +149,7 @@ class Menu(ABC):
         }
 
         menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
-        user_answer = (
-            self.view.prompt_event_menu(menu_item_list)-1
-        )
+        user_answer = self.view.prompt_event_menu(menu_item_list) - 1
         # convert the answer to the function
         function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
         # Call the function
@@ -181,13 +163,30 @@ class Menu(ABC):
         }
 
         menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
-        user_answer = (
-            self.view.prompt_event_opt_menu(menu_item_list, event)-1
-        )
+        user_answer = self.view.prompt_event_opt_menu(menu_item_list, event) - 1
         # convert the answer to the function
         function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
         # Call the function
         function_called_by_user()
+
+    def filter_event_menu(self):
+        if not self.permissions.filter_event(self._logged_user):
+            self.view.prompt_error_message("accés non authorisé")
+            self.contract_menu()
+
+        MENU_ITEM_DICT = {
+            "Evenement sans support": self.filter_events_without_support,
+            "Mes evenements": self.filter_contract_signed,
+            "Mes contrats": self.filter_contract_by_commercial,
+            "Filtrer par commerciaux": self.filter_by_commercial_menu,
+        }
+
+        menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
+        user_answer = self.view.prompt_filter_contract_menu(menu_item_list) - 1
+        # convert the answer to the function
+        function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
+        # Call the function
+        function_called_by_user(commercial=self._logged_user)
 
     @abstractmethod
     def create_user(self):
@@ -255,6 +254,10 @@ class Menu(ABC):
 
     @abstractmethod
     def delete_event(self):
+        pass
+
+    @abstractmethod
+    def logoff(self):
         pass
 
     @abstractmethod

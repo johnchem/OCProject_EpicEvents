@@ -8,7 +8,7 @@ from backend.models import User, Client, Contract, Evenement
 import authentification as auth
 
 
-class SqlAlchemyRepository():
+class SqlAlchemyRepository:
     def __init__(self, session: Session, filter):
         self.session = session
         self.filter = filter
@@ -35,7 +35,7 @@ class SqlAlchemyRepository():
         with sentry_sdk.start_transaction(name="list_user"):
             stmt = select(User).order_by(User.id)
             return self.session.scalars(stmt).unique().all()
-        
+
     def delete_user(self, user_data):
         with sentry_sdk.start_transaction(name="delete_user"):
             stmt = select(User).where(User.id == user_data.id)
@@ -71,7 +71,7 @@ class SqlAlchemyRepository():
         with sentry_sdk.start_transaction(name="list_contract"):
             stmt = select(Contract).order_by(Contract.id)
             return self.session.scalars(stmt).unique().all()
-        
+
     def delete_contract(self, contract_id: int):
         with sentry_sdk.start_transaction(name="delete_contract"):
             stmt = select(Contract).where(Contract.id == contract_id)
@@ -95,17 +95,17 @@ class SqlAlchemyRepository():
             event = self.session.scalars(stmt).first()
             self.session.delete(event)
             return True
-    
+
     def filter_by_signed_contract(self):
         with sentry_sdk.start_transaction(name="filter_by_signed_contract"):
             contracts = self.filter.by_signed_contract(self.session)
             return contracts
-    
+
     def filter_by_not_signed_contract(self):
         with sentry_sdk.start_transaction(name="filter_by_not_signed_contract"):
             contracts = self.filter.by_not_signed_contract(self.session)
             return contracts
-    
+
     def filter_contract_by_commercial(self, commercial):
         with sentry_sdk.start_transaction(name="filter_contract_by_commercial"):
             contracts = self.filter.by_commercial(self.session, commercial)
@@ -116,14 +116,18 @@ class SqlAlchemyRepository():
             commercials = self.filter.commercial_with_contract(self.session)
             return commercials
 
+    def filter_events_without_support(self):
+        with sentry_sdk.start_transaction(name="filter_events_without_support"):
+            events = self.filter.events_without_support(self.session)
+            return events
+
+    def filter_events_by_support(self, support):
+        with sentry_sdk.start_transaction(name="filter_events_by_support"):
+            events = self.filter.event_by_support(self.session, support)
+            return events
+
     # def get_event_by_client(self, session: Session, client_name):
     #     with sentry_sdk.start_transaction(name="get_event_by_client"):
     #         client = session.query(Client).filter(full_name=client_name)
     #         stmt = select(Evenement).options(joinedload(Evenement.client)).filter_by(client=client).first()
-    #         return session.scalars(stmt).unique().first()
-
-    # def get_event_by_support(self, session: Session, support_email):
-    #     with sentry_sdk.start_transaction(name="get_event_by_support"):
-    #         user = session.query(User).filter_by(email=support_email)
-    #         stmt = select(Evenement).option(joinedload(Evenement.contact_support)).filter_by(contact_support=user).first()
     #         return session.scalars(stmt).unique().first()
