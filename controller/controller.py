@@ -135,8 +135,7 @@ class Controller(menu.Menu):
             self.user_login()
 
     def user_info(self):
-        token = auth.encode(self._logged_user)
-        self.view.prompt_user_info(token)
+        self.view.prompt_user_info(self._logged_user)
 
     def create_user(self, *args, **kwargs):
         if not self.permissions.create_user(self._logged_user):
@@ -258,7 +257,7 @@ class Controller(menu.Menu):
         try:
             choices = int(choices)
             if choices > len(client):
-                self.list_user
+                self.list_client()
             client_picked = client[choices - 1]
             self.view.prompt_client_info(client_picked)
             self.client_opt_menu(client_picked)
@@ -365,7 +364,7 @@ class Controller(menu.Menu):
         try:
             choices = int(choices)
             if choices > len(contracts):
-                self.list_user
+                self.list_contract()
             contract_picked = contracts[choices - 1]
             self.view.prompt_contract_info(contract_picked)
             self.contract_opt_menu(contract_picked)
@@ -390,7 +389,7 @@ class Controller(menu.Menu):
         try:
             choices = int(choices)
             if choices > len(contracts):
-                self.list_user
+                self.filter_contract_signed(*args, **kwargs)
             contract_picked = contracts[choices - 1]
             self.view.prompt_contract_info(contract_picked)
             self.contract_opt_menu(contract_picked)
@@ -415,7 +414,7 @@ class Controller(menu.Menu):
         try:
             choices = int(choices)
             if choices > len(contracts):
-                self.list_user
+                self.filter_contract_not_signed(*args, **kwargs)
             contract_picked = contracts[choices - 1]
             self.view.prompt_contract_info(contract_picked)
             self.contract_opt_menu(contract_picked)
@@ -440,7 +439,7 @@ class Controller(menu.Menu):
         try:
             choices = int(choices)
             if choices > len(contracts):
-                self.list_user
+                self.filter_contract_by_commercial(*args, **kwargs)
             contract_picked = contracts[choices - 1]
             self.view.prompt_contract_info(contract_picked)
             self.contract_opt_menu(contract_picked)
@@ -531,7 +530,7 @@ class Controller(menu.Menu):
         try:
             choices = int(choices)
             if choices > len(event):
-                self.list_user
+                self.list_events()
             event_picked = event[choices - 1]
             self.view.prompt_event_info(event_picked)
             self.event_opt_menu(event_picked)
@@ -579,21 +578,20 @@ class Controller(menu.Menu):
         self.view.print("L'évenement à bien été supprimé")
         self.event_menu()
 
-    def filter_events_without_support(self):
-        if not self.permissions.filter_contract(self._logged_user):
+    def filter_events_without_support(self, *args, **kwargs):
+        if not self.permissions.filter_event(self._logged_user):
             self.view.prompt_error_message("accés non authorisé")
             self.contract_menu()
         events = self.repository.filter_events_without_support()
-        choices = self.view.prompt_list_events(events)
+        choices = self.view.prompt_list_event(events)
         if choices == "q":
-            self.contract_menu()
+            self.event_menu()
         try:
             choices = int(choices)
             if choices > len(events):
-                # Bug à fixer
-                self.list_user
+                self.filter_events_without_support()
             event_picked = events[choices - 1]
-            self.view.prompt_contract_info(event_picked)
+            self.view.prompt_event_info(event_picked)
             self.event_opt_menu(event_picked)
 
         except Exception as err:
@@ -603,6 +601,30 @@ class Controller(menu.Menu):
                 f"Veuillez choisir une valeur entre 1 et {len(events)} ou q pour quitter",
             )
             self.contract_opt_menu(event_picked)
+
+    def filter_my_event(self, *args, **kwargs):
+        if not self.permissions.filter_event(self._logged_user):
+            self.view.prompt_error_message("accés non authorisé")
+            self.event_menu()
+        events = self.repository.filter_events_by_support(self._logged_user)
+        choices = self.view.prompt_list_event(events)
+        if choices == "q":
+            self.event_menu()
+        try:
+            choices = int(choices)
+            if choices > len(events):
+                self.filter_my_event()
+            event_picked = events[choices - 1]
+            self.view.prompt_event_info(event_picked)
+            self.event_opt_menu(event_picked)
+
+        except Exception as err:
+            self.view.print(err)
+            capture_exception(err)
+            self.view.prompt_error_message(
+                f"Veuillez choisir une valeur entre 1 et {len(events)} ou q pour quitter",
+            )
+            self.event_opt_menu(event_picked)
 
     def logoff(self):
         auth.remove_token_file()

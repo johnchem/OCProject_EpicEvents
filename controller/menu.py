@@ -144,7 +144,7 @@ class Menu(ABC):
     def event_menu(self):
         MENU_ITEM_DICT = {
             "Liste des evenements": self.list_events,
-            "Filter les evenements": self.filter_events,
+            "Filter les evenements": self.filter_event_menu,
             "Retour": self.main_menu,
         }
 
@@ -172,17 +172,15 @@ class Menu(ABC):
     def filter_event_menu(self):
         if not self.permissions.filter_event(self._logged_user):
             self.view.prompt_error_message("accés non authorisé")
-            self.contract_menu()
+            self.event_menu()
 
         MENU_ITEM_DICT = {
             "Evenement sans support": self.filter_events_without_support,
-            "Mes evenements": self.filter_contract_signed,
-            "Mes contrats": self.filter_contract_by_commercial,
-            "Filtrer par commerciaux": self.filter_by_commercial_menu,
+            "Mes evenements": self.filter_my_event,
         }
 
         menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
-        user_answer = self.view.prompt_filter_contract_menu(menu_item_list) - 1
+        user_answer = self.view.prompt_filter_event_menu(menu_item_list) - 1
         # convert the answer to the function
         function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
         # Call the function
@@ -242,10 +240,6 @@ class Menu(ABC):
 
     @abstractmethod
     def list_events(self):
-        pass
-
-    @abstractmethod
-    def filter_events(self):
         pass
 
     @abstractmethod

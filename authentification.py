@@ -6,6 +6,7 @@ import jwt
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from backend.models import User
+
 # from settings import EXPIRATION_TIME_TOKEN
 from settings import PRIVATE_KEY, PUBLIC_KEY, EXPIRATION_TIME_TOKEN, TOKEN_FILE
 
@@ -30,14 +31,14 @@ def hash_user_password(target, value, oldvalue, initiator):
 
 # Fonction pour générer un token JWT
 def encode(payload):
-    payload['exp'] = datetime.datetime.utcnow() + datetime.timedelta(seconds=int(EXPIRATION_TIME_TOKEN))
-    return jwt.encode(payload, PRIVATE_KEY, algorithm='RS256')
+    payload["exp"] = datetime.datetime.utcnow() + datetime.timedelta(seconds=int(EXPIRATION_TIME_TOKEN))
+    return jwt.encode(payload, PRIVATE_KEY, algorithm="RS256")
 
 
 # Fonction pour vérifier un token JWT
 def decode(token):
     try:
-        payload = jwt.decode(token, PUBLIC_KEY, algorithms=['RS256'])
+        payload = jwt.decode(token, PUBLIC_KEY, algorithms=["RS256"])
         return payload
     except jwt.ExpiredSignatureError:
         return "Le token a expiré."
@@ -55,15 +56,18 @@ def encode_decode_jwt(function):
             data = function(self, *args, **kwargs)
         token = encode(data)
         return token
+
     return inner
+
 
 # Fonction pour créer un token JWT pour un utilisateur authentifié
 def create_id_token(user):
     payload = {
-        'user': user.email,
+        "user": user.email,
     }
     token = encode(payload)
     return token
+
 
 # Fonction pour vérifier le token JWT reçu du client
 def verify_jwt_token(token):
@@ -86,14 +90,14 @@ def verify_jwt_token(token):
 
 # Fonction pour enregistrer le token dans un fichier local
 def save_token_to_file(token):
-    with open(TOKEN_FILE, 'w') as file:
+    with open(TOKEN_FILE, "w") as file:
         file.write(token)
 
 
 # Fonction pour lire le token depuis le fichier local
 def read_token_from_file():
     if os.path.isfile(TOKEN_FILE):
-        with open(TOKEN_FILE, 'r') as file:
+        with open(TOKEN_FILE, "r") as file:
             token = file.read()
         return token
     else:
@@ -107,30 +111,5 @@ def remove_token_file():
         print(f"Error: {TOKEN_FILE} file not found")
 
 
-if __name__ == '__main__':
-    action = input("Voulez-vous vous inscrire (i), vous authentifier (a), générer (g) ou vérifier (v) un JWT ? ")
-
-    if action == 'i':
-        username = input("Entrez votre nom d'utilisateur : ")
-        password = input("Entrez votre mot de passe : ")
-        register_user(username, password)
-        print("Utilisateur enregistré avec succès.")
-    elif action == 'a':
-        username = input("Entrez votre nom d'utilisateur : ")
-        password = input("Entrez votre mot de passe : ")
-        user_id = authenticate_user(username, password)
-        if user_id:
-            print(f"Authentification réussie pour l'utilisateur avec l'ID : {user_id}")
-        else:
-            print("Authentification échouée.")
-    elif action == 'g':
-        user_id = input("Entrez l'ID de l'utilisateur : ")
-        token = generate_jwt({'user_id': user_id})
-        print(f"Token JWT généré : {token}")
-    elif action == 'v':
-        token = input("Entrez le token JWT à vérifier : ")
-        result = verify_jwt(token)
-        print(f"Résultat de la vérification : {result}")
-    else:
-        print("Action invalide.")
-
+if __name__ == "__main__":
+    pass

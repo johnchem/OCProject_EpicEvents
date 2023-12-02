@@ -115,16 +115,18 @@ class Permissions:
 
     def create_event_for_own_client(self, user, contract):
         # if contract is signed
-        if user.departement.value in ["Administrator"]:
+        if user.departement in [ADMIN]:
+            return True
+        elif user.departement in [COMMERCIAL] and user.contract == contract:
             return True
         return False
 
     def filter_event(self, user):
-        if user.departement.value in ["Administrator"]:
+        if user.departement in [ADMIN, SUPPORT, GESTION]:
             return True
         return False
 
     def update_in_charge_event(self, user):
-        if user.departement.value in ["Administrator"]:
+        if user.departement in [ADMIN, SUPPORT, GESTION]:
             return True
         return False

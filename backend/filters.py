@@ -32,7 +32,7 @@ class Filters:
         events = session.scalars(stmt).unique().all()
         return events
 
-    def events_by_support(self, session, support):
+    def event_by_support(self, session, support):
         stmt = select(Evenement).filter(Evenement.contact_support == support)
         events = session.scalars(stmt).unique().all()
         return events

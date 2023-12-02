@@ -9,16 +9,13 @@ class Views:
         data = decode(token)
         msg_obj = data.get("msg_obj")
         return self._handler.print(msg_obj)
-    
+
     def prompt_welcome_page(self):
         return self._handler.display_welcome_page()
 
     def prompt_login(self):
         email, password = self._handler.display_login()
-        response = {
-            "email": email,
-            "password":password
-            }
+        response = {"email": email, "password": password}
         token = encode(response)
         return token
 
@@ -116,7 +113,7 @@ class Views:
     def prompt_list_contract(self, contract_list):
         self._handler.clear()
         return self._handler.display_list_contract(contract_list)
-    
+
     def prompt_filter_contract_menu(self, menu_item):
         self._handler.clear()
         self._handler.print("[i]Menu filtrage de contrat[/i]")
@@ -157,3 +154,8 @@ class Views:
     def prompt_update_event_support(self, event):
         self._handler.clear()
         return self._handler.display_event_define_support(event)
+
+    def prompt_filter_event_menu(self, menu_item):
+        self._handler.clear()
+        self._handler.print("[i]Menu filtrage des événements[/i]")
+        return self._handler.display_menu(menu_item)
