@@ -29,7 +29,7 @@ class Permissions:
             return True
         return False
 
-    def delete_user(self, user):
+    def delete_user(self, user, target_user):
         if user.departement in [ADMIN, GESTION]:
             return True
         return False
@@ -44,13 +44,17 @@ class Permissions:
             return True
         return False
 
-    def update_client(self, user):
+    def update_client(self, user, client):
         if user.departement in [ADMIN]:
+            return True
+        elif user.departement is COMMERCIAL and client.commercial == user:
             return True
         return False
 
-    def delete_client(self, user):
+    def delete_client(self, user, client):
         if user.departement in [ADMIN]:
+            return True
+        elif user.departement is COMMERCIAL and client.commercial == user:
             return True
         return False
 
@@ -76,8 +80,10 @@ class Permissions:
             return True
         return False
 
-    def delete_contract(self, user):
-        if user.departement in [ADMIN]:
+    def delete_contract(self, user, contract):
+        if user.departement in [ADMIN, GESTION]:
+            return True
+        if user.departement in [COMMERCIAL] and contract.commercial == user:
             return True
         return False
 

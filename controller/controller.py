@@ -272,7 +272,7 @@ class Controller(menu.Menu):
             self.client_opt_menu(client_picked)
 
     def update_client(self, client):
-        if not self.permissions.update_client(self._logged_user):
+        if not self.permissions.update_client(self._logged_user, client):
             self.view.prompt_error_message("besoin d'un accés admin pour cette opération")
             self.client_opt_menu(client)
 
@@ -303,7 +303,7 @@ class Controller(menu.Menu):
 
     @check_user_auth
     def delete_client(self, client):
-        if not self.permissions.delete_client(self._logged_user):
+        if not self.permissions.delete_client(self._logged_user, client):
             self.view.prompt_error_message("accés non authorisé")
             self.client_opt_menu(client)
 
@@ -476,7 +476,7 @@ class Controller(menu.Menu):
         self.contract_menu()
 
     def delete_contract(self, contract):
-        if not self.permissions.delete_contract(self._logged_user):
+        if not self.permissions.delete_contract(self._logged_user, contract):
             self.view.prompt_error_message("accés non authorisé")
             self.contract_opt_menu(contract)
 
