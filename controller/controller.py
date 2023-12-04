@@ -138,21 +138,24 @@ class Controller(menu.Menu):
         self.view.prompt_user_info(self._logged_user)
 
     def create_user(self, *args, **kwargs):
-        if not self.permissions.create_user(self._logged_user):
-            self.view.prompt_error_message("besoin d'un accés admin ou commercial pour cette opération")
+        access, msg = self.permissions.create_user(self._logged_user)
+        if not access:
+            self.view.prompt_error_message(msg)
             self.user_menu()
         data = self.view.prompt_create_user_form()
         user = models.User(**data)
-        response = self.repository.add(user)
 
+        response, msg = self.repository.add(user)
         if response:
             self.view.prompt_user_info(user)
             capture_message(
                 f"{self._logged_user.email} - {self._logged_user.departement.value} - Creation user : {user.email}",
                 "info",
             )
-            self.repository.commit()
             self.user_menu()
+        else:
+            self.view.prompt_error_message(msg)
+            self.user_menu
 
     def list_user(self, *args, **kwargs):
         users = self.repository.list_user()
@@ -176,8 +179,9 @@ class Controller(menu.Menu):
             self.user_opt_menu(user_picked)
 
     def update_user(self, user):
-        if not self.permissions.update_user(self._logged_user, user):
-            self.view.prompt_error_message("besoin d'un accés admin pour cette opération")
+        access, msg = self.permissions.update_user(self._logged_user, user)
+        if not access:
+            self.view.prompt_error_message(msg)
             self.user_opt_menu(user)
 
         # update_user_gen = self.repository.update_user(user.id)
@@ -185,23 +189,26 @@ class Controller(menu.Menu):
         user_data = self.view.prompt_display_update_user(user_data)
 
         # response = update_user_gen.send(user_data)
-        response = self.repository.commit()
+        response, err = self.repository.commit()
+        if not response:
+            self.view.prompt_error_message(f"erreur lors de la mise à jour\n{err}")
+            self.user_opt_menu(user)
+
         capture_message(
             f"{self._logged_user.email} - {self._logged_user.departement.value} - update user :{user.email}", "info"
         )
-        if not response:
-            self.view.prompt_error_message("erreur lors de la mise à jour")
         self.user_menu()
 
     def delete_user(self, user_data, *args, **kwargs):
-        if not self.permissions.delete_user(self._logged_user):
-            self.view.prompt_error_message(
-                "besoin d'un accés admin ou faire partis \n de l'équipe gestion pour cette opération"
-            )
+        access, msg = self.permissions.delete_user(self._logged_user)
+        if not access:
+            self.view.prompt_error_message(msg)
             self.user_opt_menu(user_data)
-        response = self.repository.delete_user(user_data)
+
+        response, msg = self.repository.delete_user(user_data)
         if not response:
-            self.view.prompt_error_message("erreur lors de la suppression")
+            self.view.prompt_error_message(msg)
+            self.user_opt_menu(user_data)
         capture_message(
             f"{self._logged_user.email} - {self._logged_user.departement.value} - user deletion : {user_data.email}",
             "info",
@@ -210,10 +217,9 @@ class Controller(menu.Menu):
         self.user_menu()
 
     def create_client(self):
-        if not self.permissions.create_client(self._logged_user):
-            self.view.prompt_error_message(
-                "besoin d'un accés admin ou faire partis \n de l'équipe gestion pour cette opération"
-            )
+        access, msg = self.permissions.create_client(self._logged_user)
+        if not access:
+            self.view.prompt_error_message(msg)
             self.user_menu()
         else:
             default_commercial = self._logged_user
@@ -234,20 +240,22 @@ class Controller(menu.Menu):
 
             data["commercial_contact"] = commercial
             client = models.Client(**data)
-            response = self.repository.add(client)
+            response, msg = self.repository.add(client)
 
-        if response:
-            self.repository.commit()
-            capture_message(
-                f"{self._logged_user.email} - {self._logged_user.departement.value} - client creation {client.full_name}",
-                "info",
-            )
-            self.view.prompt_client_info(client)
-            self.main_menu()
+        if not response:
+            self.view.prompt_error_message(msg)
+            self.user_menu()
+        capture_message(
+            f"{self._logged_user.email} - {self._logged_user.departement.value} - client creation {client.full_name}",
+            "info",
+        )
+        self.view.prompt_client_info(client)
+        self.main_menu()
 
     def list_client(self):
-        if not self.permissions.read_client(self._logged_user):
-            self.view.prompt_error_message("accés non authorisé")
+        access, msg = self.permissions.read_client(self._logged_user)
+        if not access:
+            self.view.prompt_error_message(msg)
             self.user_menu()
 
         client = self.repository.list_client()
@@ -272,8 +280,9 @@ class Controller(menu.Menu):
             self.client_opt_menu(client_picked)
 
     def update_client(self, client):
-        if not self.permissions.update_client(self._logged_user, client):
-            self.view.prompt_error_message("besoin d'un accés admin pour cette opération")
+        access, msg = self.permissions.update_client(self._logged_user, client)
+        if not access:
+            self.view.prompt_error_message(msg)
             self.client_opt_menu(client)
 
         updated_client = self.view.prompt_update_client(client)
@@ -291,10 +300,12 @@ class Controller(menu.Menu):
             self.view.prompt_error_message("Ce membre ne fait pas partis de l'équipe commercial")
 
         # response = update_user_gen.send(user_data)
-        response = self.repository.commit()
-        self.view.prompt_client_info(updated_client)
+        response, err = self.repository.commit()
         if not response:
-            self.view.prompt_error_message("erreur lors de la mise à jour")
+            self.view.prompt_error_message(f"erreur lors de la mise à jour du client\n{err}")
+            self.client_opt_menu(client)
+
+        self.view.prompt_client_info(updated_client)
         capture_message(
             f"{self._logged_user.email} - {self._logged_user.departement.value} - update client {updated_client.full_name}",
             "info",
@@ -303,13 +314,15 @@ class Controller(menu.Menu):
 
     @check_user_auth
     def delete_client(self, client):
-        if not self.permissions.delete_client(self._logged_user, client):
-            self.view.prompt_error_message("accés non authorisé")
+        access, msg = self.permissions.delete_client(self._logged_user, client)
+        if not access:
+            self.view.prompt_error_message(msg)
             self.client_opt_menu(client)
 
-        response = self.repository.delete_user(client)
+        response, msg = self.repository.delete_user(client)
         if not response:
-            self.view.prompt_error_message("erreur lors de la suppression")
+            self.view.prompt_error_message(msg)
+            self.client_opt_menu(client)
         capture_message(
             f"{self._logged_user.email} - {self._logged_user.departement.value} - client deletion :{client.full_name}",
             "info",
@@ -319,38 +332,39 @@ class Controller(menu.Menu):
 
     @check_user_auth
     def create_contract(self, client=None):
-        if not self.permissions.create_contract(self._logged_user):
-            self.view.prompt_error_message("accés non authorisé")
-            self.client_menu()
+        access, msg = self.permissions.create_contract(self._logged_user, client)
+        if not access:
+            self.view.prompt_error_message(msg)
+            if client:
+                self.client_opt_menu(client)
+            else:
+                self.contract_menu()
 
         if client:
-            if not self.permissions.create_contract(self._logged_user):
-                self.view.prompt_error_message("besoin d'un accés admin pour cette opération")
-                self.client_opt_menu(client)
-
             data = self.view.prompt_create_contract(
                 client=client,
             )
             data["client"] = client
         else:
-            if not self.permissions.create_contract(self._logged_user):
-                self.view.prompt_error_message("besoin d'un accés admin pour cette opération")
-                self.contract_menu()
-
             data = self.view.prompt_create_contract()
             data["client"] = self.repository.get_client(data["client"])
 
         contract = models.Contract(**data)
-        response = self.repository.add(contract)
+        response, msg = self.repository.add(contract)
 
-        if response:
-            self.repository.commit()
-            capture_message(
-                f"{self._logged_user.email} - {self._logged_user.departement.value} - contract creation for :{contract.client.full_name}",
-                "info",
-            )
-            self.view.prompt_contract_info(contract)
-            self.contract_menu()
+        if not response:
+            self.view.prompt_error_message(msg)
+            if client:
+                self.client_opt_menu(client)
+            else:
+                self.contract_menu()
+
+        capture_message(
+            f"{self._logged_user.email} - {self._logged_user.departement.value} - contract creation for :{contract.client.full_name}",
+            "info",
+        )
+        self.view.prompt_contract_info(contract)
+        self.contract_menu()
 
     @check_user_auth
     def list_contract(self):
@@ -457,22 +471,21 @@ class Controller(menu.Menu):
         if not self.permissions.update_contract(self._logged_user, contract):
             self.view.prompt_error_message("accés non authorisé")
             self.contract_opt_menu(contract)
+
         contract = self.view.prompt_update_contract(
             contract,
             client_fullname=contract.client.full_name,
             commercial_email=contract.commercial.email,
         )
-        # contract_data.commercial = self.repository.get_user(commercial_email)
-        # contract_data.client = self.repository.get_client(client_fullname)
+        response, err = self.repository.commit()
 
-        # response = update_user_gen.send(user_data)
-        response = self.repository.commit()
+        if not response:
+            self.view.prompt_error_message(f"erreur lors de la mise à jour du contrat\n{err}")
+            self.contract_opt_menu(contract)
         capture_message(
             f"{self._logged_user.email} - {self._logged_user.departement.value} - update contract {contract.client.full_name}",
             "info",
         )
-        if not response:
-            self.view.prompt_error_message("erreur lors de la mise à jour")
         self.contract_menu()
 
     def delete_contract(self, contract):
@@ -480,9 +493,11 @@ class Controller(menu.Menu):
             self.view.prompt_error_message("accés non authorisé")
             self.contract_opt_menu(contract)
 
-        response = self.repository.delete_contract(contract)
+        response, msg = self.repository.delete_contract(contract)
         if not response:
-            self.view.prompt_error_message("erreur lors de la suppression")
+            self.view.prompt_error_message(msg)
+            self.contract_opt_menu(contract)
+
         capture_message(
             f"{self._logged_user.email} - {self._logged_user.departement.value} - contract deletion :{contract.full_name}",
             "info",
@@ -501,19 +516,18 @@ class Controller(menu.Menu):
             event_data = self.view.prompt_create_event(contract=contract)
             event_data["client"] = contract.client
             event = models.Evenement(**event_data)
-            response = self.repository.add(event)
+            response, msg = self.repository.add(event)
 
-            if response:
-                self.repository.commit()
-                capture_message(
-                    f"{self._logged_user.email} - {self._logged_user.departement.value} - event creation {event.name}",
-                    "info",
-                )
-                self.view.prompt_event_info(event)
+            if not response:
+                self.view.prompt_error_message(msg)
                 self.contract_opt_menu(contract)
-            else:
-                self.view.prompt_error_message("erreur lors de la creation")
-                self.contract_opt_menu(contract)
+
+            capture_message(
+                f"{self._logged_user.email} - {self._logged_user.departement.value} - event creation {event.name}",
+                "info",
+            )
+            self.view.prompt_event_info(event)
+            self.contract_opt_menu(contract)
         else:
             self.view.prompt_error_message("Le contrat doit être signé pour crée un évenement")
             self.contract_opt_menu(contract)
@@ -556,9 +570,10 @@ class Controller(menu.Menu):
         if self._logged_user.departement == models.Departements.SUPPORT:
             event = self.view.prompt_update_event(event)
 
-        response = self.repository.commit()
+        response, err = self.repository.commit()
         if not response:
-            self.view.prompt_error_message("erreur lors de la mise à jour")
+            self.view.prompt_error_message(f"erreur lors de la mise à jour de l'évenement\n{err}")
+            self.event_opt_menu(event)
         capture_message(
             f"{self._logged_user.email} - {self._logged_user.departement.value} - update event {event.name}", "info"
         )
@@ -569,9 +584,11 @@ class Controller(menu.Menu):
             self.view.prompt_error_message("accés non authorisé")
             self.event_opt_menu(event)
 
-        response = self.repository.delete_event(event)
+        response, msg = self.repository.delete_event(event)
         if not response:
-            self.view.prompt_error_message("erreur lors de la suppression")
+            self.view.prompt_error_message(msg)
+            self.event_opt_menu(event)
+
         capture_message(
             f"{self._logged_user.email} - {self._logged_user.departement.value} - event deletion {event.name}", "info"
         )
@@ -629,6 +646,8 @@ class Controller(menu.Menu):
     def logoff(self):
         auth.remove_token_file()
         self.user_login()
+        if self._logged_user:
+            self.main_menu()
 
     def quit(self):
         # self.view.exit_message()

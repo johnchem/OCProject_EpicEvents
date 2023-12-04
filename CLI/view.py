@@ -5,10 +5,8 @@ class Views:
     def __init__(self, handler):
         self._handler = handler
 
-    def print(self, token):
-        data = decode(token)
-        msg_obj = data.get("msg_obj")
-        return self._handler.print(msg_obj)
+    def print(self, msg):
+        return self._handler.print(msg)
 
     def prompt_welcome_page(self):
         return self._handler.display_welcome_page()

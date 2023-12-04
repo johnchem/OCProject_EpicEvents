@@ -1,8 +1,10 @@
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 from sqlalchemy.orm import Session
+import sqlalchemy.exc
+import psycopg2
 import sentry_sdk
-from sentry_sdk import capture_exception, capture_message
+from sentry_sdk import capture_exception
 
 from backend.models import User, Client, Contract, Evenement
 import authentification as auth
@@ -14,17 +16,42 @@ class SqlAlchemyRepository:
         self.filter = filter
 
     def add(self, data):
-        self.session.add(data)
-        return True
+        with sentry_sdk.start_transaction(name="add"):
+            try:
+                self.session.add(data)
+                self.session.commit()
+            except sqlalchemy.exc.IntegrityError as err:
+                if err.orig is psycopg2.errors.UniqueViolation:
+                    msg = "Cette utilisateur existe déjà !"
+                return False, msg
+            except Exception as err:
+                msg = f"erreur survenue lors de la création : {err}"
+                capture_exception(err)
+                return False, msg
+            else:
+                return True
 
     def add_bulk(self, list_data: list):
-        for data in list_data:
-            self.session.add(data)
-        return True
+        try:
+            for data in list_data:
+                self.session.add(data)
+
+        except sqlalchemy.exc.IntegrityError as err:
+            if err.orig is psycopg2.errors.UniqueViolation:
+                msg = "Cette utilisateur existe déjà !"
+            return False, msg
+        except Exception as err:
+            msg = f"erreur survenue lors de la création : {err}"
+            capture_exception(err)
+            return False, msg
 
     def commit(self):
-        self.session.commit()
-        return True
+        try:
+            self.session.commit()
+            return True, None
+        except Exception as err:
+            capture_exception(err)
+            return False, err
 
     def get_user(self, user_email: str):
         with sentry_sdk.start_transaction(name="get_user"):
@@ -38,11 +65,16 @@ class SqlAlchemyRepository:
 
     def delete_user(self, user_data):
         with sentry_sdk.start_transaction(name="delete_user"):
-            stmt = select(User).where(User.id == user_data.id)
-            user = self.session.scalars(stmt).one()
-            self.session.delete(user)
-            self.session.commit()
-            return True
+            try:
+                stmt = select(User).where(User.id == user_data.id)
+                user = self.session.scalars(stmt).one()
+                self.session.delete(user)
+                self.session.commit()
+                return True, None
+            except Exception as err:
+                capture_exception(err)
+                msg = "erreur lors de la suppression"
+                return False, msg
 
     def get_client(self, client_name: str):
         with sentry_sdk.start_transaction(name="get_client"):
@@ -56,11 +88,16 @@ class SqlAlchemyRepository:
 
     def delete_client(self, client_id: int):
         with sentry_sdk.start_transaction(name="delete_client"):
-            stmt = select(Client).where(Client.id == client_id)
-            client = self.session.scalars(stmt).first()
-            self.session.delete(client)
-            self.session.commit()
-            return True
+            try:
+                stmt = select(Client).where(Client.id == client_id)
+                client = self.session.scalars(stmt).first()
+                self.session.delete(client)
+                self.session.commit()
+                return True, None
+            except Exception as err:
+                capture_exception(err)
+                msg = "erreur lors de la suppression du client"
+                return False, msg
 
     def get_contract(self, contract_id):
         with sentry_sdk.start_transaction(name="get_contract"):
@@ -74,10 +111,16 @@ class SqlAlchemyRepository:
 
     def delete_contract(self, contract_id: int):
         with sentry_sdk.start_transaction(name="delete_contract"):
-            stmt = select(Contract).where(Contract.id == contract_id)
-            client = self.session.scalars(stmt).first()
-            self.session.delete(client)
-            return True
+            try:
+                stmt = select(Contract).where(Contract.id == contract_id)
+                client = self.session.scalars(stmt).first()
+                self.session.delete(client)
+                self.session.commit()
+                return True, None
+            except Exception as err:
+                capture_exception(err)
+                msg = "Erreur durant la suppression du contrat"
+                return False, msg
 
     def get_event(self, event_id: int):
         with sentry_sdk.start_transaction(name="get_event"):
@@ -91,10 +134,16 @@ class SqlAlchemyRepository:
 
     def delete_event(self, event_id: int):
         with sentry_sdk.start_transaction(name="delete_event"):
-            stmt = select(Evenement).where(Evenement.id == event_id)
-            event = self.session.scalars(stmt).first()
-            self.session.delete(event)
-            return True
+            try:
+                stmt = select(Evenement).where(Evenement.id == event_id)
+                event = self.session.scalars(stmt).first()
+                self.session.delete(event)
+                self.session.commit()
+                return True, None
+            except Exception as err:
+                capture_exception(err)
+                msg = "Erreur durant la suppression de l'évenement"
+                return False, msg
 
     def filter_by_signed_contract(self):
         with sentry_sdk.start_transaction(name="filter_by_signed_contract"):
@@ -125,9 +174,3 @@ class SqlAlchemyRepository:
         with sentry_sdk.start_transaction(name="filter_events_by_support"):
             events = self.filter.event_by_support(self.session, support)
             return events
-
-    # def get_event_by_client(self, session: Session, client_name):
-    #     with sentry_sdk.start_transaction(name="get_event_by_client"):
-    #         client = session.query(Client).filter(full_name=client_name)
-    #         stmt = select(Evenement).options(joinedload(Evenement.client)).filter_by(client=client).first()
-    #         return session.scalars(stmt).unique().first()
