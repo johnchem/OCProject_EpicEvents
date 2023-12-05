@@ -29,7 +29,7 @@ class SqlAlchemyRepository:
                 capture_exception(err)
                 return False, msg
             else:
-                return True
+                return True, None
 
     def add_bulk(self, list_data: list):
         try:
@@ -67,7 +67,7 @@ class SqlAlchemyRepository:
         with sentry_sdk.start_transaction(name="delete_user"):
             try:
                 stmt = select(User).where(User.id == user_data.id)
-                user = self.session.scalars(stmt).one()
+                user = self.session.scalars(stmt).unique().one()
                 self.session.delete(user)
                 self.session.commit()
                 return True, None

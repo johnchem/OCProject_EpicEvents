@@ -200,7 +200,7 @@ class Controller(menu.Menu):
         self.user_menu()
 
     def delete_user(self, user_data, *args, **kwargs):
-        access, msg = self.permissions.delete_user(self._logged_user)
+        access, msg = self.permissions.delete_user(self._logged_user, user_data)
         if not access:
             self.view.prompt_error_message(msg)
             self.user_opt_menu(user_data)
@@ -213,7 +213,7 @@ class Controller(menu.Menu):
             f"{self._logged_user.email} - {self._logged_user.departement.value} - user deletion : {user_data.email}",
             "info",
         )
-        self.view.print("L'utilisateur à bien été supprimé")
+        self.view.prompt_message("L'utilisateur à bien été supprimé")
         self.user_menu()
 
     def create_client(self):

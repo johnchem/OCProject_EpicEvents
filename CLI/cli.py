@@ -71,16 +71,22 @@ class cli_handler:
             else:
                 choice = self._display.error("Introduire un nombre")
                 continue
-            if choice==0 or choice>len(menu_item):
+            if choice == 0 or choice > len(menu_item):
                 self._display.error(f"Veuillez choisir une valeur entre 1 et {len(menu_item)}")
                 continue
             correct_answer = True
-                
+
         return choice
 
     def display_error_msg(self, msg, pause=True):
         self._display.error(msg)
-        if pause: os.system("pause")
+        if pause:
+            os.system("pause")
+
+    def display_msg(self, msg, pause=True):
+        self._display.print(msg)
+        if pause:
+            os.system("pause")
 
     def display_login(self):
         self._display.clear()
@@ -119,14 +125,8 @@ class cli_handler:
         grid.add_column(justify="center")
         grid.add_column(justify="center")
 
-        grid.add_row(
-            f"[green]{user_data.name.upper()}[/green]",
-            f"[green]{user_data.forname}[/green]"
-            )
-        grid.add_row(
-            f"[green]{user_data.email}[/green]",
-            f"[blue]{str(user_data.departement.value)}[/blue]"
-        )
+        grid.add_row(f"[green]{user_data.name.upper()}[/green]", f"[green]{user_data.forname}[/green]")
+        grid.add_row(f"[green]{user_data.email}[/green]", f"[blue]{str(user_data.departement.value)}[/blue]")
         self._display.print(grid)
 
     def display_create_user_form(self):
@@ -138,18 +138,15 @@ class cli_handler:
         for pos, item in enumerate(Departements, start=1):
             self._display.print(f"[green][{pos}] : [/green]{item.value}")
         dpt_choices = int(self._display.input())
-        departement = [x for x in Departements][dpt_choices-1]
-        password = self._display.input(
-            "[green]Mot de passe : [/green]",
-            password=True
-        )
+        departement = [x for x in Departements][dpt_choices - 1]
+        password = self._display.input("[green]Mot de passe : [/green]", password=True)
         return {
             "name": name,
             "forname": forname,
             "email": email,
             "departement": departement,
             "password": password,
-            }
+        }
 
     def display_update_user_form(self, user_data):
         user_data.name = self._display.ask("[green]Nom [/green]", default=user_data.name)
@@ -161,15 +158,10 @@ class cli_handler:
                 default_pos = pos
             self._display.print(f"[green][{pos}] : [/green]{item.value}")
         dpt_choices = self._display.ask(
-            f"[green]Departement [/green][blue]{user_data.departement.value}[/blue]",
-            default=default_pos,
-            int=True
+            f"[green]Departement [/green][blue]{user_data.departement.value}[/blue]", default=default_pos, int=True
         )
-        user_data.departement = [x for x in Departements][dpt_choices-1]
-        user_data.password = self._display.ask(
-            "[green]Mot de passe : [/green]",
-            password=True
-        )
+        user_data.departement = [x for x in Departements][dpt_choices - 1]
+        user_data.password = self._display.ask("[green]Mot de passe : [/green]", password=True)
         return user_data
 
     def display_client_info(self, client_data):
@@ -180,24 +172,20 @@ class cli_handler:
         grid.add_row(
             f"[purple]{client_data.full_name}[/purple]",
             f"[purple]{client_data.email}[/purple]",
-            )
-        grid.add_row(
-            f"[purple]{client_data.phone}[/purple]", "",
-            )
-        grid.add_row(
-            f"[purple]{client_data.company_name}[/purple]", "",
-            )
-        grid.add_row(
-            "[green]Date de creation :[/green]",
-            f"[blue]{client_data.creation_date}[/blue]"
         )
         grid.add_row(
-            "[green]Derniére mise à jour :[/green]",
-            f"[blue]{client_data.last_update}[/blue]"
+            f"[purple]{client_data.phone}[/purple]",
+            "",
         )
+        grid.add_row(
+            f"[purple]{client_data.company_name}[/purple]",
+            "",
+        )
+        grid.add_row("[green]Date de creation :[/green]", f"[blue]{client_data.creation_date}[/blue]")
+        grid.add_row("[green]Derniére mise à jour :[/green]", f"[blue]{client_data.last_update}[/blue]")
         grid.add_row(
             "[green]Responsable client[/green]",
-            f"[blue]{client_data.commercial_contact.forname} {client_data.commercial_contact.name.upper()}[/blue]"
+            f"[blue]{client_data.commercial_contact.forname} {client_data.commercial_contact.name.upper()}[/blue]",
         )
         self._display.print(grid)
 
@@ -272,29 +260,14 @@ class cli_handler:
         }
 
     def display_ask_commercial(self, default_commercial):
-        commercial = self._display.ask(
-            "[green]Email du commercial en charge[/green]",
-            default=default_commercial
-        )
+        commercial = self._display.ask("[green]Email du commercial en charge[/green]", default=default_commercial)
         return commercial
 
     def display_update_client_form(self, client_data):
-        client_data.full_name = self._display.ask(
-            "[green]Nom du client [/green]",
-            default=client_data.full_name
-            )
-        client_data.email = self._display.ask(
-            "[green]Mail de contact [/green]",
-            default=client_data.email
-            )
-        client_data.phone = self._display.ask(
-            "[green]Telephone [/green]",
-            default=client_data.phone
-            )
-        client_data.company_name = self._display.ask(
-            "[green]Nom de la société[/green]",
-            client_data.company_name
-            )
+        client_data.full_name = self._display.ask("[green]Nom du client [/green]", default=client_data.full_name)
+        client_data.email = self._display.ask("[green]Mail de contact [/green]", default=client_data.email)
+        client_data.phone = self._display.ask("[green]Telephone [/green]", default=client_data.phone)
+        client_data.company_name = self._display.ask("[green]Nom de la société[/green]", client_data.company_name)
         # client_data.commercial_contact = self._display.ask(
         #     "[green]Email du commercial en charge[/green]",
         #     default=client_data.commercial_contact.email
@@ -308,17 +281,14 @@ class cli_handler:
         else:
             default_value = None
 
-        client_full_name = self._display.ask(
-            "[green]Nom client[/green]",
-            default=default_value
-            )
+        client_full_name = self._display.ask("[green]Nom client[/green]", default=default_value)
         total_amount = self._display.ask("[green]Montant global[/green]")
         remaining_amount = self._display.ask("[green]Montant restant[/green]")
 
         for pos, item in enumerate(ContractStatus, start=1):
             self._display.print(f"[green][{pos}] : [/green]{item.value}")
         status_choices = int(self._display.input())
-        contract_status = [x for x in ContractStatus][status_choices-1]
+        contract_status = [x for x in ContractStatus][status_choices - 1]
 
         return {
             "client": client_full_name,
@@ -335,18 +305,13 @@ class cli_handler:
         grid.add_row(
             f"[purple]{contract.client.full_name}[/purple]",
             f"[purple]{contract.commercial.name.upper()} {contract.commercial.forname}[/purple]",
-            )
-        grid.add_row(
-            f"[purple]{contract.remaining_amount}/{contract.total_amount}[/purple]", "",
-            )
-        grid.add_row(
-            "[green]Date de creation :[/green]",
-            f"[blue]{contract.creation_date}[/blue]"
         )
         grid.add_row(
-            f"[blue]{contract.contract_status.value}[/blue]",
-            ""
+            f"[purple]{contract.remaining_amount}/{contract.total_amount}[/purple]",
+            "",
         )
+        grid.add_row("[green]Date de creation :[/green]", f"[blue]{contract.creation_date}[/blue]")
+        grid.add_row(f"[blue]{contract.contract_status.value}[/blue]", "")
         self._display.print(grid)
         os.system("pause")
 
@@ -394,11 +359,11 @@ class cli_handler:
         grid.add_column(justify="center")
         grid.add_row(
             f"[purple]{client.full_name}\n{client.email}\n{client.phone}",
-            f"[blue]{commercial.name.upper()} {commercial.forname}\n{commercial.email}"
+            f"[blue]{commercial.name.upper()} {commercial.forname}\n{commercial.email}",
         )
         grid.add_row(
             f"montant : {contract.remaining_amount}/{contract.total_amount}",
-            f"[{statut_color}]{contract.contract_status.value}[/{statut_color}]"
+            f"[{statut_color}]{contract.contract_status.value}[/{statut_color}]",
         )
         self._display.print(grid)
 
@@ -406,15 +371,11 @@ class cli_handler:
         self._display.print(f"[green]Nom du client [/green] : {client_fullname}")
         self._display.print(f"[green]Mail commercial [/green] : {commercial_email}")
         contract.total_amount = self._display.ask(
-            "[green]Montant total [/green]",
-            default=contract.total_amount,
-            int=True
-            )
+            "[green]Montant total [/green]", default=contract.total_amount, int=True
+        )
         contract.remaining_amount = self._display.ask(
-            "[green]Montant restant [/green]",
-            default=contract.remaining_amount,
-            int=True
-            )
+            "[green]Montant restant [/green]", default=contract.remaining_amount, int=True
+        )
 
         for pos, item in enumerate(ContractStatus, start=1):
             if item == contract.contract_status:
@@ -423,9 +384,9 @@ class cli_handler:
         dpt_choices = self._display.ask(
             f"[green]Statut du contrat [/green][cyan b]{contract.contract_status.value}[/cyan bold]",
             default=default_pos,
-            int=True
+            int=True,
         )
-        contract.contract_status = [x for x in ContractStatus][dpt_choices-1]
+        contract.contract_status = [x for x in ContractStatus][dpt_choices - 1]
         return contract
 
     # ------------------- Event display -----------------------
@@ -436,14 +397,8 @@ class cli_handler:
         grid.add_column(justify="center")
         grid.add_column(justify="center")
         grid.add_row("id", f"{event.id}")
-        grid.add_row(
-            f"{client.full_name}",
-            f"{client.email}\n{client.phone}"
-        )
-        grid.add_row(
-            f"Début : {event.event_date_start}",
-            f"Fin : {event.event_date_end}"
-        )
+        grid.add_row(f"{client.full_name}", f"{client.email}\n{client.phone}")
+        grid.add_row(f"Début : {event.event_date_start}", f"Fin : {event.event_date_end}")
         self._display.print(grid)
 
     def display_event_info(self, event):
@@ -452,17 +407,11 @@ class cli_handler:
         grid.add_column(justify="center")
         grid.add_row("id", f"{event.id}")
         grid.add_row(None, f"{event.name}")
-        grid.add_row(
-            f"{event.client.full_name}",
-            f"{event.client.email}\n{event.client.phone}"
-        )
+        grid.add_row(f"{event.client.full_name}", f"{event.client.email}\n{event.client.phone}")
         grid.add_row(f"id : {event.contract.id}", f"{event.contract.status}")
         grid.add_row("Date début", f"{event.event_date_start}")
         grid.add_row("Date fin", f"{event.event_date_end}")
-        grid.add_row(
-            "Contact support",
-            f"{event.contact_support.name.upper()} {event.contact_support.forname}"
-        )
+        grid.add_row("Contact support", f"{event.contact_support.name.upper()} {event.contact_support.forname}")
         grid.add_row("Lieu", f"{event.location}")
         grid.add_row("Nombre participant", f"{event.attendees}")
         grid.add_row("Notes", f"{event.note}")
@@ -500,10 +449,7 @@ class cli_handler:
         grid.add_column(justify="center")
         grid.add_column(justify="center")
         grid.add_row("id contrat", f"{contract.id}")
-        grid.add_row(
-            f"{contract.client.full_name}",
-            f"{contract.client.email}\n{contract.client.phone}"
-        )
+        grid.add_row(f"{contract.client.full_name}", f"{contract.client.email}\n{contract.client.phone}")
         name = self._display.ask("[green]Nom[/green]")
         event_date_start = self._display.ask(f"[green]Date et heure de début[/green] - [red]{DT_STRING}[/red]")
         event_date_start = datetime.strptime(event_date_start, DT_STRING)
@@ -526,15 +472,9 @@ class cli_handler:
         grid.add_column(justify="center")
         grid.add_column(justify="center")
         event.name = self._display.ask("[green]Nom[/green]", default=event.name)
-        event_date_start = self._display.ask(
-            "[green]Date début[/green]",
-            default=event.event_date_start
-        )
+        event_date_start = self._display.ask("[green]Date début[/green]", default=event.event_date_start)
         event.event_date_start = datetime.strptime(event_date_start, DT_STRING)
-        event_date_end = self._display.ask(
-            "[green]Date de fin[/green]",
-            default=event.event_date_end
-        )
+        event_date_end = self._display.ask("[green]Date de fin[/green]", default=event.event_date_end)
         event.event_date_end = datetime.strptime(event_date_end, DT_STRING)
         event.location = self._display.ask("[green]lieu[/green]", default=event.location)
         event.attendees = self._display.ask("[green]Nombres de participant[/green]", dafault=event.attendees)
@@ -552,10 +492,7 @@ class cli_handler:
         grid.add_column(justify="center")
         grid.add_row("id", f"{event.id}")
         grid.add_row(None, f"{event.name}")
-        grid.add_row(
-            f"{event.client.full_name}",
-            f"{event.client.email}\n{event.client.phone}"
-        )
+        grid.add_row(f"{event.client.full_name}", f"{event.client.email}\n{event.client.phone}")
         grid.add_row(f"id : {event.contract.id}", f"{event.contract.status}")
         grid.add_row("Date début", f"{event.event_date_start}")
         grid.add_row("Date fin", f"{event.event_date_end}")
@@ -564,8 +501,5 @@ class cli_handler:
         grid.add_row("Notes", f"{event.note}")
         self._display.print(grid)
 
-        support_email = self._display.ask(
-            "email du contact support",
-            default=support_email
-        )
+        support_email = self._display.ask("email du contact support", default=support_email)
         return support_email

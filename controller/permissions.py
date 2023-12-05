@@ -52,30 +52,25 @@ class Permissions:
     def update_client(self, user, client):
         if user.departement in [ADMIN]:
             return True, None
-        elif user.departement is COMMERCIAL and client.commercial == user:
+        elif user.departement is COMMERCIAL and client.commercial_contact == user:
             return True, None
-        err_msg = "besoin d'un accés admin pour cette opération"
+        err_msg = "besoin d'un accés admin ou être le commercial en charge pour cette opération"
         return False, err_msg
 
     def delete_client(self, user, client):
         if user.departement in [ADMIN]:
             return True, None
-        elif user.departement is COMMERCIAL and client.commercial == user:
+        elif user.departement is COMMERCIAL and client.commercial_contact == user:
             return True, None
         err_msg = "accés non authorisé"
         return False, err_msg
-
-    def update_own_clients(self, user, client):
-        if user.departement in [COMMERCIAL] and client.commercial_contact == user:
-            return True
-        return False
 
     def create_contract(self, user, contract=None):
         if user.departement in [ADMIN, GESTION]:
             return True, None
         elif user.departement in [COMMERCIAL] and user.contract == contract and contract is not None:
             return True
-        err_msg = "besoin d'un accés admin pour cette opération"
+        err_msg = "besoin d'un accés admin ou être le commercial en charge pour cette opération"
         return False, err_msg
 
     def read_contract(self, user):

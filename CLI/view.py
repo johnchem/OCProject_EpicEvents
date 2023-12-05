@@ -23,6 +23,9 @@ class Views:
     def prompt_error_message(self, msg):
         return self._handler.display_error_msg(msg)
 
+    def prompt_message(self, msg):
+        return self._handler.display_msg(msg)
+
     def prompt_main_menu(self, menu_item):
         self._handler.clear()
         self._handler.print("[i]Menu principal[/i]")
