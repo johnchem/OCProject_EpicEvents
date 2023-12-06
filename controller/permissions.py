@@ -65,42 +65,46 @@ class Permissions:
         err_msg = "accés non authorisé"
         return False, err_msg
 
-    def create_contract(self, user, contract=None):
+    def create_contract(self, user, client=None):
         if user.departement in [ADMIN, GESTION]:
             return True, None
-        elif user.departement in [COMMERCIAL] and user.contract == contract and contract is not None:
-            return True
+        elif client is not None and user.departement in [COMMERCIAL] and client in user.client_portfolio:
+            return True, None
         err_msg = "besoin d'un accés admin ou être le commercial en charge pour cette opération"
         return False, err_msg
 
     def read_contract(self, user):
         if user.departement in [ADMIN, GESTION, SUPPORT, COMMERCIAL]:
-            return True
-        return False
+            return True, None
+        return False, None
 
     def update_contract(self, user, contract):
         if user.departement in [ADMIN, GESTION]:
-            return True
+            return True, None
         if user.departement in [COMMERCIAL] and contract.commercial == user:
-            return True
-        return False
+            return True, None
+        return False, None
 
     def delete_contract(self, user, contract):
         if user.departement in [ADMIN, GESTION]:
-            return True
+            return True, None
         if user.departement in [COMMERCIAL] and contract.commercial == user:
-            return True
-        return False
+            return True, None
+        return False, None
 
     def filter_contract(self, user):
         if user.departement in [ADMIN, COMMERCIAL]:
-            return True
-        return False
+            return True, None
+        err_msg = ""
+        return False, err_msg
 
-    def create_event(self, user):
-        if user.departement in [ADMIN, COMMERCIAL]:
-            return True
-        return False
+    def create_event(self, user, client):
+        if user.departement is ADMIN:
+            return True, None
+        elif user.departement is COMMERCIAL and client in user.client_portfolio:
+            return True, None
+        err_msg = "besoin d'un accés admin ou être le commercial en charge pour cette opération"
+        return False, err_msg
 
     def read_event(self, user):
         if user.departement in [ADMIN, GESTION, SUPPORT, COMMERCIAL]:

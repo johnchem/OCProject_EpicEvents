@@ -506,15 +506,16 @@ class Controller(menu.Menu):
         self.contract_menu()
 
     def create_event(self, contract):
-        if not self.permissions.create_event(self._logged_user) or not self.permissions.create_event_for_own_client(
-            self._logged_user, contract
-        ):
-            # if not self.permissions.update_contract(self._logged_user, contract):
-            self.view.prompt_error_message("accés non authorisé")
+        client = contract.client
+        access, msg = self.permissions.create_event(self._logged_user, client)
+        if not access:
+            self.view.prompt_error_message(msg)
             self.contract_opt_menu(contract)
+
         if contract.contract_status == models.ContractStatus.SIGNED:
             event_data = self.view.prompt_create_event(contract=contract)
             event_data["client"] = contract.client
+            event_data["contract"] = contract
             event = models.Evenement(**event_data)
             response, msg = self.repository.add(event)
 

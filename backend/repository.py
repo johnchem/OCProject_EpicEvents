@@ -24,6 +24,9 @@ class SqlAlchemyRepository:
                 if err.orig is psycopg2.errors.UniqueViolation:
                     msg = "Cette utilisateur existe déjà !"
                 return False, msg
+            except sqlalchemy.exc.DataError as err:
+                msg = "l'une des informations fournit ne correspond pas à l'information attendu"
+                return False, msg
             except Exception as err:
                 msg = f"erreur survenue lors de la création : {err}"
                 capture_exception(err)

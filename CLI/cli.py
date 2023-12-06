@@ -403,7 +403,7 @@ class cli_handler:
 
     def display_event_info(self, event):
         grid = Table.grid(expand=False, padding=(0, 1, 1, 1))
-        grid.add_column(justify="center", color="green")
+        grid.add_column(justify="center", style="green")
         grid.add_column(justify="center")
         grid.add_row("id", f"{event.id}")
         grid.add_row(None, f"{event.name}")
@@ -445,19 +445,28 @@ class cli_handler:
         return self._display.input()
 
     def display_create_event(self, contract):
-        grid = Table.grid(expand=False, padding=(0, 1, 1, 1))
-        grid.add_column(justify="center")
-        grid.add_column(justify="center")
-        grid.add_row("id contrat", f"{contract.id}")
-        grid.add_row(f"{contract.client.full_name}", f"{contract.client.email}\n{contract.client.phone}")
-        name = self._display.ask("[green]Nom[/green]")
-        event_date_start = self._display.ask(f"[green]Date et heure de début[/green] - [red]{DT_STRING}[/red]")
-        event_date_start = datetime.strptime(event_date_start, DT_STRING)
-        event_date_end = self._display.ask(f"[green]Date et heure de fin[/green] - [red]{DT_STRING}[/red]")
-        event_date_end = datetime.strptime(event_date_end, DT_STRING)
-        location = self._display.ask("[green]lieu[/green]")
-        attendees = self._display.ask("[green]Nombres de participant[/green]")
-        note = self._display.ask("[green]Note additionnelle[/green]")
+        while True:
+            try:
+                grid = Table.grid(expand=False, padding=(0, 1, 1, 1))
+                grid.add_column(justify="center")
+                grid.add_column(justify="center")
+                grid.add_row("id contrat", f"{contract.id}")
+                grid.add_row(f"{contract.client.full_name}", f"{contract.client.email}\n{contract.client.phone}")
+                name = self._display.ask("[green]Nom[/green]")
+                event_date_start = self._display.ask(f"[green]Date et heure de début[/green] - [red]{DT_STRING}[/red]")
+                event_date_start = datetime.strptime(event_date_start, DT_STRING)
+                event_date_end = self._display.ask(f"[green]Date et heure de fin[/green] - [red]{DT_STRING}[/red]")
+                event_date_end = datetime.strptime(event_date_end, DT_STRING)
+                location = self._display.ask("[green]lieu[/green]")
+                attendees = self._display.ask("[green]Nombres de participant[/green]")
+                attendees = int(attendees)
+                note = self._display.ask("[green]Note additionnelle[/green]")
+                break
+
+            except Exception as err:
+                self.clear()
+                self.display_error_msg("La valeur introduite n'est pas conforme")
+
         return {
             "name": name,
             "event_date_start": event_date_start,

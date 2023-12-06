@@ -70,7 +70,6 @@ class Menu(ABC):
         MENU_ITEM_DICT = {
             "Modifier": self.update_client,
             "Créer nouveau contrat": self.create_contract,
-            "Créer un nouveau evenénement": self.create_event,
             "Supprimer": self.delete_client,
             "Retour": self.main_menu,
         }
