@@ -433,26 +433,38 @@ class cli_handler:
     # ------------------- Event display -----------------------
     def display_event_header(self, event):
         client = event.client
+        if event.contact_support:
+            support_name = f"[blue]{event.contact_support.name.upper()} {event.contact_support.forname}[/blue]"
+        else:
+            support_name = f"[red]Sans responsable[/red]"
 
         grid = Table.grid(expand=False, padding=(0, 1, 1, 1))
         grid.add_column(justify="center")
         grid.add_column(justify="center")
-        grid.add_row("id", f"{event.id}")
+        grid.add_row("")
         grid.add_row(f"{client.full_name}", f"{client.email}\n{client.phone}")
-        grid.add_row(f"Début : {event.event_date_start}", f"Fin : {event.event_date_end}")
+        grid.add_row(f"[purple]Début :[/purple]", f"{event.event_date_start}")
+        grid.add_row(f"[purple]Fin :[/purple]", f"{event.event_date_end}")
+        grid.add_row(f"[purple]Contact support :[/purple]", f"{support_name}")
+        grid.add_row("")
         self._display.print(grid)
 
     def display_event_info(self, event):
+        if event.contact_support:
+            support_name = f"[blue]{event.contact_support.name.upper()} {event.contact_support.forname}[/blue]"
+        else:
+            support_name = f"[red]Sans responsable[/red]"
+
         grid = Table.grid(expand=False, padding=(0, 1, 1, 1))
-        grid.add_column(justify="center", style="green")
+        grid.add_column(justify="left", style="green")
         grid.add_column(justify="center")
         grid.add_row("id", f"{event.id}")
         grid.add_row(None, f"{event.name}")
         grid.add_row(f"{event.client.full_name}", f"{event.client.email}\n{event.client.phone}")
-        grid.add_row(f"id : {event.contract.id}", f"{event.contract.status}")
+        grid.add_row(f"id : {event.contract.id}", f"{event.contract.contract_status.value}")
         grid.add_row("Date début", f"{event.event_date_start}")
         grid.add_row("Date fin", f"{event.event_date_end}")
-        grid.add_row("Contact support", f"{event.contact_support.name.upper()} {event.contact_support.forname}")
+        grid.add_row("Contact support", f"{support_name}")
         grid.add_row("Lieu", f"{event.location}")
         grid.add_row("Nombre participant", f"{event.attendees}")
         grid.add_row("Notes", f"{event.note}")

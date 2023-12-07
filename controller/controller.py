@@ -557,11 +557,10 @@ class Controller(menu.Menu):
                 f"Veuillez choisir une valeur entre 1 et {len(event)}",
                 "ou q pour quitter",
             )
-            self.event_opt_menu(event_picked)
-
         except Exception as err:
             self.view.print(err)
             capture_exception(err)
+        else:
             self.event_opt_menu(event_picked)
 
     def update_event(self, event):
