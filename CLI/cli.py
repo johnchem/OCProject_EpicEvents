@@ -130,16 +130,21 @@ class cli_handler:
         self._display.print(grid)
 
     def display_create_user_form(self):
-        self._display.clear()
-        name = self._display.input("[green]Nom : [/green]")
-        forname = self._display.input("[green]Prenom : [/green]")
-        email = self._display.input("[green]email : [/green]")
-        self._display.print("[green]Departement : [/green]")
-        for pos, item in enumerate(Departements, start=1):
-            self._display.print(f"[green][{pos}] : [/green]{item.value}")
-        dpt_choices = int(self._display.input())
-        departement = [x for x in Departements][dpt_choices - 1]
-        password = self._display.input("[green]Mot de passe : [/green]", password=True)
+        while True:
+            try:
+                name = self._display.input("[green]Nom : [/green]")
+                forname = self._display.input("[green]Prenom : [/green]")
+                email = self._display.input("[green]email : [/green]")
+                self._display.print("[green]Departement : [/green]")
+                for pos, item in enumerate(Departements, start=1):
+                    self._display.print(f"[green][{pos}] : [/green]{item.value}")
+                dpt_choices = int(self._display.input())
+                departement = [x for x in Departements][dpt_choices - 1]
+                password = self._display.input("[green]Mot de passe : [/green]", password=True)
+                break
+            except Exception as err:
+                self.clear()
+                self.display_error_msg(f"erreur lors de la creation : {err}")
         return {
             "name": name,
             "forname": forname,
@@ -149,19 +154,27 @@ class cli_handler:
         }
 
     def display_update_user_form(self, user_data):
-        user_data.name = self._display.ask("[green]Nom [/green]", default=user_data.name)
-        user_data.forname = self._display.ask("[green]Prenom [/green]", default=user_data.forname)
-        user_data.email = self._display.ask("[green]email [/green]", default=user_data.email)
-        self._display.print("[green]Departement [/green]")
-        for pos, item in enumerate(Departements, start=1):
-            if item == user_data.departement:
-                default_pos = pos
-            self._display.print(f"[green][{pos}] : [/green]{item.value}")
-        dpt_choices = self._display.ask(
-            f"[green]Departement [/green][blue]{user_data.departement.value}[/blue]", default=default_pos, int=True
-        )
-        user_data.departement = [x for x in Departements][dpt_choices - 1]
-        user_data.password = self._display.ask("[green]Mot de passe : [/green]", password=True)
+        while True:
+            try:
+                user_data.name = self._display.ask("[green]Nom [/green]", default=user_data.name)
+                user_data.forname = self._display.ask("[green]Prenom [/green]", default=user_data.forname)
+                user_data.email = self._display.ask("[green]email [/green]", default=user_data.email)
+                self._display.print("[green]Departement [/green]")
+                for pos, item in enumerate(Departements, start=1):
+                    if item == user_data.departement:
+                        default_pos = pos
+                    self._display.print(f"[green][{pos}] : [/green]{item.value}")
+                dpt_choices = self._display.ask(
+                    f"[green]Departement [/green][blue]{user_data.departement.value}[/blue]",
+                    default=default_pos,
+                    int=True,
+                )
+                user_data.departement = [x for x in Departements][dpt_choices - 1]
+                user_data.password = self._display.ask("[green]Mot de passe : [/green]", password=True)
+                break
+            except Exception as err:
+                self.clear()
+                self.display_error_msg(f"erreur lors de la mise à jour : {err}")
         return user_data
 
     def display_client_info(self, client_data):
@@ -248,10 +261,16 @@ class cli_handler:
         return self._display.input()
 
     def display_create_client_form(self):
-        full_name = self._display.ask("[green]Nom client[/green]")
-        email = self._display.ask("[green]Mail de contact[/green]")
-        phone = self._display.ask("[green]Telephone[/green]")
-        company_name = self._display.ask("[green]Nom de la société[/green]")
+        while True:
+            try:
+                full_name = self._display.ask("[green]Nom client[/green]")
+                email = self._display.ask("[green]Mail de contact[/green]")
+                phone = self._display.ask("[green]Telephone[/green]")
+                company_name = self._display.ask("[green]Nom de la société[/green]")
+                break
+            except Exception as err:
+                self.clear()
+                self.display_error_msg(f"erreur lors de la creation : {err}")
         return {
             "full_name": full_name,
             "email": email,
@@ -264,14 +283,23 @@ class cli_handler:
         return commercial
 
     def display_update_client_form(self, client_data):
-        client_data.full_name = self._display.ask("[green]Nom du client [/green]", default=client_data.full_name)
-        client_data.email = self._display.ask("[green]Mail de contact [/green]", default=client_data.email)
-        client_data.phone = self._display.ask("[green]Telephone [/green]", default=client_data.phone)
-        client_data.company_name = self._display.ask("[green]Nom de la société[/green]", client_data.company_name)
-        # client_data.commercial_contact = self._display.ask(
-        #     "[green]Email du commercial en charge[/green]",
-        #     default=client_data.commercial_contact.email
-        # )
+        while True:
+            try:
+                client_data.full_name = self._display.ask(
+                    "[green]Nom du client [/green]", default=client_data.full_name
+                )
+                client_data.email = self._display.ask("[green]Mail de contact [/green]", default=client_data.email)
+                client_data.phone = self._display.ask("[green]Telephone [/green]", default=client_data.phone)
+                client_data.company_name = self._display.ask(
+                    "[green]Nom de la société[/green]", client_data.company_name
+                )
+                client_data.commercial_contact = self._display.ask(
+                    "[green]Email du commercial en charge[/green]", default=client_data.commercial_contact.email
+                )
+                break
+            except Exception as err:
+                self.clear()
+                self.display_error_msg(f"erreur lors de la mise à jour : {err}")
         return client_data
 
     # -------- Contract views --------------
@@ -281,14 +309,20 @@ class cli_handler:
         else:
             default_value = None
 
-        client_full_name = self._display.ask("[green]Nom client[/green]", default=default_value)
-        total_amount = self._display.ask("[green]Montant global[/green]")
-        remaining_amount = self._display.ask("[green]Montant restant[/green]")
+        while True:
+            try:
+                client_full_name = self._display.ask("[green]Nom client[/green]", default=default_value)
+                total_amount = self._display.ask("[green]Montant global[/green]")
+                remaining_amount = self._display.ask("[green]Montant restant[/green]")
 
-        for pos, item in enumerate(ContractStatus, start=1):
-            self._display.print(f"[green][{pos}] : [/green]{item.value}")
-        status_choices = int(self._display.input())
-        contract_status = [x for x in ContractStatus][status_choices - 1]
+                for pos, item in enumerate(ContractStatus, start=1):
+                    self._display.print(f"[green][{pos}] : [/green]{item.value}")
+                status_choices = int(self._display.input())
+                contract_status = [x for x in ContractStatus][status_choices - 1]
+                break
+            except Exception as err:
+                self.clear()
+                self.display_error_msg(f"erreur lors de la creation : {err}")
 
         return {
             "client": client_full_name,
@@ -368,25 +402,32 @@ class cli_handler:
         self._display.print(grid)
 
     def display_update_contract_form(self, contract, client_fullname, commercial_email):
-        self._display.print(f"[green]Nom du client [/green] : {client_fullname}")
-        self._display.print(f"[green]Mail commercial [/green] : {commercial_email}")
-        contract.total_amount = self._display.ask(
-            "[green]Montant total [/green]", default=contract.total_amount, int=True
-        )
-        contract.remaining_amount = self._display.ask(
-            "[green]Montant restant [/green]", default=contract.remaining_amount, int=True
-        )
+        while True:
+            try:
+                self._display.print(f"[green]Nom du client [/green] : {client_fullname}")
+                self._display.print(f"[green]Mail commercial [/green] : {commercial_email}")
+                contract.total_amount = self._display.ask(
+                    "[green]Montant total [/green]", default=contract.total_amount, int=True
+                )
+                contract.remaining_amount = self._display.ask(
+                    "[green]Montant restant [/green]", default=contract.remaining_amount, int=True
+                )
 
-        for pos, item in enumerate(ContractStatus, start=1):
-            if item == contract.contract_status:
-                default_pos = pos
-            self._display.print(f"[red][{pos}] : [/red]{item.value}")
-        dpt_choices = self._display.ask(
-            f"[green]Statut du contrat [/green][cyan b]{contract.contract_status.value}[/cyan bold]",
-            default=default_pos,
-            int=True,
-        )
-        contract.contract_status = [x for x in ContractStatus][dpt_choices - 1]
+                for pos, item in enumerate(ContractStatus, start=1):
+                    if item == contract.contract_status:
+                        default_pos = pos
+                    self._display.print(f"[red][{pos}] : [/red]{item.value}")
+                dpt_choices = self._display.ask(
+                    f"[green]Statut du contrat [/green][cyan b]{contract.contract_status.value}[/cyan bold]",
+                    default=default_pos,
+                    int=True,
+                )
+                contract.contract_status = [x for x in ContractStatus][dpt_choices - 1]
+                break
+            except Exception as err:
+                self.clear()
+                self.display_error_msg(f"erreur lors de la mise à jour : {err}")
+
         return contract
 
     # ------------------- Event display -----------------------
@@ -429,13 +470,17 @@ class cli_handler:
         table.add_column("Nombre participant", justify="center", style="cyan")
 
         for pos, event in enumerate(event_list, start=1):
+            if event.contact_support:
+                support_name = f"[blue]{event.contact_support.name.upper()} {event.contact_support.forname}[/blue]"
+            else:
+                support_name = f"[red]Sans responsable[/red]"
+
             table.add_row(
                 f"{pos}",
-                f"{event.id}",
                 f"[purple]{event.client.full_name}",
                 f"[purple]{event.event_date_start}[/purple]",
-                f"[purple]{event.event_end_date}[/purple]",
-                f"[blue]{event.contact_support.name.upper()} {event.contact_support.forname}[/blue]",
+                f"[purple]{event.event_date_end}[/purple]",
+                f"{support_name}",
                 f"{event.location}",
                 f"[purple]{event.attendees}[/purple]",
             )
@@ -463,9 +508,13 @@ class cli_handler:
                 note = self._display.ask("[green]Note additionnelle[/green]")
                 break
 
-            except Exception as err:
+            except ValueError as err:
                 self.clear()
                 self.display_error_msg("La valeur introduite n'est pas conforme")
+
+            except Exception as err:
+                self.clear()
+                self.display_error_msg(f"erreur lors de la creation : {err}")
 
         return {
             "name": name,
@@ -477,17 +526,28 @@ class cli_handler:
         }
 
     def display_event_update(self, event):
-        grid = Table.grid(expand=False, padding=(0, 1, 1, 1))
-        grid.add_column(justify="center")
-        grid.add_column(justify="center")
-        event.name = self._display.ask("[green]Nom[/green]", default=event.name)
-        event_date_start = self._display.ask("[green]Date début[/green]", default=event.event_date_start)
-        event.event_date_start = datetime.strptime(event_date_start, DT_STRING)
-        event_date_end = self._display.ask("[green]Date de fin[/green]", default=event.event_date_end)
-        event.event_date_end = datetime.strptime(event_date_end, DT_STRING)
-        event.location = self._display.ask("[green]lieu[/green]", default=event.location)
-        event.attendees = self._display.ask("[green]Nombres de participant[/green]", dafault=event.attendees)
-        event.note = self._display.ask("[green]Note additionnelle[/green]", default=event.note)
+        while True:
+            try:
+                grid = Table.grid(expand=False, padding=(0, 1, 1, 1))
+                grid.add_column(justify="center")
+                grid.add_column(justify="center")
+                event.name = self._display.ask("[green]Nom[/green]", default=event.name)
+                event_date_start = self._display.ask("[green]Date début[/green]", default=event.event_date_start)
+                event.event_date_start = datetime.strptime(event_date_start, DT_STRING)
+                event_date_end = self._display.ask("[green]Date de fin[/green]", default=event.event_date_end)
+                event.event_date_end = datetime.strptime(event_date_end, DT_STRING)
+                event.location = self._display.ask("[green]lieu[/green]", default=event.location)
+                attendees = self._display.ask("[green]Nombres de participant[/green]", dafault=event.attendees)
+                event.attendees = int(attendees)
+                event.note = self._display.ask("[green]Note additionnelle[/green]", default=event.note)
+                break
+            except ValueError as err:
+                self.clear()
+                self.display_error_msg("La valeur introduite n'est pas conforme")
+
+            except Exception as err:
+                self.clear()
+                self.display_error_msg(f"erreur lors de la mise à jour : {err}")
         return event
 
     def display_event_define_support(self, event):

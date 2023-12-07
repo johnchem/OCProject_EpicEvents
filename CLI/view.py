@@ -39,6 +39,7 @@ class Views:
         return self._handler.display_user_header(user_data)
 
     def prompt_create_user_form(self):
+        self._handler.clear()
         return self._handler.display_create_user_form()
 
     def prompt_list_users(self, users_list):

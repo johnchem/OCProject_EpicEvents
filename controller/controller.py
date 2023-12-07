@@ -541,7 +541,7 @@ class Controller(menu.Menu):
         event = self.repository.list_event()
         choices = self.view.prompt_list_event(event)
         if choices == "q":
-            self.contract_menu()
+            self.event_menu()
         try:
             choices = int(choices)
             if choices > len(event):
@@ -550,13 +550,18 @@ class Controller(menu.Menu):
             self.view.prompt_event_info(event_picked)
             self.event_opt_menu(event_picked)
 
-        except Exception as err:
+        except ValueError as err:
             self.view.print(err)
             capture_exception(err)
             self.view.prompt_error_message(
                 f"Veuillez choisir une valeur entre 1 et {len(event)}",
                 "ou q pour quitter",
             )
+            self.event_opt_menu(event_picked)
+
+        except Exception as err:
+            self.view.print(err)
+            capture_exception(err)
             self.event_opt_menu(event_picked)
 
     def update_event(self, event):

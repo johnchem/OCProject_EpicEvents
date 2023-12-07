@@ -22,7 +22,7 @@ class SqlAlchemyRepository:
                 self.session.commit()
             except sqlalchemy.exc.IntegrityError as err:
                 if err.orig is psycopg2.errors.UniqueViolation:
-                    msg = "Cette utilisateur existe déjà !"
+                    msg = "Cet object existe déjà !"
                 return False, msg
             except sqlalchemy.exc.DataError as err:
                 msg = "l'une des informations fournit ne correspond pas à l'information attendu"
@@ -133,7 +133,7 @@ class SqlAlchemyRepository:
     def list_event(self):
         with sentry_sdk.start_transaction(name="list_event"):
             stmt = select(Evenement).order_by(Evenement.id)
-            return self.session.scalars(stmt).all()
+            return self.session.scalars(stmt).unique().all()
 
     def delete_event(self, event_id: int):
         with sentry_sdk.start_transaction(name="delete_event"):
