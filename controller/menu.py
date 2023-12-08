@@ -121,6 +121,7 @@ class Menu(ABC):
             "Contrat en signés": self.filter_contract_signed,
             "Mes contrats": self.filter_contract_by_commercial,
             "Filtrer par commerciaux": self.filter_by_commercial_menu,
+            "Retour": self.contract_menu,
         }
 
         menu_item_list = [x for x in MENU_ITEM_DICT.keys()]
@@ -166,7 +167,7 @@ class Menu(ABC):
         # convert the answer to the function
         function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
         # Call the function
-        function_called_by_user()
+        function_called_by_user(event=event)
 
     def filter_event_menu(self):
         if not self.permissions.filter_event(self._logged_user):
@@ -176,6 +177,7 @@ class Menu(ABC):
         MENU_ITEM_DICT = {
             "Evenement sans support": self.filter_events_without_support,
             "Mes evenements": self.filter_my_event,
+            "Retour": self.event_menu,
         }
 
         menu_item_list = [x for x in MENU_ITEM_DICT.keys()]

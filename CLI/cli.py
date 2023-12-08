@@ -16,6 +16,7 @@ from backend.models import DT_STRING
 class Display:
     def __init__(self):
         self._console = Console()
+        self._console.set_window_title("EpicsEvents")
 
     def print(self, msg_obj=None) -> None:
         self._console.print(msg_obj)
@@ -46,7 +47,8 @@ class Display:
             return Prompt.ask(msg_obj, choices=choices, default=default, *args, **kwargs)
 
     def clear(self):
-        self._console.clear()
+        # self._console.clear()
+        os.system("cls")
 
 
 class cli_handler:
@@ -105,7 +107,7 @@ class cli_handler:
         self._display.clear()
         welcome_prompt = Panel(
             """
-                Welcome to Epic Event
+                Welcome to Epic Events
             """,
             box=box.ROUNDED,
         )
@@ -197,23 +199,59 @@ class cli_handler:
         grid.add_row("[green]Date de creation :[/green]", f"[blue]{client_data.creation_date}[/blue]")
         grid.add_row("[green]Derniére mise à jour :[/green]", f"[blue]{client_data.last_update}[/blue]")
         grid.add_row(
-            "[green]Responsable client[/green]",
+            "[green]Responsable client :[/green]",
             f"[blue]{client_data.commercial_contact.forname} {client_data.commercial_contact.name.upper()}[/blue]",
         )
         self._display.print(grid)
 
         self._display.print(Padding("[green u]Contrats actif[/green u]", (1, 0, 0, 0)))
         if client_data.contract:
-            # self._display.print(f"{client_data.contract}")
+            contract_grid = Table(expand=False, box=box.SIMPLE)
+            contract_grid.add_column(f"Date creation", justify="center", style="purple")
+            contract_grid.add_column(f"Statut", justify="center")
+            contract_grid.add_column(f"Montant", justify="center", style="purple")
+            contract_grid.add_column(f"Commercial", justify="center", style="purple")
+
             for contract in client_data.contract:
-                self._display.print(f"{contract}")
+                if contract.contract_status == ContractStatus.SIGNED:
+                    status_color = "green"
+                else:
+                    status_color = "red"
+                contract_grid.add_row(
+                    f"{contract.creation_date}",
+                    f"[{status_color}]{contract.contract_status.value}[/{status_color}]",
+                    f"[red]{contract.remaining_amount}[/red]/{contract.total_amount}",
+                    f"{contract.commercial.email}",
+                )
+            self._display.print(contract_grid)
         else:
             self._display.print("[i] ... pas de contrat[/i]")
 
         self._display.print(Padding("[green u]Evenement actif[/green u]", (1, 0, 0, 0)))
         if client_data.evenements:
+            # event_grid = Table(expand=False, padding=(0, 1, 1, 1))
+            event_grid = Table(expand=False, box=box.SIMPLE)
+            event_grid.add_column("Client", justify="center", style="purple")
+            event_grid.add_column("Date début", justify="center")
+            event_grid.add_column("Date fin", justify="center")
+            event_grid.add_column("Contact support", justify="center", style="purple")
+            event_grid.add_column("Lieu", justify="center", style="purple")
+            event_grid.add_column("Nombre participant", justify="center", style="purple")
+
             for event in client_data.evenements:
-                self._display.print(repr(event))
+                if event.contact_support:
+                    support_name = f"[blue]{event.contact_support.name.upper()} {event.contact_support.forname}[/blue]"
+                else:
+                    support_name = f"[red]Sans responsable[/red]"
+                event_grid.add_row(
+                    f"[purple]{event.client.full_name}",
+                    f"[purple]{event.event_date_start}[/purple]",
+                    f"[purple]{event.event_date_end}[/purple]",
+                    f"{support_name}",
+                    f"{event.location}",
+                    f"[purple]{event.attendees}[/purple]",
+                )
+            self._display.print(event_grid)
         else:
             self._display.print("[i] ... pas d'évenement[/i]")
         os.system("pause")
