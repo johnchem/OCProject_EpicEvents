@@ -1,6 +1,3 @@
-from authentification import encode_decode_jwt, encode, decode
-
-
 class Views:
     def __init__(self, handler):
         self._handler = handler
@@ -13,9 +10,7 @@ class Views:
 
     def prompt_login(self):
         email, password = self._handler.display_login()
-        response = {"email": email, "password": password}
-        token = encode(response)
-        return token
+        return email, password
 
     def prompt_display_menu(self, menu_item):
         return self._handler.display_menu(menu_item)

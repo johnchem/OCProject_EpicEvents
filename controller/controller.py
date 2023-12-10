@@ -42,16 +42,10 @@ def check_user_auth(func):
                 # no token found : ask for identification
                 self.user_login()
 
-            # while not auth_user_email:
-            #     self.view.prompt_error_message(f"Erreur d'authentification : {error}")
-            #     self.user_login()
-
-            # auth_user = self.repository.get_user(auth_user_email)
-            # self._logged_user = auth_user
             func(self, *args, **kwargs)
         except Exception as err:
             capture_exception(err)
-            # self.user_login()
+            self.user_login()
 
     return inner
 
@@ -112,10 +106,7 @@ class Controller(menu.Menu):
 
     @visitor_allowed
     def user_login(self):
-        token = self.view.prompt_login()
-        data = auth.decode(token)
-        email = data.get("email", None)
-        password = data.get("password", None)
+        email, password = self.view.prompt_login()
 
         user = self.repository.get_user(email)
         if not user:

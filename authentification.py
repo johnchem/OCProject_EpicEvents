@@ -35,29 +35,18 @@ def encode(payload):
     return jwt.encode(payload, PRIVATE_KEY, algorithm="RS256")
 
 
-# Fonction pour vérifier un token JWT
-def decode(token):
-    try:
-        payload = jwt.decode(token, PUBLIC_KEY, algorithms=["RS256"])
-        return payload
-    except jwt.ExpiredSignatureError:
-        return "Le token a expiré."
-    except jwt.InvalidTokenError:
-        return "Token invalide."
+# def encode_decode_jwt(function):
+#     @functools.wraps(function)
+#     def inner(self, token=None, *args, **kwargs):
+#         if token:
+#             decoded_data = decode(token)
+#             data = function(self, decoded_data, *args, **kwargs)
+#         else:
+#             data = function(self, *args, **kwargs)
+#         token = encode(data)
+#         return token
 
-
-def encode_decode_jwt(function):
-    @functools.wraps(function)
-    def inner(self, token=None, *args, **kwargs):
-        if token:
-            decoded_data = decode(token)
-            data = function(self, decoded_data, *args, **kwargs)
-        else:
-            data = function(self, *args, **kwargs)
-        token = encode(data)
-        return token
-
-    return inner
+#     return inner
 
 
 # Fonction pour créer un token JWT pour un utilisateur authentifié
@@ -69,16 +58,22 @@ def create_id_token(user):
     return token
 
 
+# Fonction pour vérifier un token JWT
+# def decode(token):
+#     try:
+#         payload = jwt.decode(token, PUBLIC_KEY, algorithms=["RS256"])
+#         return payload
+#     except jwt.ExpiredSignatureError:
+#         return "Le token a expiré."
+#     except jwt.InvalidTokenError:
+#         return "Token invalide."
+
+
 # Fonction pour vérifier le token JWT reçu du client
 def verify_jwt_token(token):
     try:
-        payload = decode(token)
+        payload = jwt.decode(token, PUBLIC_KEY, algorithms=["RS256"])
         user = payload.get("user")
-        expiration = payload.get("exp")
-
-        # Vérification de l'expiration
-        if datetime.datetime.fromtimestamp(expiration) < datetime.datetime.utcnow():
-            return None, "expired token"
 
         return user, None  # Utilisateur authentifié
 
