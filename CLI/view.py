@@ -30,8 +30,8 @@ class Views:
     def prompt_user_info(self, user_data):
         return self._handler.display_user_info(user_data)
 
-    def prompt_user_header(self, user_data):
-        return self._handler.display_user_header(user_data)
+    # def prompt_user_header(self, user_data):
+    #     return self._handler.display_user_header(user_data)
 
     def prompt_create_user_form(self):
         self._handler.clear()
@@ -63,6 +63,7 @@ class Views:
 
     def prompt_client_opt_menu(self, menu_item, client):
         self._handler.clear()
+        self._handler.display_client_header(client)
         return self._handler.display_menu(menu_item)
 
     def prompt_client_info(self, client_data):

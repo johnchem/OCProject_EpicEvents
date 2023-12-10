@@ -101,7 +101,7 @@ class Controller(menu.Menu):
         self.welcome_page()
         if not self._logged_user:
             self.user_login()
-        self.user_info()
+        self.view.prompt_user_info(self._logged_user)
         self.main_menu()
 
     @visitor_allowed
@@ -124,9 +124,6 @@ class Controller(menu.Menu):
             capture_message(f"wrong password for :{email}", "error")
             self.view.prompt_error_message(f"Mot de passe incorrect")
             self.user_login()
-
-    def user_info(self):
-        self.view.prompt_user_info(self._logged_user)
 
     def create_user(self, *args, **kwargs):
         access, msg = self.permissions.create_user(self._logged_user)

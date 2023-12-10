@@ -117,8 +117,8 @@ class Menu(ABC):
             self.contract_menu()
 
         MENU_ITEM_DICT = {
-            "Contrat en cours": self.filter_contract_not_signed,
-            "Contrat en signés": self.filter_contract_signed,
+            "Contrats en cours": self.filter_contract_not_signed,
+            "Contrats signés": self.filter_contract_signed,
             "Mes contrats": self.filter_contract_by_commercial,
             "Filtrer par commerciaux": self.filter_by_commercial_menu,
             "Retour": self.contract_menu,

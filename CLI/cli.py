@@ -16,7 +16,7 @@ from backend.models import DT_STRING
 class Display:
     def __init__(self):
         self._console = Console()
-        self._console.set_window_title("EpicsEvents")
+        self._console.set_window_title(f"EpicsEvents")
 
     def print(self, msg_obj=None) -> None:
         self._console.print(msg_obj)
@@ -55,6 +55,7 @@ class cli_handler:
     def __init__(self):
         self._display = Display()
 
+    # -------- general views --------------
     def clear(self):
         self._display.clear()
 
@@ -114,6 +115,7 @@ class cli_handler:
         self._display.log_styled(welcome_prompt)
         os.system("pause")
 
+    # -------- User views --------------
     def display_user_info(self, user_data):
         self._display.clear()
         self._display.print(f"[green]Nom : [/green]{user_data.name}")
@@ -129,6 +131,7 @@ class cli_handler:
 
         grid.add_row(f"[green]{user_data.name.upper()}[/green]", f"[green]{user_data.forname}[/green]")
         grid.add_row(f"[green]{user_data.email}[/green]", f"[blue]{str(user_data.departement.value)}[/blue]")
+        grid.add_row("", "")
         self._display.print(grid)
 
     def display_create_user_form(self):
@@ -172,13 +175,32 @@ class cli_handler:
                     int=True,
                 )
                 user_data.departement = [x for x in Departements][dpt_choices - 1]
-                user_data.password = self._display.ask("[green]Mot de passe : [/green]", password=True)
+                user_data.password = self._display.ask("[green]Mot de passe [/green]", password=True)
                 break
             except Exception as err:
                 self.clear()
                 self.display_error_msg(f"erreur lors de la mise à jour : {err}")
         return user_data
 
+    def display_list_user(self, user_list):
+        table = Table(title="Utilisateurs")
+        table.add_column("Id", justify="center", style="red")
+        table.add_column("Nom", justify="center", style="green")
+        table.add_column("Email", justify="center")
+        table.add_column("Departement", justify="center", style="cyan")
+
+        for pos, user in enumerate(user_list, start=1):
+            table.add_row(
+                f"{pos}",
+                f"{user.name.upper()} {user.forname}",
+                f"{user.email}",
+                f"{user.departement.value}",
+            )
+        self._display.print(table)
+        self._display.print("Selectionner un utilisateur ou q pour revenir")
+        return self._display.input()
+
+    # -------- Client views --------------
     def display_client_info(self, client_data):
         grid = Table.grid(expand=False, padding=(0, 1, 1, 1))
         grid.add_column(justify="center")
@@ -256,23 +278,34 @@ class cli_handler:
             self._display.print("[i] ... pas d'évenement[/i]")
         os.system("pause")
 
-    def display_list_user(self, user_list):
-        table = Table(title="Utilisateurs")
-        table.add_column("Id", justify="center", style="red")
-        table.add_column("Nom", justify="center", style="green")
-        table.add_column("Email", justify="center")
-        table.add_column("Departement", justify="center", style="cyan")
+    def display_client_header(self, client_data):
+        grid = Table.grid(expand=False, padding=(0, 1, 1, 1))
+        grid.add_column(justify="center")
+        grid.add_column(justify="right")
+        grid.add_column(justify="left")
 
-        for pos, user in enumerate(user_list, start=1):
-            table.add_row(
-                f"{pos}",
-                f"{user.name.upper()} {user.forname}",
-                f"{user.email}",
-                f"{user.departement.value}",
-            )
-        self._display.print(table)
-        self._display.print("Selectionner un utilisateur ou q pour revenir")
-        return self._display.input()
+        grid.add_row(
+            f"[purple]{client_data.full_name}[/purple]",
+            f"[green]Date de creation : [/green]",
+            f"[blue]{client_data.creation_date}[/blue]",
+        )
+        grid.add_row(
+            f"[purple]{client_data.email}[/purple]",
+            f"[green]Derniére mise à jour : [/green]",
+            f"[blue]{client_data.last_update}[/blue]",
+        )
+        grid.add_row(
+            f"[purple]{client_data.phone}[/purple]",
+            "[green]Responsable client :[/green]",
+            f"[blue]{client_data.commercial_contact.forname} {client_data.commercial_contact.name.upper()}[/blue]",
+        )
+        grid.add_row(
+            f"[purple]{client_data.company_name}[/purple]",
+            "",
+            "",
+        )
+        grid.add_row("", "", "")
+        self._display.print(grid)
 
     def display_list_client(self, client_list):
         table = Table(title="Clients")
@@ -331,9 +364,9 @@ class cli_handler:
                 client_data.company_name = self._display.ask(
                     "[green]Nom de la société[/green]", client_data.company_name
                 )
-                client_data.commercial_contact = self._display.ask(
-                    "[green]Email du commercial en charge[/green]", default=client_data.commercial_contact.email
-                )
+                # client_data.commercial_contact = self._display.ask(
+                #     "[green]Email du commercial en charge[/green]", default=client_data.commercial_contact.email
+                # )
                 break
             except Exception as err:
                 self.clear()
@@ -437,6 +470,7 @@ class cli_handler:
             f"montant : {contract.remaining_amount}/{contract.total_amount}",
             f"[{statut_color}]{contract.contract_status.value}[/{statut_color}]",
         )
+        grid.add_row("", "")
         self._display.print(grid)
 
     def display_update_contract_form(self, contract, client_fullname, commercial_email):
@@ -484,7 +518,7 @@ class cli_handler:
         grid.add_row(f"[purple]Début :[/purple]", f"{event.event_date_start}")
         grid.add_row(f"[purple]Fin :[/purple]", f"{event.event_date_end}")
         grid.add_row(f"[purple]Contact support :[/purple]", f"{support_name}")
-        grid.add_row("")
+        grid.add_row("", "")
         self._display.print(grid)
 
     def display_event_info(self, event):
