@@ -129,6 +129,8 @@ class Menu(ABC):
         # convert the answer to the function
         function_called_by_user = MENU_ITEM_DICT[menu_item_list[user_answer]]
         # Call the function
+        if function_called_by_user == self.contract_menu:
+            function_called_by_user()
         function_called_by_user(commercial=self._logged_user)
 
     def filter_by_commercial_menu(self, *args, **kwargs):
