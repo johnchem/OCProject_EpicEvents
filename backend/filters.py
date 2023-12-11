@@ -27,6 +27,11 @@ class Filters:
         commercials = session.scalars(stmt).unique().all()
         return commercials
 
+    def contract_not_fully_paid(self, session):
+        stmt = select(Contract).filter(Contract.remaining_amount != Contract.total_amount)
+        contracts = session.scalars(stmt).unique().all()
+        return contracts
+
     def events_without_support(self, session):
         stmt = select(Evenement).filter(Evenement.contact_support == None)
         events = session.scalars(stmt).unique().all()

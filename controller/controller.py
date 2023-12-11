@@ -125,6 +125,7 @@ class Controller(menu.Menu):
             self.view.prompt_error_message(f"Mot de passe incorrect")
             self.user_login()
 
+    # *************** User functions ***************
     def create_user(self, *args, **kwargs):
         access, msg = self.permissions.create_user(self._logged_user)
         if not access:
@@ -204,6 +205,7 @@ class Controller(menu.Menu):
         self.view.prompt_message("L'utilisateur à bien été supprimé")
         self.user_menu()
 
+    # ************** Client functions **************
     def create_client(self):
         access, msg = self.permissions.create_client(self._logged_user)
         if not access:
@@ -300,7 +302,6 @@ class Controller(menu.Menu):
         )
         self.client_menu()
 
-    @check_user_auth
     def delete_client(self, client):
         access, msg = self.permissions.delete_client(self._logged_user, client)
         if not access:
@@ -318,7 +319,7 @@ class Controller(menu.Menu):
         self.view.print("Le client à bien été supprimé")
         self.client_menu()
 
-    @check_user_auth
+    # ************* Contracts functions *************
     def create_contract(self, client=None):
         access, msg = self.permissions.create_contract(self._logged_user, client)
         if not access:
@@ -328,14 +329,19 @@ class Controller(menu.Menu):
             else:
                 self.contract_menu()
 
-        if client:
-            data = self.view.prompt_create_contract(
-                client=client,
-            )
-            data["client"] = client
-        else:
-            data = self.view.prompt_create_contract()
-            data["client"] = self.repository.get_client(data["client"])
+        data = self.view.prompt_ask_client(client=client)
+        updated_client = self.repository.get_client(data["client"])
+        if updated_client is None:
+            self.view.prompt_error_message("Ce client n'est pas enregistré")
+            self.contract_menu()
+
+        access, msg = self.permissions.create_contract(self._logged_user, updated_client)
+        if not access:
+            self.view.prompt_error_message(msg)
+            self.contract_menu()
+
+        data = self.view.prompt_create_contract()
+        data["client"] = updated_client
 
         contract = models.Contract(**data)
         response, msg = self.repository.add(contract)
@@ -354,10 +360,10 @@ class Controller(menu.Menu):
         self.view.prompt_contract_info(contract)
         self.contract_menu()
 
-    @check_user_auth
     def list_contract(self):
-        if not self.permissions.read_contract(self._logged_user):
-            self.view.prompt_error_message("accés non authorisé")
+        access, msg = self.permissions.read_contract(self._logged_user)
+        if not access:
+            self.view.prompt_error_message(msg)
             self.contract_menu()
         contracts = self.repository.list_contract()
         choices = self.view.prompt_list_contract(contracts)
@@ -379,10 +385,10 @@ class Controller(menu.Menu):
             )
             self.contract_opt_menu(contract_picked)
 
-    @check_user_auth
     def filter_contract_signed(self, *args, **kwargs):
-        if not self.permissions.filter_contract(self._logged_user):
-            self.view.prompt_error_message("accés non authorisé")
+        access, msg = self.permissions.filter_contract(self._logged_user)
+        if not access:
+            self.view.prompt_error_message(msg)
             self.contract_menu()
         contracts = self.repository.filter_by_signed_contract()
         choices = self.view.prompt_list_contract(contracts)
@@ -404,10 +410,10 @@ class Controller(menu.Menu):
             )
             self.contract_opt_menu(contract_picked)
 
-    @check_user_auth
     def filter_contract_not_signed(self, *args, **kwargs):
-        if not self.permissions.filter_contract(self._logged_user):
-            self.view.prompt_error_message("accés non authorisé")
+        access, msg = self.permissions.filter_contract(self._logged_user)
+        if not access:
+            self.view.prompt_error_message(msg)
             self.contract_menu()
         contracts = self.repository.filter_by_not_signed_contract()
         choices = self.view.prompt_list_contract(contracts)
@@ -429,10 +435,10 @@ class Controller(menu.Menu):
             )
             self.contract_opt_menu(contract_picked)
 
-    @check_user_auth
     def filter_contract_by_commercial(self, commercial, *args, **kwargs):
-        if not self.permissions.filter_contract(self._logged_user):
-            self.view.prompt_error_message("accés non authorisé")
+        access, msg = self.permissions.filter_contract(self._logged_user)
+        if not access:
+            self.view.prompt_error_message(msg)
             self.contract_menu()
         contracts = self.repository.filter_contract_by_commercial(commercial)
         choices = self.view.prompt_list_contract(contracts)
@@ -454,10 +460,35 @@ class Controller(menu.Menu):
             )
             self.contract_opt_menu(contract_picked)
 
-    @check_user_auth
+    def filter_contract_not_fully_paid(self, *args, **kwargs):
+        access, msg = self.permissions.filter_contract(self._logged_user)
+        if not access:
+            self.view.prompt_error_message(msg)
+            self.contract_menu()
+        contracts = self.repository.filter_contract_not_fully_paid()
+        choices = self.view.prompt_list_contract(contracts)
+        if choices == "q":
+            self.contract_menu()
+        try:
+            choices = int(choices)
+            if choices > len(contracts):
+                self.filter_contract_not_fully_signed()
+            contract_picked = contracts[choices - 1]
+            self.view.prompt_contract_info(contract_picked)
+            self.contract_opt_menu(contract_picked)
+
+        except Exception as err:
+            self.view.print(err)
+            capture_exception(err)
+            self.view.prompt_error_message(
+                f"Veuillez choisir une valeur entre 1 et {len(contracts)} ou q pour quitter",
+            )
+            self.contract_opt_menu(contract_picked)
+
     def update_contract(self, contract):
-        if not self.permissions.update_contract(self._logged_user, contract):
-            self.view.prompt_error_message("accés non authorisé")
+        access, msg = self.permissions.update_contract(self._logged_user, contract)
+        if not access:
+            self.view.prompt_error_message(msg)
             self.contract_opt_menu(contract)
 
         contract = self.view.prompt_update_contract(
@@ -477,7 +508,8 @@ class Controller(menu.Menu):
         self.contract_menu()
 
     def delete_contract(self, contract):
-        if not self.permissions.delete_contract(self._logged_user, contract):
+        access, msg = self.permissions.delete_contract(self._logged_user, contract)
+        if not access:
             self.view.prompt_error_message("accés non authorisé")
             self.contract_opt_menu(contract)
 
@@ -493,6 +525,7 @@ class Controller(menu.Menu):
         self.view.print("Le contrat à bien été supprimé")
         self.contract_menu()
 
+    # *************** Events functions ***************
     def create_event(self, contract):
         client = contract.client
         access, msg = self.permissions.create_event(self._logged_user, client)
@@ -522,8 +555,9 @@ class Controller(menu.Menu):
             self.contract_opt_menu(contract)
 
     def list_events(self):
-        if not self.permissions.read_event(self._logged_user):
-            self.view.prompt_error_message("accés non authorisé")
+        access, msg = self.permissions.read_event(self._logged_user)
+        if not access:
+            self.view.prompt_error_message(msg)
             self.event_menu()
 
         event = self.repository.list_event()
@@ -552,8 +586,9 @@ class Controller(menu.Menu):
             self.event_opt_menu(event_picked)
 
     def update_event(self, event):
-        if not self.permissions.update_event(self._logged_user):
-            self.view.prompt_error_message("accés non authorisé")
+        access, msg = self.permissions.update_event(self._logged_user)
+        if not access:
+            self.view.prompt_error_message(msg)
             self.event_opt_menu(event)
 
         if self._logged_user.departement == models.Departements.GESTION:
@@ -573,7 +608,8 @@ class Controller(menu.Menu):
         self.event_opt_menu(event)
 
     def delete_event(self, event):
-        if not self.permissions.delete_event(self._logged_user):
+        access, msg = self.permissions.delete_event(self._logged_user)
+        if not access:
             self.view.prompt_error_message("accés non authorisé")
             self.event_opt_menu(event)
 
@@ -588,9 +624,10 @@ class Controller(menu.Menu):
         self.view.print("L'évenement à bien été supprimé")
         self.event_menu()
 
-    def filter_events_without_support(self, *args, **kwargs):
-        if not self.permissions.filter_event(self._logged_user):
-            self.view.prompt_error_message("accés non authorisé")
+    def filter_events_without_support(self):
+        access, msg = self.permissions.filter_event(self._logged_user)
+        if not access:
+            self.view.prompt_error_message(msg)
             self.contract_menu()
         events = self.repository.filter_events_without_support()
         choices = self.view.prompt_list_event(events)
@@ -612,9 +649,10 @@ class Controller(menu.Menu):
             )
             self.contract_opt_menu(event_picked)
 
-    def filter_my_event(self, *args, **kwargs):
-        if not self.permissions.filter_event(self._logged_user):
-            self.view.prompt_error_message("accés non authorisé")
+    def filter_my_event(self):
+        access, msg = self.permissions.filter_event(self._logged_user)
+        if not access:
+            self.view.prompt_error_message(msg)
             self.event_menu()
         events = self.repository.filter_events_by_support(self._logged_user)
         choices = self.view.prompt_list_event(events)
@@ -636,6 +674,7 @@ class Controller(menu.Menu):
             )
             self.event_opt_menu(event_picked)
 
+    # *************** Closure functions ***************
     def logoff(self):
         auth.remove_token_file()
         self.user_login()

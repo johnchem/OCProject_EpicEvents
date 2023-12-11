@@ -66,11 +66,11 @@ class Permissions:
         return False, err_msg
 
     def create_contract(self, user, client=None):
-        if user.departement in [ADMIN, GESTION]:
+        if client is not None and user.departement in [COMMERCIAL] and client in user.client_portfolio:
             return True, None
-        elif client is not None and user.departement in [COMMERCIAL] and client in user.client_portfolio:
+        elif user.departement in [ADMIN, GESTION, COMMERCIAL]:
             return True, None
-        err_msg = "besoin d'un accés admin ou être le commercial en charge pour cette opération"
+        err_msg = "besoin d'un accés admin, gestion ou être le commercial en charge du client pour cette opération"
         return False, err_msg
 
     def read_contract(self, user):

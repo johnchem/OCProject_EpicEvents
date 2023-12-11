@@ -374,15 +374,28 @@ class cli_handler:
         return client_data
 
     # -------- Contract views --------------
-    def display_create_contract(self, client=None):
-        if client:
-            default_value = client.full_name
-        else:
-            default_value = None
-
+    def display_ask_client(self, client=None):
         while True:
+            if client:
+                default_value = client.full_name
+            else:
+                default_value = None
+
             try:
                 client_full_name = self._display.ask("[green]Nom client[/green]", default=default_value)
+                break
+
+            except Exception as err:
+                self.clear()
+                self.display_error_msg(f"erreur lors de la creation : {err}")
+
+        return {
+            "client": client_full_name,
+        }
+
+    def display_create_contract(self):
+        while True:
+            try:
                 total_amount = self._display.ask("[green]Montant global[/green]")
                 remaining_amount = self._display.ask("[green]Montant restant[/green]")
 
@@ -396,7 +409,6 @@ class cli_handler:
                 self.display_error_msg(f"erreur lors de la creation : {err}")
 
         return {
-            "client": client_full_name,
             "total_amount": total_amount,
             "remaining_amount": remaining_amount,
             "contract_status": contract_status,

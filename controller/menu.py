@@ -119,6 +119,7 @@ class Menu(ABC):
         MENU_ITEM_DICT = {
             "Contrats en cours": self.filter_contract_not_signed,
             "Contrats signés": self.filter_contract_signed,
+            "Contrats impayés": self.filter_contract_not_fully_paid,
             "Mes contrats": self.filter_contract_by_commercial,
             "Filtrer par commerciaux": self.filter_by_commercial_menu,
             "Retour": self.contract_menu,
@@ -251,6 +252,30 @@ class Menu(ABC):
 
     @abstractmethod
     def delete_event(self):
+        pass
+
+    @abstractmethod
+    def filter_contract_not_signed(self):
+        pass
+
+    @abstractmethod
+    def filter_contract_signed(self):
+        pass
+
+    @abstractmethod
+    def filter_contract_not_fully_paid(self):
+        pass
+
+    @abstractmethod
+    def filter_contract_by_commercial(self):
+        pass
+
+    @abstractmethod
+    def filter_events_without_support(self):
+        pass
+
+    @abstractmethod
+    def filter_my_event(self):
         pass
 
     @abstractmethod

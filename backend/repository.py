@@ -163,6 +163,11 @@ class SqlAlchemyRepository:
             contracts = self.filter.by_commercial(self.session, commercial)
             return contracts
 
+    def filter_contract_not_fully_paid(self):
+        with sentry_sdk.start_transaction(name="filter_contract_not_fully_paid"):
+            contracts = self.filter.contract_not_fully_paid(self.session)
+            return contracts
+
     def list_commercial_with_contract(self):
         with sentry_sdk.start_transaction(name="list_commercial_with_contract"):
             commercials = self.filter.commercial_with_contract(self.session)

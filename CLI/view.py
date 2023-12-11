@@ -30,9 +30,6 @@ class Views:
     def prompt_user_info(self, user_data):
         return self._handler.display_user_info(user_data)
 
-    # def prompt_user_header(self, user_data):
-    #     return self._handler.display_user_header(user_data)
-
     def prompt_create_user_form(self):
         self._handler.clear()
         return self._handler.display_create_user_form()
@@ -96,9 +93,12 @@ class Views:
         self._handler.display_contract_header(contract)
         return self._handler.display_menu(menu_item)
 
-    def prompt_create_contract(self, client=None):
+    def prompt_ask_client(self, client=None):
         self._handler.clear()
-        return self._handler.display_create_contract(client)
+        return self._handler.display_ask_client(client)
+
+    def prompt_create_contract(self):
+        return self._handler.display_create_contract()
 
     def prompt_update_contract(self, contract, client_fullname, commercial_email):
         self._handler.clear()
