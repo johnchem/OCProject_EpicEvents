@@ -586,7 +586,7 @@ class Controller(menu.Menu):
             self.event_opt_menu(event_picked)
 
     def update_event(self, event):
-        access, msg = self.permissions.update_event(self._logged_user)
+        access, msg = self.permissions.update_event(self._logged_user, event)
         if not access:
             self.view.prompt_error_message(msg)
             self.event_opt_menu(event)
@@ -608,9 +608,9 @@ class Controller(menu.Menu):
         self.event_opt_menu(event)
 
     def delete_event(self, event):
-        access, msg = self.permissions.delete_event(self._logged_user)
+        access, msg = self.permissions.delete_event(self._logged_user, event)
         if not access:
-            self.view.prompt_error_message("accés non authorisé")
+            self.view.prompt_error_message(msg)
             self.event_opt_menu(event)
 
         response, msg = self.repository.delete_event(event)

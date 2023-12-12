@@ -111,21 +111,34 @@ class Permissions:
             return True
         return False
 
-    def update_event(self, user):
+    def update_event(self, user, event):
         if user.departement in [ADMIN]:
-            return True
-        return False
+            return True, None
+        elif event.support == None:
+            err_msg = "Un membre Support doit être défini avant de réaliser cette opération"
+            return False, err_msg
+        elif user.departement is SUPPORT and event.support == user:
+            return True, None
+        err_msg = "accés limité au membre Support en charge"
+        return False, err_msg
 
-    def delete_event(self, user):
+    def delete_event(self, user, event):
         if user.departement in [ADMIN]:
-            return True
-        return False
+            return True, None
+        elif event.support == None:
+            err_msg = "Un membre Support doit être défini avant de réaliser cette opération"
+            return False, err_msg
+        elif user.departement is SUPPORT and event.support == user:
+            return True, None
+        err_msg = "accés limité au membre Support en charge"
+        return False, err_msg
 
     def add_support_to_event(self, user):
         if user.departement in [ADMIN]:
-            return True
-        if user.departement in [GESTION]:
-            return True
+            return True, None
+        if user.departement is GESTION:
+            return True, None
+        err_msg = "opération limité à un membre de l'équipe Gestion"
         return False
 
     # def create_event_for_own_client(self, user, contract):
