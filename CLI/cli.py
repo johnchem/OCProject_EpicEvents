@@ -628,12 +628,16 @@ class cli_handler:
                 grid.add_column(justify="center")
                 grid.add_column(justify="center")
                 event.name = self._display.ask("[green]Nom[/green]", default=event.name)
-                event_date_start = self._display.ask("[green]Date début[/green]", default=event.event_date_start)
+                event_date_start = self._display.ask(
+                    f"[green]Date début[/green] - [red]{DT_STRING}[/red]", default=event.event_date_start
+                )
                 event.event_date_start = datetime.strptime(event_date_start, DT_STRING)
-                event_date_end = self._display.ask("[green]Date de fin[/green]", default=event.event_date_end)
+                event_date_end = self._display.ask(
+                    f"[green]Date de fin[/green] - [red]{DT_STRING}[/red]", default=event.event_date_end
+                )
                 event.event_date_end = datetime.strptime(event_date_end, DT_STRING)
                 event.location = self._display.ask("[green]lieu[/green]", default=event.location)
-                attendees = self._display.ask("[green]Nombres de participant[/green]", dafault=event.attendees)
+                attendees = self._display.ask("[green]Nombres de participant[/green]", default=f"{event.attendees}")
                 event.attendees = int(attendees)
                 event.note = self._display.ask("[green]Note additionnelle[/green]", default=event.note)
                 break
@@ -653,12 +657,12 @@ class cli_handler:
             support_email = None
 
         grid = Table.grid(expand=False, padding=(0, 1, 1, 1))
-        grid.add_column(justify="center", color="green")
+        grid.add_column(justify="center", style="green")
         grid.add_column(justify="center")
         grid.add_row("id", f"{event.id}")
         grid.add_row(None, f"{event.name}")
         grid.add_row(f"{event.client.full_name}", f"{event.client.email}\n{event.client.phone}")
-        grid.add_row(f"id : {event.contract.id}", f"{event.contract.status}")
+        grid.add_row(f"id : {event.contract.id}", f"{event.contract.contract_status.value}")
         grid.add_row("Date début", f"{event.event_date_start}")
         grid.add_row("Date fin", f"{event.event_date_end}")
         grid.add_row("Lieu", f"{event.location}")

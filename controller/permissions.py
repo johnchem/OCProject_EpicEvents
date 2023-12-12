@@ -108,19 +108,24 @@ class Permissions:
 
     def read_event(self, user):
         if user.departement in [ADMIN, GESTION, SUPPORT, COMMERCIAL]:
-            return True
-        return False
+            return True, None
+        err_msg = ""
+        return False, err_msg
 
     def update_event(self, user, event):
         if user.departement in [ADMIN]:
             return True, None
-        elif event.support == None:
+
+        if event.contact_support == None:
+            if user.departement is GESTION:
+                return True, None
             err_msg = "Un membre Support doit être défini avant de réaliser cette opération"
             return False, err_msg
-        elif user.departement is SUPPORT and event.support == user:
-            return True, None
-        err_msg = "accés limité au membre Support en charge"
-        return False, err_msg
+        else:
+            if user.departement is SUPPORT and event.contact_support == user:
+                return True, None
+            err_msg = "accés limité au membre Support en charge"
+            return False, err_msg
 
     def delete_event(self, user, event):
         if user.departement in [ADMIN]:
@@ -128,18 +133,18 @@ class Permissions:
         elif event.support == None:
             err_msg = "Un membre Support doit être défini avant de réaliser cette opération"
             return False, err_msg
-        elif user.departement is SUPPORT and event.support == user:
+        elif user.departement is SUPPORT and event.contact_support == user:
             return True, None
         err_msg = "accés limité au membre Support en charge"
         return False, err_msg
 
-    def add_support_to_event(self, user):
-        if user.departement in [ADMIN]:
-            return True, None
-        if user.departement is GESTION:
-            return True, None
-        err_msg = "opération limité à un membre de l'équipe Gestion"
-        return False
+    # def add_support_to_event(self, user):
+    #     if user.departement in [ADMIN]:
+    #         return True, None
+    #     if user.departement is GESTION:
+    #         return True, None
+    #     err_msg = "opération limité à un membre de l'équipe Gestion"
+    #     return False, err_msg
 
     # def create_event_for_own_client(self, user, contract):
     #     # if contract is signed

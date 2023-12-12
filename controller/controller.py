@@ -593,7 +593,15 @@ class Controller(menu.Menu):
 
         if self._logged_user.departement == models.Departements.GESTION:
             support_email = self.view.prompt_update_event_support(event)
-            event.contact_support = self.repository.get_user(support_email)
+            support = self.repository.get_user(support_email)
+
+            if support is None:
+                self.view.prompt_error_message("L'utilisateur n'existe pas")
+                self.event_opt_menu(event)
+            elif support.departement is not models.Departements.SUPPORT:
+                self.view.prompt_error_message("L'utilisateur n'est pas membre de l'équipe Support")
+                self.event_opt_menu(event)
+            event.contact_support = support
 
         if self._logged_user.departement == models.Departements.SUPPORT:
             event = self.view.prompt_update_event(event)
