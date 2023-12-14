@@ -1,8 +1,6 @@
 from datetime import datetime
 import os
 from typing import Optional
-from backend.models import ContractStatus, Departements
-
 from rich import box
 from rich.console import Console
 from rich.panel import Panel
@@ -10,7 +8,8 @@ from rich.table import Table
 from rich.prompt import Prompt, IntPrompt
 from rich.padding import Padding
 
-from backend.models import DT_STRING
+from epicevents.backend.models import ContractStatus, Departements
+from epicevents.backend.models import DT_STRING
 
 
 class Display:

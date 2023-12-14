@@ -3,9 +3,10 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import sentry_sdk
-from backend.models import User, Departements
 
-from settings import (
+from epicevents.backend.models import User, Departements
+
+from epicevents.settings import (
     SERVER,
     ADMIN_LOGIN,
     PORT,
@@ -13,11 +14,8 @@ from settings import (
     PSQL,
     PGPASSWORD,
     SENTRY_KEY,
-    # TEST_DATABASE_NAME,
-    # TEST_ADMIN_LOGIN,
-    # TEST_PGPASSWORD,
 )
-from backend.models import Base
+from epicevents.backend.models import Base
 
 ADMIN_CREDENTIAL = {
     "database": DATABASE_NAME,
@@ -25,14 +23,6 @@ ADMIN_CREDENTIAL = {
     "password": PGPASSWORD,
     "port": PORT,
 }
-
-# TEST_CREDENTIAL = {
-#     "database": TEST_DATABASE_NAME,
-#     "user": TEST_ADMIN_LOGIN,
-#     "password": TEST_PGPASSWORD,
-#     "port": PORT,
-# }
-
 
 sentry_sdk.init(
     dsn=SENTRY_KEY,

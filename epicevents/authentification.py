@@ -5,10 +5,9 @@ from sqlalchemy import event
 import jwt
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-from backend.models import User
 
-# from settings import EXPIRATION_TIME_TOKEN
-from settings import PRIVATE_KEY, PUBLIC_KEY, EXPIRATION_TIME_TOKEN, TOKEN_FILE
+from epicevents.backend.models import User
+from epicevents.settings import PRIVATE_KEY, PUBLIC_KEY, EXPIRATION_TIME_TOKEN, TOKEN_FILE
 
 
 def authenticate_user(user, password):
@@ -35,20 +34,6 @@ def encode(payload):
     return jwt.encode(payload, PRIVATE_KEY, algorithm="RS256")
 
 
-# def encode_decode_jwt(function):
-#     @functools.wraps(function)
-#     def inner(self, token=None, *args, **kwargs):
-#         if token:
-#             decoded_data = decode(token)
-#             data = function(self, decoded_data, *args, **kwargs)
-#         else:
-#             data = function(self, *args, **kwargs)
-#         token = encode(data)
-#         return token
-
-#     return inner
-
-
 # Fonction pour créer un token JWT pour un utilisateur authentifié
 def create_id_token(user):
     payload = {
@@ -56,17 +41,6 @@ def create_id_token(user):
     }
     token = encode(payload)
     return token
-
-
-# Fonction pour vérifier un token JWT
-# def decode(token):
-#     try:
-#         payload = jwt.decode(token, PUBLIC_KEY, algorithms=["RS256"])
-#         return payload
-#     except jwt.ExpiredSignatureError:
-#         return "Le token a expiré."
-#     except jwt.InvalidTokenError:
-#         return "Token invalide."
 
 
 # Fonction pour vérifier le token JWT reçu du client

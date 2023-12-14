@@ -1,4 +1,4 @@
-from backend.models import Departements
+from epicevents.backend.models import Departements
 
 COMMERCIAL = Departements.COMMERCIAL
 GESTION = Departements.GESTION
@@ -137,22 +137,6 @@ class Permissions:
             return True, None
         err_msg = "accés limité au membre Support en charge"
         return False, err_msg
-
-    # def add_support_to_event(self, user):
-    #     if user.departement in [ADMIN]:
-    #         return True, None
-    #     if user.departement is GESTION:
-    #         return True, None
-    #     err_msg = "opération limité à un membre de l'équipe Gestion"
-    #     return False, err_msg
-
-    # def create_event_for_own_client(self, user, contract):
-    #     # if contract is signed
-    #     if user.departement in [ADMIN]:
-    #         return True
-    #     elif user.departement in [COMMERCIAL] and user.contract == contract:
-    #         return True
-    #     return False
 
     def filter_event(self, user):
         if user.departement in [ADMIN, SUPPORT, GESTION]:

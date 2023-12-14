@@ -2,13 +2,12 @@ import functools
 import inspect
 from sentry_sdk import capture_exception, capture_message
 
-from CLI.view import Views
-
-from backend.repository import SqlAlchemyRepository
-import backend.models as models
-import controller.menu as menu
-from controller.permissions import Permissions
-import authentification as auth
+from epicevents.backend.repository import SqlAlchemyRepository
+from epicevents.controller.permissions import Permissions
+from epicevents.CLI.view import Views
+import epicevents.backend.models as models
+import epicevents.controller.menu as menu
+import epicevents.authentification as auth
 
 
 def check_user_auth(func):
@@ -87,7 +86,6 @@ class Controller(menu.Menu):
         permissions: Permissions,
     ):
         menu.Menu.__init__(self, view, repository)
-        # self.repository = repository
         self.permissions = permissions
         self._logged_user = None
         self.id_token = None

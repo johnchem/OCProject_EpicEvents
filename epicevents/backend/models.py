@@ -1,16 +1,14 @@
 from datetime import datetime
 import enum
 import json
+import sqlalchemy.sql.functions as func
 from sqlalchemy import Integer, String, ForeignKey, DateTime, Text
 from sqlalchemy import Enum
 from sqlalchemy.orm import DeclarativeBase, relationship
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
-
-# from sqlalchemy.orm import validates
 from typing import List
 
-import sqlalchemy.sql.functions as func
 
 DT_STRING = "%d/%m/%Y %H:%M"
 

@@ -1,13 +1,13 @@
-from sqlalchemy import select
-from sqlalchemy.orm import joinedload
-from sqlalchemy.orm import Session
 import sqlalchemy.exc
 import psycopg2
 import sentry_sdk
 from sentry_sdk import capture_exception
+from sqlalchemy import select
+from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import Session
 
-from backend.models import User, Client, Contract, Evenement
-import authentification as auth
+import epicevents.authentification as auth
+from epicevents.backend.models import User, Client, Contract, Evenement
 
 
 class SqlAlchemyRepository:

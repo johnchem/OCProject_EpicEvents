@@ -1,6 +1,6 @@
 import environ
 import os
-from RSA_gen import generate_RSA_pair
+from epicevents.RSA_gen import generate_RSA_pair
 
 env = environ.Env()
 

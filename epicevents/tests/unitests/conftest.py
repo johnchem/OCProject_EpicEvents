@@ -2,8 +2,8 @@ import pytest
 from datetime import datetime
 from sqlalchemy.orm import sessionmaker
 
-from setup import _create_test_engine
-from backend.models import Base, User, Client, Contract, Evenement, Departements, ContractStatus
+from epicevents.setup import _create_test_engine
+from epicevents.backend.models import Base, User, Client, Contract, Evenement, Departements, ContractStatus
 
 DT_STRING = "%d/%m/%Y %H:%M:%S"
 
@@ -19,6 +19,7 @@ def create_object_record(_session_creation):
         session.refresh(obj)
         session.close()
         return obj
+
     return _create_object_record
 
 
@@ -42,6 +43,7 @@ def database_access():
 
     session.rollback()
     Base.metadata.drop_all(engine)
+
 
 # -------------- User Object ----------------
 
@@ -85,13 +87,10 @@ def user_george():
 @pytest.fixture
 def user_michel():
     _user = User(
-        name="michel",
-        forname="test",
-        email="michel@test3.com",
-        password="abc123!",
-        departement=Departements.SUPPORT
+        name="michel", forname="test", email="michel@test3.com", password="abc123!", departement=Departements.SUPPORT
     )
     return _user
+
 
 # ---------- Client Object --------------
 
@@ -140,15 +139,13 @@ def client_staplehero(create_object_record, user_paul):
 
 # ---------- Contract Object --------------
 
+
 @pytest.fixture
 def contract_roule_maboule(create_object_record, client_bowling):
     client_bowling = create_object_record(client_bowling)
 
     _contract = Contract(
-        client=client_bowling,
-        total_amount=10000,
-        remaining_amount=250,
-        contract_status=ContractStatus.SIGNED
+        client=client_bowling, total_amount=10000, remaining_amount=250, contract_status=ContractStatus.SIGNED
     )
     return _contract
 
@@ -164,6 +161,7 @@ def contract_jean_nemarre(create_object_record, client_bowling_2):
         contract_status=ContractStatus.NOT_SIGNED,
     )
     return _contract
+
 
 # ---------- Evenement Object --------------
 

@@ -5,8 +5,8 @@ import sqlalchemy
 from conftest import *
 from conftest import DT_STRING
 from werkzeug.security import check_password_hash
-from backend.models import User, Client, Contract, Evenement, Departements, ContractStatus
-from backend.repository import SqlAlchemyRepository
+from epicevents.backend.models import User, Client, Contract, Evenement, Departements, ContractStatus
+from epicevents.backend.repository import SqlAlchemyRepository
 
 # --------- Test Object CRUD : User -------------
 
@@ -126,10 +126,8 @@ def test_list_client(database_access, client_bowling, client_bowling_2, client_s
     assert "rouli bouli" in [x.full_name for x in list_client]
     assert "jean nemarre" in [x.full_name for x in list_client]
     assert ["roule maboule", "rouli bouli"].sort() == [
-            x.full_name
-            for x in list_client
-            if x.company_name == "Bowling & Cie"
-        ].sort()
+        x.full_name for x in list_client if x.company_name == "Bowling & Cie"
+    ].sort()
 
 
 def test_update_client(database_access, client_bowling, user_george):
@@ -170,6 +168,7 @@ def test_delete_client(database_access, client_bowling):
     with pytest.raises(sqlalchemy.exc.NoResultFound, match="No row was found when one was required"):
         session.query(Client).where(Client.id == client_bowling.id).one()
 
+
 # --------- Test Object CRUD : Contract -----------
 
 
@@ -179,8 +178,7 @@ def test_create_contract(database_access, contract_roule_maboule):
     repository.add(contract_roule_maboule)
     session.commit()
 
-    contract = session.query(Contract).join(Client). \
-        filter(Client.full_name == "roule maboule").first()
+    contract = session.query(Contract).join(Client).filter(Client.full_name == "roule maboule").first()
     assert contract.client.full_name == "roule maboule"
     assert contract.total_amount == 10000
     assert contract.remaining_amount == 250
@@ -236,6 +234,7 @@ def test_delete_contract(database_access, contract_roule_maboule):
     with pytest.raises(sqlalchemy.exc.NoResultFound, match="No row was found when one was required"):
         session.query(Contract).where(Contract.id == contract_roule_maboule.id).one()
 
+
 # --------- Test Object CRUD : Evenement ----------
 
 
@@ -290,5 +289,6 @@ def test_logout(database_access):
 
     assert response
     assert repository.user_auth is False
+
 
 # --------- Test General function -------------

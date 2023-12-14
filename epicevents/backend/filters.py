@@ -2,8 +2,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 from sqlalchemy.orm import Session
 
-from backend.models import User, Client, Contract, Evenement
-from backend.models import Departements, ContractStatus
+from epicevents.backend.models import User, Client, Contract, Evenement
+from epicevents.backend.models import Departements, ContractStatus
 
 
 class Filters:

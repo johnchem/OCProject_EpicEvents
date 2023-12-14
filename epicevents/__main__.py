@@ -1,23 +1,22 @@
-import atexit
 import sys
 from sentry_sdk import capture_message
 from sqlalchemy.orm import sessionmaker
 
 # views
-from CLI.view import Views
-from CLI.cli import cli_handler
+from epicevents.CLI.cli import cli_handler
+from epicevents.CLI.view import Views
 
 # backend
-import setup
-from backend.repository import SqlAlchemyRepository
-from backend.filters import Filters
+import epicevents.setup as setup
+from epicevents.backend.repository import SqlAlchemyRepository
+from epicevents.backend.filters import Filters
 
 # controller
-from controller.controller import Controller
-from controller.permissions import Permissions
+from epicevents.controller.controller import Controller
+from epicevents.controller.permissions import Permissions
 
-# tools 
-import authentification as auth
+# tools
+import epicevents.authentification as auth
 
 
 def create_session():
@@ -56,6 +55,7 @@ def reset():
     setup.reinit_tables()
     print("Application réinitialisée")
 
+
 def emmerg_exit():
     # In case of crash : record event and remove login token
     auth.remove_token_file()
@@ -65,7 +65,7 @@ def emmerg_exit():
 
 
 if __name__ == "__main__":
-    try :
+    try:
         globals()[sys.argv[1]]()
     except Exception as err:
         emmerg_exit()
