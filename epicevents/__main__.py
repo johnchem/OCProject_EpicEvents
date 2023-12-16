@@ -40,6 +40,7 @@ def run():
 
 
 def start_application():
+    setup._create_database()
     setup.create_tables()
     print("base de données créés")
 
