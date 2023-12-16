@@ -53,7 +53,7 @@
 # 1er lancement
 - Lancer l'environnement virtuel, si celui-ci n'est pas actif, `.venv\Scripts\activate`
 - Entrer la commande `python3 - m epicevents start_application`
-- le script va créer une nouvelle base de données avec le nom introduit à la clef **DATABASE_NAME**. les tables seront initialisé et 1 utilisateur par defaut **admin@epicevents.com** avec le mot de passe **admin**. Ce compte permettra de créer un premier utilisateur **support** pour l'administration des premiers compte utilisateur.
+- le script va créer une nouvelle base de données avec le nom introduit à la clef **DATABASE_NAME**. les tables seront initialisé et 1 utilisateur par defaut **admin@epicevents.com** avec le mot de passe **admin**. Ce compte permettra de créer un premier utilisateur **Gestion** pour l'administration des premiers compte utilisateur.
 - La console affichera le message ci-dessous quand l'opération sera terminé avec succés.
     ```
     CREATE DATABASE
@@ -66,3 +66,7 @@
 - Lancer l'environnement virtuel, si celui-ci n'est pas actif, `.venv\Scripts\activate`
 - Entrer la commande `python3 - m epicevents run`
 - un écran d'acceuil demandera la connection à l'application, utiliser le compte par defaut lors de la 1ere connection
+
+# autres options
+- `python3 - m epicevents reset` : supprime et créer à nouveau les tables de données
+- `python3 - m epicevents delete_data` : supprime les données sans supprimer les tables

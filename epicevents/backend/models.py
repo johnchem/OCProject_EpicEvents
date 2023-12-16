@@ -53,17 +53,17 @@ class User(Base):
     client_portfolio: Mapped[List["Client"]] = relationship(
         back_populates="commercial_contact",
         lazy="joined",
-        cascade="save-update",
+        cascade="all, delete-orphan",
     )
     contract_portfolio: Mapped[List["Contract"]] = relationship(
         back_populates="commercial",
         lazy="joined",
-        cascade="save-update",
+        cascade="all, delete-orphan",
     )
     evenements: Mapped[List["Evenement"]] = relationship(
         back_populates="contact_support",
         lazy="joined",
-        cascade="save-update",
+        cascade="all, delete-orphan",
     )
 
     def __repr__(self) -> str:
@@ -83,13 +83,13 @@ class Client(Base):
     commercial_contact_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
 
     contract: Mapped[List["Contract"]] = relationship(
-        back_populates="client", lazy="joined", cascade="save-update, delete, delete-orphan"
+        back_populates="client", lazy="joined", cascade="all, delete-orphan"
     )
     commercial_contact: Mapped["User"] = relationship(
         back_populates="client_portfolio", foreign_keys=[commercial_contact_id], lazy="joined", cascade="save-update"
     )
     evenements: Mapped[List["Evenement"]] = relationship(
-        back_populates="client", lazy="joined", cascade="save-update, delete, delete-orphan"
+        back_populates="client", lazy="joined", cascade="all, delete-orphan"
     )
 
     @property
@@ -139,7 +139,9 @@ class Contract(Base):
         lazy="joined",
         cascade="save-update",
     )
-    evenement: Mapped["Evenement"] = relationship(back_populates="contract", lazy="joined")
+    evenement: Mapped["Evenement"] = relationship(
+        back_populates="contract", lazy="joined", cascade="all, delete-orphan"
+    )
 
     def __init__(self, client, total_amount, remaining_amount, contract_status):
         self.total_amount = total_amount
@@ -173,7 +175,7 @@ class Evenement(Base):
     contact_support_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=True)
     location: Mapped[str] = mapped_column(String(60))
     attendees: Mapped[int] = mapped_column(Integer)
-    note: Mapped[str] = mapped_column(Text)
+    note: Mapped[str] = mapped_column(Text, nullable=True)
 
     client: Mapped["Client"] = relationship(
         back_populates="evenements",

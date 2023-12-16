@@ -45,12 +45,6 @@ def start_application():
     print("base de données créés")
 
 
-def delete_data():
-    # clean DB w/ deleting the tables
-    setup.drop_tables()
-    print("Données supprimées")
-
-
 def reset():
     # delete all tables and data; fresh start
     setup.reinit_tables()
