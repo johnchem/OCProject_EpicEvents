@@ -49,3 +49,20 @@
 - définissez vos préférences pour la fréquence d'alerte
 - choisissz le nom du projet et l'équipe responsable puis cliquez sur **Create Project**
 - Sentry va fournir une clef. Celle-ci doit être collé dans le champs du .env sans les guillemets  
+
+# 1er lancement
+- Lancer l'environnement virtuel, si celui-ci n'est pas actif, `.venv\Scripts\activate`
+- Entrer la commande `python3 - m epicevents start_application`
+- le script va créer une nouvelle base de données avec le nom introduit à la clef **DATABASE_NAME**. les tables seront initialisé et 1 utilisateur par defaut **admin@epicevents.com** avec le mot de passe **admin**. Ce compte permettra de créer un premier utilisateur **support** pour l'administration des premiers compte utilisateur.
+- La console affichera le message ci-dessous quand l'opération sera terminé avec succés.
+    ```
+    CREATE DATABASE
+    base de données créés
+    ```
+
+:warning: il est recommandé de supprimer ce compte admin aprés la créaction du 1er compte support pour limiter les risques d'accés non authorisé. 
+
+# Lancement de l'application
+- Lancer l'environnement virtuel, si celui-ci n'est pas actif, `.venv\Scripts\activate`
+- Entrer la commande `python3 - m epicevents run`
+- un écran d'acceuil demandera la connection à l'application, utiliser le compte par defaut lors de la 1ere connection

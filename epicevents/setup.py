@@ -54,7 +54,7 @@ def _create_general_user():
     _user = User(
         name="admin",
         forname="admin",
-        email="admin@test.com",
+        email="admin@epicevents.com",
         password="admin",
         departement=Departements.ADMIN,
     )
