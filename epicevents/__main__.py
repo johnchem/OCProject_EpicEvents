@@ -1,5 +1,5 @@
 import sys
-from sentry_sdk import capture_message
+from sentry_sdk import capture_message, capture_exception
 from sqlalchemy.orm import sessionmaker
 
 # views
@@ -59,13 +59,11 @@ def reset():
 def emmerg_exit():
     # In case of crash : record event and remove login token
     auth.remove_token_file()
-    msg = "Emergency Stop - Clean up token"
-    capture_message(msg)
-    print(msg)
 
 
 if __name__ == "__main__":
     try:
         globals()[sys.argv[1]]()
     except Exception as err:
+        capture_exception(err)
         emmerg_exit()
