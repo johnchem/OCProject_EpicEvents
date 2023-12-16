@@ -1,6 +1,5 @@
 from datetime import datetime
 import enum
-import json
 import sqlalchemy.sql.functions as func
 from sqlalchemy import Integer, String, ForeignKey, DateTime, Text
 from sqlalchemy import Enum
@@ -48,7 +47,6 @@ class User(Base):
     departement: Mapped[str] = mapped_column(
         Enum(
             Departements,
-            # values_callable=lambda m: list(m.values())
         )
     )
 
@@ -71,16 +69,6 @@ class User(Base):
     def __repr__(self) -> str:
         return f"User(id={self.id}, name={self.name}, forname={self.forname}, dpt={self.departement})"
 
-    # def default(self):
-    #     try:
-    #         iterable = iter(self)
-    #     except TypeError:
-    #         pass
-    #     else:
-    #         return list(iterable)
-    #     # Let the base class default method raise the TypeError
-    #     return json.JSONEncoder.default(self, o)
-
 
 class Client(Base):
     __tablename__ = "client"
@@ -100,7 +88,7 @@ class Client(Base):
     commercial_contact: Mapped["User"] = relationship(
         back_populates="client_portfolio", foreign_keys=[commercial_contact_id], lazy="joined", cascade="save-update"
     )
-    evenements: Mapped[list["Evenement"]] = relationship(
+    evenements: Mapped[List["Evenement"]] = relationship(
         back_populates="client", lazy="joined", cascade="save-update, delete, delete-orphan"
     )
 
@@ -179,7 +167,7 @@ class Evenement(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(60), nullable=False)
     contract_id: Mapped[int] = mapped_column(ForeignKey("contract.id"))
-    client_id: Mapped["Client"] = mapped_column(ForeignKey("client.id"))
+    client_id: Mapped[int] = mapped_column(ForeignKey("client.id"))
     _event_date_start: Mapped[datetime] = mapped_column(DateTime)
     _event_date_end: Mapped[datetime] = mapped_column(DateTime)
     contact_support_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=True)
@@ -222,21 +210,3 @@ class Evenement(Base):
     def event_date_end(self, date_time):
         date_time = date_time.strftime(DT_STRING)
         self._event_date_end = date_time
-
-    # @property
-    # def client_name(self):
-    #     return self.client.company_name
-
-    # @property
-    # def client_contact(self) -> str:
-    #     return self.client.full_name
-
-    # def __init__(self, contract, event_date_start, event_date_end, location, attendees, contact_support, note):
-    #     self.contract = contract
-    #     self.client = contract.client
-    #     self.contact_support = contact_support
-    #     self.event_date_start = event_date_start
-    #     self.event_date_end = event_date_end
-    #     self.location = location
-    #     self.attendees = attendees
-    #     self.note = note
