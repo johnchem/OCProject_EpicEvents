@@ -2,7 +2,6 @@ import pytest
 from datetime import datetime
 import sqlalchemy
 
-from conftest import *
 from conftest import DT_STRING
 from werkzeug.security import check_password_hash
 from epicevents.backend.models import User, Client, Contract, Evenement, Departements, ContractStatus

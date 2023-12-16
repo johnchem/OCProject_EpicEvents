@@ -1,5 +1,5 @@
 import sys
-from sentry_sdk import capture_message, capture_exception
+from sentry_sdk import capture_exception
 from sqlalchemy.orm import sessionmaker
 
 # views

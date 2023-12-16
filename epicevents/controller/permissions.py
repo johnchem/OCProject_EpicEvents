@@ -116,7 +116,7 @@ class Permissions:
         if user.departement in [ADMIN]:
             return True, None
 
-        if event.contact_support == None:
+        if event.contact_support is None:
             if user.departement is GESTION:
                 return True, None
             err_msg = "Un membre Support doit être défini avant de réaliser cette opération"
@@ -130,7 +130,7 @@ class Permissions:
     def delete_event(self, user, event):
         if user.departement in [ADMIN]:
             return True, None
-        elif event.support == None:
+        elif event.support is None:
             err_msg = "Un membre Support doit être défini avant de réaliser cette opération"
             return False, err_msg
         elif user.departement is SUPPORT and event.contact_support == user:

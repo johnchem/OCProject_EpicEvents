@@ -1,9 +1,8 @@
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload
 from sqlalchemy.orm import Session
 
-from epicevents.backend.models import User, Client, Contract, Evenement
-from epicevents.backend.models import Departements, ContractStatus
+from epicevents.backend.models import User, Contract, Evenement
+from epicevents.backend.models import ContractStatus
 
 
 class Filters:
@@ -33,7 +32,7 @@ class Filters:
         return contracts
 
     def events_without_support(self, session):
-        stmt = select(Evenement).filter(Evenement.contact_support == None)
+        stmt = select(Evenement).filter(Evenement.contact_support is None)
         events = session.scalars(stmt).unique().all()
         return events
 

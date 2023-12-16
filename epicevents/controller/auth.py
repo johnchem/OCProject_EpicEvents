@@ -1,5 +1,4 @@
 import functools
-from epicevents.settings import PRIVATE_KEY, PUBLIC_KEY, EXPIRATION_TIME_TOKEN
 
 
 def login(function):

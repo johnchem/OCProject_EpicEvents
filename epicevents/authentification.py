@@ -1,4 +1,3 @@
-import functools
 import os
 from sentry_sdk import capture_exception
 from sqlalchemy import event

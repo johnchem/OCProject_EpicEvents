@@ -6,7 +6,6 @@ from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 from sqlalchemy.orm import Session
 
-import epicevents.authentification as auth
 from epicevents.backend.models import User, Client, Contract, Evenement
 
 
@@ -24,7 +23,7 @@ class SqlAlchemyRepository:
                 if err.orig is psycopg2.errors.UniqueViolation:
                     msg = "Cet object existe déjà !"
                 return False, msg
-            except sqlalchemy.exc.DataError as err:
+            except sqlalchemy.exc.DataError:
                 msg = "l'une des informations fournit ne correspond pas à l'information attendu"
                 return False, msg
             except Exception as err:

@@ -120,7 +120,7 @@ class Controller(menu.Menu):
             auth.save_token_to_file(self.id_token)
         else:
             capture_message(f"wrong password for :{email}", "error")
-            self.view.prompt_error_message(f"Mot de passe incorrect")
+            self.view.prompt_error_message("Mot de passe incorrect")
             self.user_login()
 
     # *************** User functions ***************
@@ -295,7 +295,11 @@ class Controller(menu.Menu):
 
         self.view.prompt_client_info(updated_client)
         capture_message(
-            f"{self._logged_user.email} - {self._logged_user.departement.value} - update client {updated_client.full_name}",
+            (
+                f"{self._logged_user.email} -",
+                f" {self._logged_user.departement.value} -",
+                f" update client {updated_client.full_name}",
+            ),
             "info",
         )
         self.client_menu()
@@ -352,7 +356,11 @@ class Controller(menu.Menu):
                 self.contract_menu()
 
         capture_message(
-            f"{self._logged_user.email} - {self._logged_user.departement.value} - contract creation for :{contract.client.full_name}",
+            (
+                f"{self._logged_user.email} -",
+                f" {self._logged_user.departement.value} -",
+                f" contract creation for :{contract.client.full_name}",
+            ),
             "info",
         )
         self.view.prompt_contract_info(contract)
@@ -500,7 +508,11 @@ class Controller(menu.Menu):
             self.view.prompt_error_message(f"erreur lors de la mise à jour du contrat\n{err}")
             self.contract_opt_menu(contract)
         capture_message(
-            f"{self._logged_user.email} - {self._logged_user.departement.value} - update contract {contract.client.full_name}",
+            (
+                f"{self._logged_user.email} -",
+                f" {self._logged_user.departement.value} -",
+                f" update contract {contract.client.full_name}",
+            ),
             "info",
         )
         self.contract_menu()
@@ -517,7 +529,11 @@ class Controller(menu.Menu):
             self.contract_opt_menu(contract)
 
         capture_message(
-            f"{self._logged_user.email} - {self._logged_user.departement.value} - contract deletion :{contract.full_name}",
+            (
+                f"{self._logged_user.email} -",
+                f" {self._logged_user.departement.value} -",
+                f" contract deletion :{contract.full_name}",
+            ),
             "info",
         )
         self.view.print("Le contrat à bien été supprimé")

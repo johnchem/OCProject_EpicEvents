@@ -15,7 +15,7 @@ from epicevents.backend.models import DT_STRING
 class Display:
     def __init__(self):
         self._console = Console()
-        self._console.set_window_title(f"EpicsEvents")
+        self._console.set_window_title("EpicsEvents")
 
     def print(self, msg_obj=None) -> None:
         self._console.print(msg_obj)
@@ -228,10 +228,10 @@ class cli_handler:
         self._display.print(Padding("[green u]Contrats actif[/green u]", (1, 0, 0, 0)))
         if client_data.contract:
             contract_grid = Table(expand=False, box=box.SIMPLE)
-            contract_grid.add_column(f"Date creation", justify="center", style="purple")
-            contract_grid.add_column(f"Statut", justify="center")
-            contract_grid.add_column(f"Montant", justify="center", style="purple")
-            contract_grid.add_column(f"Commercial", justify="center", style="purple")
+            contract_grid.add_column("Date creation", justify="center", style="purple")
+            contract_grid.add_column("Statut", justify="center")
+            contract_grid.add_column("Montant", justify="center", style="purple")
+            contract_grid.add_column("Commercial", justify="center", style="purple")
 
             for contract in client_data.contract:
                 if contract.contract_status == ContractStatus.SIGNED:
@@ -263,7 +263,7 @@ class cli_handler:
                 if event.contact_support:
                     support_name = f"[blue]{event.contact_support.name.upper()} {event.contact_support.forname}[/blue]"
                 else:
-                    support_name = f"[red]Sans responsable[/red]"
+                    support_name = "[red]Sans responsable[/red]"
                 event_grid.add_row(
                     f"[purple]{event.client.full_name}",
                     f"[purple]{event.event_date_start}[/purple]",
@@ -285,12 +285,12 @@ class cli_handler:
 
         grid.add_row(
             f"[purple]{client_data.full_name}[/purple]",
-            f"[green]Date de creation : [/green]",
+            "[green]Date de creation : [/green]",
             f"[blue]{client_data.creation_date}[/blue]",
         )
         grid.add_row(
             f"[purple]{client_data.email}[/purple]",
-            f"[green]Derniére mise à jour : [/green]",
+            "[green]Derniére mise à jour : [/green]",
             f"[blue]{client_data.last_update}[/blue]",
         )
         grid.add_row(
@@ -519,16 +519,16 @@ class cli_handler:
         if event.contact_support:
             support_name = f"[blue]{event.contact_support.name.upper()} {event.contact_support.forname}[/blue]"
         else:
-            support_name = f"[red]Sans responsable[/red]"
+            support_name = "[red]Sans responsable[/red]"
 
         grid = Table.grid(expand=False, padding=(0, 1, 1, 1))
         grid.add_column(justify="center")
         grid.add_column(justify="center")
         grid.add_row("")
         grid.add_row(f"{client.full_name}", f"{client.email}\n{client.phone}")
-        grid.add_row(f"[purple]Début :[/purple]", f"{event.event_date_start}")
-        grid.add_row(f"[purple]Fin :[/purple]", f"{event.event_date_end}")
-        grid.add_row(f"[purple]Contact support :[/purple]", f"{support_name}")
+        grid.add_row("[purple]Début :[/purple]", f"{event.event_date_start}")
+        grid.add_row("[purple]Fin :[/purple]", f"{event.event_date_end}")
+        grid.add_row("[purple]Contact support :[/purple]", f"{support_name}")
         grid.add_row("", "")
         self._display.print(grid)
 
@@ -536,7 +536,7 @@ class cli_handler:
         if event.contact_support:
             support_name = f"[blue]{event.contact_support.name.upper()} {event.contact_support.forname}[/blue]"
         else:
-            support_name = f"[red]Sans responsable[/red]"
+            support_name = "[red]Sans responsable[/red]"
 
         grid = Table.grid(expand=False, padding=(0, 1, 1, 1))
         grid.add_column(justify="left", style="green")
@@ -568,7 +568,7 @@ class cli_handler:
             if event.contact_support:
                 support_name = f"[blue]{event.contact_support.name.upper()} {event.contact_support.forname}[/blue]"
             else:
-                support_name = f"[red]Sans responsable[/red]"
+                support_name = "[red]Sans responsable[/red]"
 
             table.add_row(
                 f"{pos}",
@@ -603,7 +603,7 @@ class cli_handler:
                 note = self._display.ask("[green]Note additionnelle[/green]")
                 break
 
-            except ValueError as err:
+            except ValueError:
                 self.clear()
                 self.display_error_msg("La valeur introduite n'est pas conforme")
 
@@ -640,7 +640,7 @@ class cli_handler:
                 event.attendees = int(attendees)
                 event.note = self._display.ask("[green]Note additionnelle[/green]", default=event.note)
                 break
-            except ValueError as err:
+            except ValueError:
                 self.clear()
                 self.display_error_msg("La valeur introduite n'est pas conforme")
 
