@@ -62,15 +62,13 @@ class Permissions:
             return True, None
         elif user.departement is COMMERCIAL and client.commercial_contact == user:
             return True, None
-        err_msg = "accés non authorisé"
+        err_msg = "besoin d'un accés admin ou être le commercial en charge pour cette opération"
         return False, err_msg
 
-    def create_contract(self, user, client=None):
-        if client is not None and user.departement in [COMMERCIAL] and client in user.client_portfolio:
+    def create_contract(self, user):
+        if user.departement in [ADMIN, GESTION]:
             return True, None
-        elif user.departement in [ADMIN, GESTION, COMMERCIAL]:
-            return True, None
-        err_msg = "besoin d'un accés admin, gestion ou être le commercial en charge du client pour cette opération"
+        err_msg = "besoin d'un accés admin ou gestion pour cette opération"
         return False, err_msg
 
     def read_contract(self, user):

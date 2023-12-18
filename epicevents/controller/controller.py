@@ -323,7 +323,7 @@ class Controller(menu.Menu):
 
     # ************* Contracts functions *************
     def create_contract(self, client=None):
-        access, msg = self.permissions.create_contract(self._logged_user, client)
+        access, msg = self.permissions.create_contract(self._logged_user)
         if not access:
             self.view.prompt_error_message(msg)
             if client:
